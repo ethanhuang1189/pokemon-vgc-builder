@@ -1,0 +1,88 @@
+POKEMON CHAMPIONS TEST CLI
+==========================
+
+Run tests from the project root with:
+  npm test <command> <args>
+  node scripts/test.mjs <command> <args>
+
+
+COMMANDS
+--------
+
+pokemon <name> [move1] [move2] ...
+  Checks whether a given Pokemon can legally use the specified moves.
+  Each move is checked twice: first against legal_moves.txt (is it allowed
+  in the format), then against the Pokemon's actual learnset (can this
+  Pokemon learn it). Reports pass/fail per move and a total score.
+
+  Example:
+    npm test pokemon charizard flamethrower fly earthquake "draco meteor"
+
+
+ability <name> [ability1] [ability2] ...
+  Lists the abilities the specified Pokemon has, then checks whether each
+  provided ability name is one of them. Reports pass/fail per ability.
+
+  Example:
+    npm test ability gengar "cursed body"
+
+
+mega <name>
+  Shows all legal mega forms for a Pokemon (from legal_mega.txt) along
+  with the mega stone item that activates each form.
+
+  Example:
+    npm test mega charizard
+
+
+moves <name>
+  Lists every move the specified Pokemon can legally use — meaning it
+  appears in both the Pokemon's learnset AND legal_moves.txt.
+
+  Example:
+    npm test moves pikachu
+
+
+item <item name>
+  Checks whether an item appears in legal_items.txt and in the dex.
+  Also flags if the item is a mega stone (mega stones are activated via
+  the Mega button in the builder, not the item dropdown).
+
+  Example:
+    npm test item leftovers
+    npm test item venusaurite
+
+
+stat <name> [hp] [atk] [def] [spa] [spd] [spe] [bst]
+  Checks a Pokemon's base stats. Always prints the actual stats first so
+  you can see real values even when a check fails. Provide 1-6 positional
+  numbers (HP / Atk / Def / SpA / SpD / Spe in order) and an optional 7th
+  for the Base Stat Total. Omit all numbers to just display the real stats.
+
+  Examples:
+    npm test stat charizard
+    npm test stat charizard 78 84 78 109 85 100
+    npm test stat charizard 78 84 78 109 85 100 534
+
+
+legal <name>
+  Full legality summary for a Pokemon. Shows whether it appears in
+  legal_mons.txt, how many legal moves it has access to, its abilities,
+  and any mega forms available.
+
+  Example:
+    npm test legal gardevoir
+
+
+HOW IT WORKS
+------------
+
+The script reads legal_mons.txt, legal_moves.txt, legal_items.txt, and
+legal_mega.txt directly from the project root — the same source files
+the app uses. It loads the @pkmn/dex library (same version as the app)
+for Pokemon data and learnsets.
+
+Name matching is normalized: hyphens, dots, and apostrophes are stripped
+and casing is ignored, so "Mr. Rime", "mr rime", and "mr-rime" all resolve
+to the same entry. Multi-word names like "draco meteor" or "air slash" are
+matched greedily across multiple arguments, so quoting is optional.
