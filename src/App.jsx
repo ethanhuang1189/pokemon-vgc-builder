@@ -13,7 +13,10 @@ import { exportToShowdown } from './utils/showdown';
 const allMegas = buildMegaForms(Dex);
 
 const allSpecies = [...Dex.species.all()]
-  .filter(s => s.exists && LEGAL_MON_NAMES.has(normalize(s.name)))
+  .filter(s => {
+    if (!s.exists || s.isNonstandard || s.battleOnly) return false;
+    return LEGAL_MON_NAMES.has(normalize(s.name)) || LEGAL_MON_NAMES.has(normalize(s.baseSpecies));
+  })
   .sort((a, b) => a.name.localeCompare(b.name));
 
 const allMoves = [...Dex.moves.all()]
@@ -30,60 +33,7 @@ const allAbilities = [...Dex.abilities.all()]
   .sort((a, b) => a.name.localeCompare(b.name));
 
 function Header() {
-  const { team, clearTeam } = useTeam();
-  const [toast, setToast] = useState('');
-
-  function showToast(msg) {
-    setToast(msg);
-    setTimeout(() => setToast(''), 2200);
-  }
-
-  function copyText(text) {
-    // navigator.clipboard requires HTTPS; fall back to execCommand on HTTP (LAN testing)
-    if (navigator.clipboard?.writeText) {
-      return navigator.clipboard.writeText(text).catch(() => execCommandCopy(text));
-    }
-    execCommandCopy(text);
-    return Promise.resolve();
-  }
-
-  function execCommandCopy(text) {
-    const ta = document.createElement('textarea');
-    Object.assign(ta.style, { position: 'fixed', opacity: '0', top: '0', left: '0' });
-    ta.value = text;
-    document.body.appendChild(ta);
-    ta.focus();
-    ta.select();
-    try { document.execCommand('copy'); } catch { /* silent */ }
-    document.body.removeChild(ta);
-  }
-
-  function handleCopy() {
-    const text = exportToShowdown(team, allMegas);
-    if (!text) { showToast('No Pokémon on team'); return; }
-    copyText(text).then(() => showToast('Copied!'));
-  }
-
-  async function handlePokePaste() {
-    const text = exportToShowdown(team, allMegas);
-    if (!text) { showToast('No Pokémon on team'); return; }
-    // Open the window synchronously (required — async window.open is blocked as a popup).
-    // Do NOT use 'noopener' here: it causes window.open to return null in Chrome/Safari,
-    // preventing us from navigating the window once the API call completes.
-    const win = window.open('', '_blank');
-    try {
-      const res = await fetch('https://pokepast.es/api/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ content: text, author: '', title: '' }).toString(),
-      });
-      const { url } = await res.json();
-      if (win) win.location.href = url;
-    } catch {
-      if (win) win.location.href = 'https://pokepast.es';
-      showToast('Could not create paste');
-    }
-  }
+  const { clearTeam } = useTeam();
 
   return (
     <header
@@ -101,23 +51,6 @@ function Header() {
           <span className="text-xs text-gray-500 ml-2 hidden sm:inline">{REGULATION.label}</span>
         </div>
 
-        {/* Toast */}
-        {toast && (
-          <span className="text-xs text-green-400 shrink-0">{toast}</span>
-        )}
-
-        <button
-          onClick={handleCopy}
-          className="text-xs px-3 py-1.5 bg-indigo-700 hover:bg-indigo-600 text-white border border-indigo-600 transition-colors shrink-0"
-        >
-          Copy
-        </button>
-        <button
-          onClick={handlePokePaste}
-          className="text-xs px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 transition-colors shrink-0"
-        >
-          PokePaste
-        </button>
         <button
           onClick={() => { if (confirm('Clear all 6 slots?')) clearTeam(); }}
           className="text-xs px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-400 border border-gray-700 transition-colors shrink-0"

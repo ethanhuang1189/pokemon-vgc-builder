@@ -24,9 +24,11 @@ function megaNameToSlug(megaName) {
   return variant ? `${base}-mega-${variant}` : `${base}-mega`;
 }
 
-const GIF_SPRITE    = n   => `https://projectpokemon.org/images/normal-sprite/${nameToSlug(n)}.gif`;
-const SWSH_SPRITE   = n   => `https://projectpokemon.org/images/sprites-models/swsh-normal-sprites/${nameToSlug(n)}.gif`;
-const STATIC_SPRITE = num => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${num}.png`;
+const GIF_SPRITE      = n   => `https://projectpokemon.org/images/normal-sprite/${nameToSlug(n)}.gif`;
+const SWSH_SPRITE     = n   => `https://projectpokemon.org/images/sprites-models/swsh-normal-sprites/${nameToSlug(n)}.gif`;
+const SHOWDOWN_GIF    = n   => `https://play.pokemonshowdown.com/sprites/ani/${nameToSlug(n)}.gif`;
+const SHOWDOWN_STATIC = n   => `https://play.pokemonshowdown.com/sprites/dex/${nameToSlug(n)}.png`;
+const STATIC_SPRITE   = num => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${num}.png`;
 
 const learnsetCache = new Map();
 async function fetchLearnableIds(Dex, speciesId) {
@@ -122,15 +124,17 @@ export default function TeamSlot({ index, allSpecies, allMoves, allItems, allAbi
   );
   const activeMega = slot.megaFormId ? allMegas.find(m => m.id === slot.megaFormId) : null;
 
-  const baseGifUrl    = slot.species ? GIF_SPRITE(slot.species.name)   : null;
-  const baseSwshUrl   = slot.species ? SWSH_SPRITE(slot.species.name)  : null;
-  const baseStaticUrl = slot.species ? STATIC_SPRITE(slot.species.num) : null;
+  const baseGifUrl        = slot.species ? GIF_SPRITE(slot.species.name)        : null;
+  const baseSwshUrl       = slot.species ? SWSH_SPRITE(slot.species.name)       : null;
+  const baseShowdownGif   = slot.species ? SHOWDOWN_GIF(slot.species.name)      : null;
+  const baseShowdownStatic= slot.species ? SHOWDOWN_STATIC(slot.species.name)   : null;
+  const baseStaticUrl     = slot.species ? STATIC_SPRITE(slot.species.num)      : null;
   const megaUrls = activeMega ? (() => {
     const slug = megaNameToSlug(activeMega.name);
     const bulba = BULBAPEDIA_MEGA[slug];
     return [`https://projectpokemon.org/images/normal-sprite/${slug}.gif`, ...(bulba ? [bulba] : [])];
   })() : [];
-  const allSpriteUrls = [...megaUrls, baseGifUrl, baseSwshUrl, baseStaticUrl].filter(Boolean);
+  const allSpriteUrls = [...megaUrls, baseGifUrl, baseSwshUrl, baseShowdownGif, baseShowdownStatic, baseStaticUrl].filter(Boolean);
   const spriteUrl = allSpriteUrls[Math.min(spriteUrlIdx, allSpriteUrls.length - 1)] ?? null;
 
   const slotAbilities = useMemo(() => {
@@ -371,7 +375,13 @@ export default function TeamSlot({ index, allSpecies, allMoves, allItems, allAbi
                 renderOption={s => (
                   <div className="flex items-center gap-1.5">
                     <img src={GIF_SPRITE(s.name)} alt=""
-                      onError={e => { e.target.src = e.target.src.includes('normal-sprite/') ? SWSH_SPRITE(s.name) : STATIC_SPRITE(s.num); }}
+                      onError={e => {
+                        const src = e.target.src;
+                        if (src.includes('normal-sprite/')) e.target.src = SWSH_SPRITE(s.name);
+                        else if (src.includes('swsh-normal-sprites/')) e.target.src = SHOWDOWN_GIF(s.name);
+                        else if (src.includes('/sprites/ani/')) e.target.src = SHOWDOWN_STATIC(s.name);
+                        else e.target.src = STATIC_SPRITE(s.num);
+                      }}
                       className="w-7 h-7 object-contain shrink-0" />
                     <span className="text-white flex-1 truncate text-xs">{s.name}</span>
                     <div className="flex gap-1 shrink-0">{s.types.map(t => <TypeBadge key={t} type={t} />)}</div>
