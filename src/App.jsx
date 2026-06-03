@@ -13,10 +13,7 @@ import { exportToShowdown } from './utils/showdown';
 const allMegas = buildMegaForms(Dex);
 
 const allSpecies = [...Dex.species.all()]
-  .filter(s => {
-    if (!s.exists || s.isNonstandard || s.battleOnly) return false;
-    return LEGAL_MON_NAMES.has(normalize(s.name)) || LEGAL_MON_NAMES.has(normalize(s.baseSpecies));
-  })
+  .filter(s => s.exists && !s.isNonstandard && !s.battleOnly && LEGAL_MON_NAMES.has(normalize(s.name)))
   .sort((a, b) => a.name.localeCompare(b.name));
 
 const allMoves = [...Dex.moves.all()]

@@ -161,6 +161,9 @@ Stunfisk
 Sylveon
 Talonflame
 Tauros
+Tauros-Paldea-Aqua
+Tauros-Paldea-Blaze
+Tauros-Paldea-Combat
 Tinkaton
 Torkoal
 Torterra
