@@ -13,6 +13,7 @@ Amnesia
 Ancient Power
 Apple Acid
 Aqua Cutter
+Aqua Jet
 Aqua Ring
 Aqua Step
 Armor Cannon
