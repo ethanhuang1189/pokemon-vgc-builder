@@ -34,12 +34,20 @@ const learnsetCache = new Map();
 async function fetchLearnableIds(Dex, speciesId) {
   if (learnsetCache.has(speciesId)) return learnsetCache.get(speciesId);
   const allIds = new Set();
-  let current = Dex.species.get(speciesId);
-  while (current?.exists) {
-    const ls = await Dex.learnsets.get(current.id);
-    if (ls?.learnset) for (const id of Object.keys(ls.learnset)) allIds.add(id);
-    current = current.prevo ? Dex.species.get(current.prevo) : null;
+  const visited = new Set();
+
+  async function collect(id) {
+    if (!id || visited.has(id)) return;
+    visited.add(id);
+    const species = Dex.species.get(id);
+    if (!species?.exists) return;
+    const ls = await Dex.learnsets.get(species.id);
+    if (ls?.learnset) for (const moveId of Object.keys(ls.learnset)) allIds.add(moveId);
+    if (species.changesFrom) await collect(species.changesFrom);
+    if (species.prevo) await collect(species.prevo);
   }
+
+  await collect(speciesId);
   const result = allIds.size > 0 ? allIds : null;
   learnsetCache.set(speciesId, result);
   return result;
