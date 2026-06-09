@@ -1,9 +1,12 @@
 import { useState, useRef, useCallback } from 'react';
 import { Dex } from '@pkmn/dex';
 import { TeamProvider, useTeam } from './context/TeamContext';
+import { PickerProvider } from './context/PickerContext';
+import BottomSheet from './components/BottomSheet';
 import TeamSlot from './components/TeamSlot';
 import AnalysisPanel from './components/AnalysisPanel';
 import TeamExport from './components/TeamExport';
+import WeaknessChart from './components/WeaknessChart';
 import { REGULATION } from './data/regulations';
 import { LEGAL_MON_NAMES, LEGAL_ITEM_NAMES, LEGAL_MOVE_NAMES, normalize } from './data/legalLists';
 import { buildMegaForms, MEGA_STONE_NAMES } from './data/megaForms';
@@ -153,10 +156,6 @@ function TeamBuilder() {
               >
                 <TeamSlot
                   index={i}
-                  allSpecies={allSpecies}
-                  allMoves={allMoves}
-                  allItems={allItems}
-                  allAbilities={allAbilities}
                   allMegas={allMegas}
                   onMoveHandlePointerDown={e => onMoveHandlePointerDown(i, e)}
                 />
@@ -166,6 +165,10 @@ function TeamBuilder() {
         </div>
         <div className="mt-3">
           <TeamExport />
+        </div>
+        <div className="mt-4 bg-gray-800 border border-gray-700 rounded-sm p-3">
+          <h3 className="text-xs font-semibold text-gray-300 mb-3 uppercase tracking-wide">Weakness / Resistance Chart</h3>
+          <WeaknessChart />
         </div>
       </div>
 
@@ -257,15 +260,18 @@ function Footer() {
 
 export default function App() {
   return (
-    <TeamProvider Dex={Dex}>
-      <div className="min-h-screen bg-gray-900 flex flex-col">
-        <Header />
-        <div className="flex-1">
-          <TeamBuilder />
-          <MobileAnalysis />
+    <PickerProvider allSpecies={allSpecies} allMoves={allMoves} allItems={allItems} allAbilities={allAbilities} allMegas={allMegas} Dex={Dex}>
+      <TeamProvider Dex={Dex}>
+        <div className="min-h-screen bg-gray-900 flex flex-col">
+          <Header />
+          <div className="flex-1">
+            <TeamBuilder />
+            <MobileAnalysis />
+          </div>
+          <Footer />
         </div>
-        <Footer />
-      </div>
-    </TeamProvider>
+        <BottomSheet />
+      </TeamProvider>
+    </PickerProvider>
   );
 }
