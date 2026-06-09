@@ -44,7 +44,7 @@ export const NOT_VERY_EFFECTIVE = {
   Water:    ['Water','Grass','Dragon'],
   Electric: ['Electric','Grass','Dragon'],
   Grass:    ['Fire','Grass','Poison','Flying','Bug','Dragon','Steel'],
-  Ice:      ['Water','Ice'],
+  Ice:      ['Fire','Water','Ice','Steel'],
   Fighting: ['Poison','Bug','Psychic','Flying','Fairy'],
   Poison:   ['Poison','Ground','Rock','Ghost'],
   Ground:   ['Grass','Bug'],

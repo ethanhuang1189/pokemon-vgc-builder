@@ -365,56 +365,47 @@ function SpeciesSubPicker({ subPicker }) {
 
       <div className="px-4 py-1 text-[10px] text-gray-500 shrink-0 border-b border-gray-800">{filteredSpecies.length} Pokémon</div>
 
-      <div className="overflow-y-auto flex-1">
-        {q && hasSuggestions && (
-          <div className="px-3 pt-3 pb-1 border-b border-gray-800">
-            {suggestedTypes.length > 0 && (
-              <div className="mb-3">
-                <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1.5">Type filter</div>
-                <div className="flex flex-wrap gap-1.5">
-                  {suggestedTypes.map(t => (
-                    <button key={t} type="button" onClick={() => addType(t)}
-                      className="px-2.5 py-1 bg-gray-700 border border-gray-600 text-xs text-white hover:border-indigo-500">
-                      {t}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-            {suggestedMoves.length > 0 && (
-              <div className="mb-3">
-                <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1.5">Filter by move</div>
-                <div className="flex flex-col gap-1">
-                  {suggestedMoves.map(m => (
-                    <button key={m.id} type="button" onClick={() => { setMoveFilter(m); setQuery(''); }}
-                      className="flex items-center gap-2 px-2 py-1.5 bg-gray-700 border border-gray-600 text-left hover:border-indigo-500">
-                      <span className="text-xs text-white shrink-0">{m.name}</span>
-                      <TypeBadge type={m.type} size="xs" />
-                      <CategoryIcon category={m.category} size="xs" />
-                      {m.basePower > 0 && <span className="text-[10px] text-gray-400">{m.basePower} BP</span>}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-            {suggestedAbilities.length > 0 && (
-              <div className="mb-3">
-                <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1.5">Filter by ability</div>
-                <div className="flex flex-col gap-1">
-                  {suggestedAbilities.map(a => (
-                    <button key={a.id} type="button" onClick={() => { setAbilityFilter(a.name); setQuery(''); }}
-                      className="flex items-center gap-2 px-2 py-1.5 bg-gray-700 border border-gray-600 text-left hover:border-indigo-500">
-                      <span className="text-xs text-white shrink-0">{a.name}</span>
-                      {a.shortDesc && <span className="text-[10px] text-gray-400 truncate">{a.shortDesc}</span>}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-            {filteredSpecies.length > 0 && <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-2">Pokémon</div>}
-          </div>
-        )}
+      {/* Compact filter suggestions — above Pokémon list so results stay visible */}
+      {q && hasSuggestions && (
+        <div className="px-3 pt-1.5 pb-2 border-b border-gray-700/60 shrink-0 space-y-1.5">
+          {suggestedTypes.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1">
+              <span className="text-[9px] text-gray-500 uppercase tracking-widest mr-0.5 shrink-0">Type:</span>
+              {suggestedTypes.map(t => (
+                <button key={t} type="button" onClick={() => addType(t)}
+                  className="px-2 py-0.5 bg-gray-700 border border-gray-600 text-[10px] text-white hover:border-indigo-500 rounded-sm">
+                  {t}
+                </button>
+              ))}
+            </div>
+          )}
+          {suggestedMoves.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1">
+              <span className="text-[9px] text-gray-500 uppercase tracking-widest mr-0.5 shrink-0">Move:</span>
+              {suggestedMoves.map(m => (
+                <button key={m.id} type="button" onClick={() => { setMoveFilter(m); setQuery(''); }}
+                  className="flex items-center gap-1 px-2 py-0.5 bg-gray-700 border border-gray-600 text-[10px] text-white hover:border-indigo-500 rounded-sm">
+                  {m.name}
+                  <TypeBadge type={m.type} size="xs" />
+                </button>
+              ))}
+            </div>
+          )}
+          {suggestedAbilities.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1">
+              <span className="text-[9px] text-gray-500 uppercase tracking-widest mr-0.5 shrink-0">Ability:</span>
+              {suggestedAbilities.map(a => (
+                <button key={a.id} type="button" onClick={() => { setAbilityFilter(a.name); setQuery(''); }}
+                  className="px-2 py-0.5 bg-gray-700 border border-gray-600 text-[10px] text-white hover:border-indigo-500 rounded-sm">
+                  {a.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
+      <div className="overflow-y-auto flex-1">
         {filteredSpecies.length === 0
           ? <div className="px-4 py-10 text-center text-gray-500 text-sm">No Pokémon found</div>
           : filteredSpecies.map(s => {
