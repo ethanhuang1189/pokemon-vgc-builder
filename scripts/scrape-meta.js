@@ -3,13 +3,13 @@
 // Strategy 2: DOM parse after JS renders
 // Outputs to src/data/metaStats.json
 
-const puppeteer = require('puppeteer');
-const fs        = require('fs');
-const path      = require('path');
+import puppeteer from 'puppeteer';
+import fs        from 'fs';
+import path      from 'path';
 
-const OUT_FILE    = path.join(__dirname, '..', 'src', 'data', 'metaStats.json');
-const DEBUG_SHOT  = path.join(__dirname, 'debug.png');
-const URL         = 'https://www.pikalytics.com/';
+const OUT_FILE   = path.join(import.meta.dirname, '..', 'src', 'data', 'metaStats.json');
+const DEBUG_SHOT = path.join(import.meta.dirname, 'debug.png');
+const URL        = 'https://www.pikalytics.com/';
 
 function looksLikePokemonData(arr) {
   if (!Array.isArray(arr) || arr.length < 3) return false;
@@ -22,11 +22,11 @@ function looksLikePokemonData(arr) {
 }
 
 function normalizeApiEntry(entry) {
-  const name  = entry.name || entry.pokemon || entry.Pokemon || '';
+  const name  = (entry.name || entry.pokemon || entry.Pokemon || '').trim();
   const usage = parseFloat(
     entry.usage ?? entry.Usage ?? entry.percent ?? entry.percentage ?? entry.count ?? 0
   );
-  return name && !isNaN(usage) ? { name: name.trim(), slug: name.trim(), usage } : null;
+  return name && !isNaN(usage) ? { name, slug: name, usage } : null;
 }
 
 async function scrape() {
@@ -42,39 +42,35 @@ async function scrape() {
     '(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
   );
 
-  // ── Strategy 1: intercept API JSON responses ────────────────────────────────
+  // ── Strategy 1: intercept API JSON responses ──────────────────────────────
   const intercepted = [];
   page.on('response', async response => {
     const ct = response.headers()['content-type'] || '';
     if (!ct.includes('json')) return;
     try {
       const json = await response.json();
-      // Direct array of pokemon
       if (looksLikePokemonData(json)) {
         intercepted.push(...json);
         return;
       }
-      // Nested: { data: [...] } or { pokemon: [...] } or { results: [...] }
       for (const key of ['data', 'pokemon', 'results', 'usage', 'list']) {
         if (looksLikePokemonData(json[key])) {
           intercepted.push(...json[key]);
           return;
         }
       }
-    } catch { /* non-JSON body or network error */ }
+    } catch { /* non-JSON or network error */ }
   });
 
   console.log('Navigating to Pikalytics…');
   try {
     await page.goto(URL, { waitUntil: 'networkidle2', timeout: 30000 });
-  } catch (e) {
+  } catch {
     console.log('networkidle2 timed out, continuing anyway…');
   }
 
-  // Brief extra wait for any late API calls
   await new Promise(r => setTimeout(r, 3000));
 
-  // Check if Strategy 1 gave us usable data
   if (intercepted.length >= 3) {
     console.log(`API interception found ${intercepted.length} entries.`);
     const seen   = new Set();
@@ -93,8 +89,7 @@ async function scrape() {
 
   console.log('API interception insufficient — falling back to DOM scraping…');
 
-  // ── Strategy 2: DOM scraping ─────────────────────────────────────────────────
-  // Wait for at least one percentage to appear
+  // ── Strategy 2: DOM scraping ──────────────────────────────────────────────
   try {
     await page.waitForFunction(
       () => document.body.innerText.match(/\d+\.\d+%/),
@@ -118,15 +113,14 @@ async function scrape() {
       result.push({ name, slug: slug || name, usage: parseFloat(usage) });
     }
 
-    // 2a: anchor tags with /pokedex/FORMAT/POKEMON and a % somewhere in their text
+    // 2a: anchor tags with /pokedex/FORMAT/POKEMON and a % in text
     for (const link of document.querySelectorAll('a[href*="/pokedex/"]')) {
       const href  = link.getAttribute('href') || '';
       const match = href.match(/\/pokedex\/[^/]+\/([^/?#]+)/);
       if (!match) continue;
       const slug = decodeURIComponent(match[1]).trim();
       if (!slug) continue;
-      const text     = link.innerText || '';
-      const pctMatch = text.match(/(\d+\.\d+)%/);
+      const pctMatch = (link.innerText || '').match(/(\d+\.\d+)%/);
       if (!pctMatch) continue;
       const img  = link.querySelector('img');
       const name = img?.alt?.trim() || slug.replace(/-/g, ' ');
@@ -135,24 +129,17 @@ async function scrape() {
 
     if (result.length >= 3) return result;
 
-    // 2b: find leaf elements whose entire text is "X.XX%", walk up for img alt
+    // 2b: find leaf elements whose text is exactly "X.XX%", walk up for img alt
     for (const el of document.querySelectorAll('*')) {
       if (el.children.length > 0) continue;
-      const text     = (el.textContent || '').trim();
-      const pctMatch = text.match(/^(\d+\.\d+)%$/);
+      const pctMatch = (el.textContent || '').trim().match(/^(\d+\.\d+)%$/);
       if (!pctMatch) continue;
       let container = el.parentElement;
       for (let i = 0; i < 10; i++) {
         if (!container) break;
         const img = container.querySelector('img[alt]');
-        if (img?.alt && !/logo|icon|banner|sprite/i.test(img.alt)) {
+        if (img?.alt && !/logo|icon|banner/i.test(img.alt)) {
           addEntry(img.alt.trim(), img.alt.trim(), pctMatch[1]);
-          break;
-        }
-        // Also check for heading/span text nearby
-        const heading = container.querySelector('h1,h2,h3,h4,[class*="name"],[class*="Name"]');
-        if (heading?.textContent?.trim()) {
-          addEntry(heading.textContent.trim(), '', pctMatch[1]);
           break;
         }
         container = container.parentElement;
@@ -162,7 +149,6 @@ async function scrape() {
     return result;
   });
 
-  // Take a screenshot for debugging regardless
   await page.screenshot({ path: DEBUG_SHOT });
   await browser.close();
   return data;
@@ -180,8 +166,8 @@ async function main() {
   const sorted = (data || []).sort((a, b) => b.usage - a.usage);
 
   if (sorted.length < 3) {
-    console.error(`Only ${sorted.length} entries found — aborting to preserve existing data.`);
-    console.error('Check debug.png artifact for a screenshot of what the page looked like.');
+    console.error(`Only ${sorted.length} entries — aborting to preserve existing data.`);
+    console.error('Check the debug-screenshot artifact for what the page looked like.');
     process.exit(1);
   }
 
