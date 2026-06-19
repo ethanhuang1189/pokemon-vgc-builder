@@ -62,6 +62,22 @@ const MEGA_STONE_MAP = {
   drampamega:          'Drampanite',
   scovillainmega:      'Scovillainite',
   glimmoramega:        'Glimmoranite',
+  raichuxmega:         'Raichunite X',
+  raichuymega:         'Raichunite Y',
+  sceptilemega:        'Sceptilite',
+  blazikenmega:        'Blazikenite',
+  swampertmega:        'Swampertite',
+  mawilemega:          'Mawilite',
+  metagrossmega:       'Metagrossite',
+  staraptormega:       'Staraptite',
+  scolipedemega:       'Scolipite',
+  scraftymega:         'Scraftinite',
+  eelektrossmega:      'Eelektrossite',
+  pyroarmega:          'Pyroarite',
+  malamarmega:         'Malamarite',
+  barbaraclemega:      'Barbaracite',
+  dragalgemega:        'Dragalgite',
+  falinksmega:         'Falinksite',
 };
 
 export const MEGA_STONE_NAMES = new Set(Object.values(MEGA_STONE_MAP));
@@ -73,6 +89,7 @@ function parseMegaNames(raw) {
 function getBaseSpeciesName(megaName) {
   const base = megaName.replace(/^Mega /, '');
   if (base.startsWith('Charizard')) return 'Charizard';
+  if (base === 'Raichu X' || base === 'Raichu Y') return 'Raichu';
   if (base === 'Meowstic (Male)') return 'Meowstic';
   if (base === 'Meowstic (Female)') return 'Meowstic-F';
   return base;
@@ -82,12 +99,16 @@ function getMegaDexId(megaName) {
   const base = megaName.replace(/^Mega /, '');
   if (base === 'Charizard X') return 'charizardmegax';
   if (base === 'Charizard Y') return 'charizardmegay';
+  if (base === 'Raichu X') return 'raichuxmega';
+  if (base === 'Raichu Y') return 'raichuymega';
   return base.toLowerCase().replace(/[^a-z0-9]/g, '') + 'mega';
 }
 
 // Converts @pkmn/dex id to Showdown CDN sprite path segment
 // e.g. venusaurmega → venusaur-mega, charizardmegax → charizard-mega-x
 export function toShowdownId(dexId) {
+  if (dexId === 'raichuxmega') return 'raichu-mega-x';
+  if (dexId === 'raichuymega') return 'raichu-mega-y';
   return dexId
     .replace(/mega([xy])$/, '-mega-$1')
     .replace(/mega$/, '-mega');

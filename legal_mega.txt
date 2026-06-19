@@ -42,6 +42,11 @@ Mega Lucario
 Mega Abomasnow
 Mega Gallade
 Mega Froslass
+Mega Sceptile
+Mega Blaziken
+Mega Swampert
+Mega Mawile
+Mega Metagross
 Mega Emboar
 Mega Excadrill
 Mega Audino
@@ -58,3 +63,14 @@ Mega Crabominable
 Mega Drampa
 Mega Scovillain
 Mega Glimmora
+Mega Raichu X
+Mega Raichu Y
+Mega Staraptor
+Mega Scolipede
+Mega Scrafty
+Mega Eelektross
+Mega Pyroar
+Mega Malamar
+Mega Barbaracle
+Mega Dragalge
+Mega Falinks

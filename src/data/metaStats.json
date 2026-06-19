@@ -1,0 +1,10 @@
+{
+  "label": "Pikalytics · Reg M-B",
+  "updatedAt": "2026-06-19",
+  "data": [
+    { "name": "Garchomp", "slug": "Garchomp", "usage": 35.0 },
+    { "name": "Sinistcha", "slug": "Sinistcha", "usage": 28.0 },
+    { "name": "Basculegion", "slug": "Basculegion", "usage": 22.0 },
+    { "name": "Whimsicott", "slug": "Whimsicott", "usage": 18.0 }
+  ]
+}

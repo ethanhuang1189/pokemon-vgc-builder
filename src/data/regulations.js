@@ -1,3 +1,3 @@
 export const REGULATION = {
-  label: 'Regulation MA (Pokemon Champions)',
+  label: 'Regulation M-B (Pokemon Champions)',
 };

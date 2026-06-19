@@ -11,6 +11,7 @@ import {
   GIF_SPRITE, SWSH_SPRITE, SHOWDOWN_GIF, SHOWDOWN_STATIC, STATIC_SPRITE,
   nameToSlug, handleSpriteError,
 } from '../utils/sprites';
+import { MEGA_LEARNSETS } from '../data/megaLearnsets';
 
 const ALL_TYPES = [
   'Normal','Fire','Water','Electric','Grass','Ice','Fighting','Poison',
@@ -101,9 +102,19 @@ function SlotPanel() {
   useEffect(() => {
     if (!slot?.species) { setSlotMoves(allMoves); return; }
     fetchLearnableIds(Dex, slot.species.id).then(ids => {
-      setSlotMoves(ids ? allMoves.filter(m => ids.has(m.id)) : allMoves);
+      const extraMoves = slot?.megaFormId ? (MEGA_LEARNSETS[slot.megaFormId] ?? []) : [];
+      if (ids) {
+        const merged = new Set(ids);
+        for (const id of extraMoves) merged.add(id);
+        setSlotMoves(allMoves.filter(m => merged.has(m.id)));
+      } else if (extraMoves.length > 0) {
+        const extra = new Set(extraMoves);
+        setSlotMoves(allMoves.filter(m => extra.has(m.id)));
+      } else {
+        setSlotMoves(allMoves);
+      }
     });
-  }, [slot?.species?.id, allMoves, Dex]);
+  }, [slot?.species?.id, slot?.megaFormId, allMoves, Dex]);
 
   const activeMega = slot?.megaFormId ? allMegas.find(m => m.id === slot.megaFormId) : null;
   const availableMegas = slot?.species ? allMegas.filter(m => m.baseId === slot.species.id) : [];
