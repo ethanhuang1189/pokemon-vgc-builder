@@ -16,13 +16,21 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install Puppeteer
         run: npm install puppeteer
 
       - name: Scrape Pikalytics
         run: node scripts/scrape-meta.js
+
+      - name: Upload debug screenshot on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-screenshot
+          path: scripts/debug.png
+          if-no-files-found: ignore
 
       - name: Commit if changed
         run: |

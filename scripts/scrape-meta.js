@@ -1,17 +1,38 @@
 // Scrapes Pikalytics homepage for Pokemon Champions top usage stats.
-// Run via GitHub Actions; outputs to src/data/metaStats.json.
+// Strategy 1: intercept the JSON API responses Pikalytics makes on load
+// Strategy 2: DOM parse after JS renders
+// Outputs to src/data/metaStats.json
 
 const puppeteer = require('puppeteer');
 const fs        = require('fs');
 const path      = require('path');
 
-const OUT_FILE = path.join(__dirname, '..', 'src', 'data', 'metaStats.json');
-const URL      = 'https://www.pikalytics.com/';
+const OUT_FILE    = path.join(__dirname, '..', 'src', 'data', 'metaStats.json');
+const DEBUG_SHOT  = path.join(__dirname, 'debug.png');
+const URL         = 'https://www.pikalytics.com/';
+
+function looksLikePokemonData(arr) {
+  if (!Array.isArray(arr) || arr.length < 3) return false;
+  const first = arr[0];
+  return first && (
+    typeof first.name === 'string' ||
+    typeof first.pokemon === 'string' ||
+    typeof first.Pokemon === 'string'
+  );
+}
+
+function normalizeApiEntry(entry) {
+  const name  = entry.name || entry.pokemon || entry.Pokemon || '';
+  const usage = parseFloat(
+    entry.usage ?? entry.Usage ?? entry.percent ?? entry.percentage ?? entry.count ?? 0
+  );
+  return name && !isNaN(usage) ? { name: name.trim(), slug: name.trim(), usage } : null;
+}
 
 async function scrape() {
   const browser = await puppeteer.launch({
     headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
   });
 
   const page = await browser.newPage();
@@ -21,17 +42,67 @@ async function scrape() {
     '(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
   );
 
-  console.log('Navigating to Pikalytics…');
-  await page.goto(URL, { waitUntil: 'networkidle2', timeout: 30000 });
+  // ── Strategy 1: intercept API JSON responses ────────────────────────────────
+  const intercepted = [];
+  page.on('response', async response => {
+    const ct = response.headers()['content-type'] || '';
+    if (!ct.includes('json')) return;
+    try {
+      const json = await response.json();
+      // Direct array of pokemon
+      if (looksLikePokemonData(json)) {
+        intercepted.push(...json);
+        return;
+      }
+      // Nested: { data: [...] } or { pokemon: [...] } or { results: [...] }
+      for (const key of ['data', 'pokemon', 'results', 'usage', 'list']) {
+        if (looksLikePokemonData(json[key])) {
+          intercepted.push(...json[key]);
+          return;
+        }
+      }
+    } catch { /* non-JSON body or network error */ }
+  });
 
-  // Wait for at least one usage percentage to appear in the DOM
+  console.log('Navigating to Pikalytics…');
+  try {
+    await page.goto(URL, { waitUntil: 'networkidle2', timeout: 30000 });
+  } catch (e) {
+    console.log('networkidle2 timed out, continuing anyway…');
+  }
+
+  // Brief extra wait for any late API calls
+  await new Promise(r => setTimeout(r, 3000));
+
+  // Check if Strategy 1 gave us usable data
+  if (intercepted.length >= 3) {
+    console.log(`API interception found ${intercepted.length} entries.`);
+    const seen   = new Set();
+    const result = [];
+    for (const entry of intercepted) {
+      const norm = normalizeApiEntry(entry);
+      if (!norm || seen.has(norm.name.toLowerCase())) continue;
+      seen.add(norm.name.toLowerCase());
+      result.push(norm);
+    }
+    if (result.length >= 3) {
+      await browser.close();
+      return result.sort((a, b) => b.usage - a.usage);
+    }
+  }
+
+  console.log('API interception insufficient — falling back to DOM scraping…');
+
+  // ── Strategy 2: DOM scraping ─────────────────────────────────────────────────
+  // Wait for at least one percentage to appear
   try {
     await page.waitForFunction(
       () => document.body.innerText.match(/\d+\.\d+%/),
       { timeout: 15000 }
     );
   } catch {
-    console.error('Timed out waiting for usage percentages — page may have changed structure.');
+    await page.screenshot({ path: DEBUG_SHOT });
+    console.error('No percentages found — screenshot saved to debug.png');
     await browser.close();
     process.exit(1);
   }
@@ -40,54 +111,48 @@ async function scrape() {
     const seen   = new Set();
     const result = [];
 
-    // Strategy 1: anchor tags linking to /pokedex/FORMAT/POKEMON with % in text
+    function addEntry(name, slug, usage) {
+      const key = name.toLowerCase();
+      if (seen.has(key)) return;
+      seen.add(key);
+      result.push({ name, slug: slug || name, usage: parseFloat(usage) });
+    }
+
+    // 2a: anchor tags with /pokedex/FORMAT/POKEMON and a % somewhere in their text
     for (const link of document.querySelectorAll('a[href*="/pokedex/"]')) {
       const href  = link.getAttribute('href') || '';
       const match = href.match(/\/pokedex\/[^/]+\/([^/?#]+)/);
       if (!match) continue;
-
-      const slug    = decodeURIComponent(match[1]).trim();
-      const slugKey = slug.toLowerCase();
-      if (!slug || seen.has(slugKey)) continue;
-
+      const slug = decodeURIComponent(match[1]).trim();
+      if (!slug) continue;
       const text     = link.innerText || '';
       const pctMatch = text.match(/(\d+\.\d+)%/);
       if (!pctMatch) continue;
-
       const img  = link.querySelector('img');
       const name = img?.alt?.trim() || slug.replace(/-/g, ' ');
-      if (!name || seen.has(name.toLowerCase())) continue;
-
-      seen.add(slugKey);
-      seen.add(name.toLowerCase());
-      result.push({ name, slug, usage: parseFloat(pctMatch[1]) });
+      addEntry(name, slug, pctMatch[1]);
     }
 
-    if (result.length >= 5) return result;
+    if (result.length >= 3) return result;
 
-    // Strategy 2: walk every leaf element for "X.XX%" text, find nearest img alt
-    const seenPct = new Set();
+    // 2b: find leaf elements whose entire text is "X.XX%", walk up for img alt
     for (const el of document.querySelectorAll('*')) {
       if (el.children.length > 0) continue;
-      const text     = el.textContent?.trim() || '';
+      const text     = (el.textContent || '').trim();
       const pctMatch = text.match(/^(\d+\.\d+)%$/);
       if (!pctMatch) continue;
-
-      const pct = parseFloat(pctMatch[1]);
-      const key = pct.toString();
-      if (seenPct.has(key)) continue;
-
       let container = el.parentElement;
-      for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < 10; i++) {
         if (!container) break;
         const img = container.querySelector('img[alt]');
-        if (img?.alt && !/logo|icon|banner/i.test(img.alt)) {
-          const name = img.alt.trim();
-          if (!seen.has(name.toLowerCase())) {
-            seen.add(name.toLowerCase());
-            seenPct.add(key);
-            result.push({ name, slug: name, usage: pct });
-          }
+        if (img?.alt && !/logo|icon|banner|sprite/i.test(img.alt)) {
+          addEntry(img.alt.trim(), img.alt.trim(), pctMatch[1]);
+          break;
+        }
+        // Also check for heading/span text nearby
+        const heading = container.querySelector('h1,h2,h3,h4,[class*="name"],[class*="Name"]');
+        if (heading?.textContent?.trim()) {
+          addEntry(heading.textContent.trim(), '', pctMatch[1]);
           break;
         }
         container = container.parentElement;
@@ -97,17 +162,33 @@ async function scrape() {
     return result;
   });
 
+  // Take a screenshot for debugging regardless
+  await page.screenshot({ path: DEBUG_SHOT });
   await browser.close();
+  return data;
+}
 
-  const sorted = data.sort((a, b) => b.usage - a.usage);
-
-  if (sorted.length < 3) {
-    console.error(`Only found ${sorted.length} entries — aborting to avoid overwriting good data.`);
+async function main() {
+  let data;
+  try {
+    data = await scrape();
+  } catch (err) {
+    console.error('Scraper threw:', err);
     process.exit(1);
   }
 
-  console.log(`Found ${sorted.length} Pokémon. Top 5:`);
-  sorted.slice(0, 5).forEach((p, i) => console.log(`  ${i + 1}. ${p.name} ${p.usage}%`));
+  const sorted = (data || []).sort((a, b) => b.usage - a.usage);
+
+  if (sorted.length < 3) {
+    console.error(`Only ${sorted.length} entries found — aborting to preserve existing data.`);
+    console.error('Check debug.png artifact for a screenshot of what the page looked like.');
+    process.exit(1);
+  }
+
+  console.log(`\nFound ${sorted.length} Pokémon. Top 10:`);
+  sorted.slice(0, 10).forEach((p, i) =>
+    console.log(`  ${String(i + 1).padStart(2)}. ${p.name.padEnd(20)} ${p.usage}%`)
+  );
 
   const out = {
     label:     'Pikalytics · Reg M-B',
@@ -116,7 +197,7 @@ async function scrape() {
   };
 
   fs.writeFileSync(OUT_FILE, JSON.stringify(out, null, 2));
-  console.log(`Written to ${OUT_FILE}`);
+  console.log(`\nWritten to ${OUT_FILE}`);
 }
 
-scrape().catch(err => { console.error(err); process.exit(1); });
+main();
