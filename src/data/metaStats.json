@@ -1,10 +1,1046 @@
 {
   "label": "Pikalytics · Reg M-B",
-  "updatedAt": "2026-06-19",
+  "updatedAt": "2026-06-20",
   "data": [
-    { "name": "Garchomp", "slug": "Garchomp", "usage": 35.0 },
-    { "name": "Sinistcha", "slug": "Sinistcha", "usage": 28.0 },
-    { "name": "Basculegion", "slug": "Basculegion", "usage": 22.0 },
-    { "name": "Whimsicott", "slug": "Whimsicott", "usage": 18.0 }
+    {
+      "name": "Garchomp",
+      "slug": "Garchomp",
+      "usage": 0
+    },
+    {
+      "name": "Sinistcha",
+      "slug": "Sinistcha",
+      "usage": 0
+    },
+    {
+      "name": "Basculegion",
+      "slug": "Basculegion",
+      "usage": 0
+    },
+    {
+      "name": "Whimsicott",
+      "slug": "Whimsicott",
+      "usage": 0
+    },
+    {
+      "name": "Kingambit",
+      "slug": "Kingambit",
+      "usage": 0
+    },
+    {
+      "name": "Staraptor",
+      "slug": "Staraptor",
+      "usage": 0
+    },
+    {
+      "name": "Incineroar",
+      "slug": "Incineroar",
+      "usage": 0
+    },
+    {
+      "name": "Charizard",
+      "slug": "Charizard",
+      "usage": 0
+    },
+    {
+      "name": "Raichu",
+      "slug": "Raichu",
+      "usage": 0
+    },
+    {
+      "name": "Pelipper",
+      "slug": "Pelipper",
+      "usage": 0
+    },
+    {
+      "name": "Sneasler",
+      "slug": "Sneasler",
+      "usage": 0
+    },
+    {
+      "name": "Archaludon",
+      "slug": "Archaludon",
+      "usage": 0
+    },
+    {
+      "name": "Grimmsnarl",
+      "slug": "Grimmsnarl",
+      "usage": 0
+    },
+    {
+      "name": "Sylveon",
+      "slug": "Sylveon",
+      "usage": 0
+    },
+    {
+      "name": "Swampert",
+      "slug": "Swampert",
+      "usage": 0
+    },
+    {
+      "name": "Metagross",
+      "slug": "Metagross",
+      "usage": 0
+    },
+    {
+      "name": "Farigiraf",
+      "slug": "Farigiraf",
+      "usage": 0
+    },
+    {
+      "name": "Floette-Eternal",
+      "slug": "Floette-Eternal",
+      "usage": 0
+    },
+    {
+      "name": "Gholdengo",
+      "slug": "Gholdengo",
+      "usage": 0
+    },
+    {
+      "name": "Aerodactyl",
+      "slug": "Aerodactyl",
+      "usage": 0
+    },
+    {
+      "name": "Maushold",
+      "slug": "Maushold",
+      "usage": 0
+    },
+    {
+      "name": "Annihilape",
+      "slug": "Annihilape",
+      "usage": 0
+    },
+    {
+      "name": "Sableye",
+      "slug": "Sableye",
+      "usage": 0
+    },
+    {
+      "name": "Mawile",
+      "slug": "Mawile",
+      "usage": 0
+    },
+    {
+      "name": "Ninetales-Alola",
+      "slug": "Ninetales-Alola",
+      "usage": 0
+    },
+    {
+      "name": "Torkoal",
+      "slug": "Torkoal",
+      "usage": 0
+    },
+    {
+      "name": "Froslass",
+      "slug": "Froslass",
+      "usage": 0
+    },
+    {
+      "name": "Talonflame",
+      "slug": "Talonflame",
+      "usage": 0
+    },
+    {
+      "name": "Rotom-Wash",
+      "slug": "Rotom-Wash",
+      "usage": 0
+    },
+    {
+      "name": "Glimmora",
+      "slug": "Glimmora",
+      "usage": 0
+    },
+    {
+      "name": "Delphox",
+      "slug": "Delphox",
+      "usage": 0
+    },
+    {
+      "name": "Dragonite",
+      "slug": "Dragonite",
+      "usage": 0
+    },
+    {
+      "name": "Tyranitar",
+      "slug": "Tyranitar",
+      "usage": 0
+    },
+    {
+      "name": "Blastoise",
+      "slug": "Blastoise",
+      "usage": 0
+    },
+    {
+      "name": "Milotic",
+      "slug": "Milotic",
+      "usage": 0
+    },
+    {
+      "name": "Venusaur",
+      "slug": "Venusaur",
+      "usage": 0
+    },
+    {
+      "name": "Hydreigon",
+      "slug": "Hydreigon",
+      "usage": 0
+    },
+    {
+      "name": "Politoed",
+      "slug": "Politoed",
+      "usage": 0
+    },
+    {
+      "name": "Tsareena",
+      "slug": "Tsareena",
+      "usage": 0
+    },
+    {
+      "name": "Gengar",
+      "slug": "Gengar",
+      "usage": 0
+    },
+    {
+      "name": "Kangaskhan",
+      "slug": "Kangaskhan",
+      "usage": 0
+    },
+    {
+      "name": "Pyroar",
+      "slug": "Pyroar",
+      "usage": 0
+    },
+    {
+      "name": "Gardevoir",
+      "slug": "Gardevoir",
+      "usage": 0
+    },
+    {
+      "name": "Corviknight",
+      "slug": "Corviknight",
+      "usage": 0
+    },
+    {
+      "name": "Scrafty",
+      "slug": "Scrafty",
+      "usage": 0
+    },
+    {
+      "name": "Vivillon",
+      "slug": "Vivillon",
+      "usage": 0
+    },
+    {
+      "name": "Eelektross",
+      "slug": "Eelektross",
+      "usage": 0
+    },
+    {
+      "name": "Scovillain",
+      "slug": "Scovillain",
+      "usage": 0
+    },
+    {
+      "name": "Primarina",
+      "slug": "Primarina",
+      "usage": 0
+    },
+    {
+      "name": "Ceruledge",
+      "slug": "Ceruledge",
+      "usage": 0
+    },
+    {
+      "name": "Scizor",
+      "slug": "Scizor",
+      "usage": 0
+    },
+    {
+      "name": "Excadrill",
+      "slug": "Excadrill",
+      "usage": 0
+    },
+    {
+      "name": "Kommo-o",
+      "slug": "Kommo-o",
+      "usage": 0
+    },
+    {
+      "name": "Blaziken",
+      "slug": "Blaziken",
+      "usage": 0
+    },
+    {
+      "name": "Meowscarada",
+      "slug": "Meowscarada",
+      "usage": 0
+    },
+    {
+      "name": "Dragalge",
+      "slug": "Dragalge",
+      "usage": 0
+    },
+    {
+      "name": "Arcanine-Hisui",
+      "slug": "Arcanine-Hisui",
+      "usage": 0
+    },
+    {
+      "name": "Gyarados",
+      "slug": "Gyarados",
+      "usage": 0
+    },
+    {
+      "name": "Meganium",
+      "slug": "Meganium",
+      "usage": 0
+    },
+    {
+      "name": "Gallade",
+      "slug": "Gallade",
+      "usage": 0
+    },
+    {
+      "name": "Aegislash",
+      "slug": "Aegislash",
+      "usage": 0
+    },
+    {
+      "name": "Rotom-Heat",
+      "slug": "Rotom-Heat",
+      "usage": 0
+    },
+    {
+      "name": "Sceptile",
+      "slug": "Sceptile",
+      "usage": 0
+    },
+    {
+      "name": "Camerupt",
+      "slug": "Camerupt",
+      "usage": 0
+    },
+    {
+      "name": "Mamoswine",
+      "slug": "Mamoswine",
+      "usage": 0
+    },
+    {
+      "name": "Malamar",
+      "slug": "Malamar",
+      "usage": 0
+    },
+    {
+      "name": "Volcarona",
+      "slug": "Volcarona",
+      "usage": 0
+    },
+    {
+      "name": "Clefable",
+      "slug": "Clefable",
+      "usage": 0
+    },
+    {
+      "name": "Typhlosion-Hisui",
+      "slug": "Typhlosion-Hisui",
+      "usage": 0
+    },
+    {
+      "name": "Hatterene",
+      "slug": "Hatterene",
+      "usage": 0
+    },
+    {
+      "name": "Lycanroc-Dusk",
+      "slug": "Lycanroc-Dusk",
+      "usage": 0
+    },
+    {
+      "name": "Kleavor",
+      "slug": "Kleavor",
+      "usage": 0
+    },
+    {
+      "name": "Oranguru",
+      "slug": "Oranguru",
+      "usage": 0
+    },
+    {
+      "name": "Overqwil",
+      "slug": "Overqwil",
+      "usage": 0
+    },
+    {
+      "name": "Vanilluxe",
+      "slug": "Vanilluxe",
+      "usage": 0
+    },
+    {
+      "name": "Lopunny",
+      "slug": "Lopunny",
+      "usage": 0
+    },
+    {
+      "name": "Zoroark-Hisui",
+      "slug": "Zoroark-Hisui",
+      "usage": 0
+    },
+    {
+      "name": "Espathra",
+      "slug": "Espathra",
+      "usage": 0
+    },
+    {
+      "name": "Basculegion-F",
+      "slug": "Basculegion-F",
+      "usage": 0
+    },
+    {
+      "name": "Palafin",
+      "slug": "Palafin",
+      "usage": 0
+    },
+    {
+      "name": "Toxapex",
+      "slug": "Toxapex",
+      "usage": 0
+    },
+    {
+      "name": "Heliolisk",
+      "slug": "Heliolisk",
+      "usage": 0
+    },
+    {
+      "name": "Lucario",
+      "slug": "Lucario",
+      "usage": 0
+    },
+    {
+      "name": "Samurott-Hisui",
+      "slug": "Samurott-Hisui",
+      "usage": 0
+    },
+    {
+      "name": "Weavile",
+      "slug": "Weavile",
+      "usage": 0
+    },
+    {
+      "name": "Tinkaton",
+      "slug": "Tinkaton",
+      "usage": 0
+    },
+    {
+      "name": "Vileplume",
+      "slug": "Vileplume",
+      "usage": 0
+    },
+    {
+      "name": "Wyrdeer",
+      "slug": "Wyrdeer",
+      "usage": 0
+    },
+    {
+      "name": "Armarouge",
+      "slug": "Armarouge",
+      "usage": 0
+    },
+    {
+      "name": "Jolteon",
+      "slug": "Jolteon",
+      "usage": 0
+    },
+    {
+      "name": "Skeledirge",
+      "slug": "Skeledirge",
+      "usage": 0
+    },
+    {
+      "name": "Dragapult",
+      "slug": "Dragapult",
+      "usage": 0
+    },
+    {
+      "name": "Azumarill",
+      "slug": "Azumarill",
+      "usage": 0
+    },
+    {
+      "name": "Mudsdale",
+      "slug": "Mudsdale",
+      "usage": 0
+    },
+    {
+      "name": "Mimikyu",
+      "slug": "Mimikyu",
+      "usage": 0
+    },
+    {
+      "name": "Rhyperior",
+      "slug": "Rhyperior",
+      "usage": 0
+    },
+    {
+      "name": "Araquanid",
+      "slug": "Araquanid",
+      "usage": 0
+    },
+    {
+      "name": "Decidueye-Hisui",
+      "slug": "Decidueye-Hisui",
+      "usage": 0
+    },
+    {
+      "name": "Chandelure",
+      "slug": "Chandelure",
+      "usage": 0
+    },
+    {
+      "name": "Liepard",
+      "slug": "Liepard",
+      "usage": 0
+    },
+    {
+      "name": "Meowstic",
+      "slug": "Meowstic",
+      "usage": 0
+    },
+    {
+      "name": "Slowking-Galar",
+      "slug": "Slowking-Galar",
+      "usage": 0
+    },
+    {
+      "name": "Scolipede",
+      "slug": "Scolipede",
+      "usage": 0
+    },
+    {
+      "name": "Ninetales",
+      "slug": "Ninetales",
+      "usage": 0
+    },
+    {
+      "name": "Umbreon",
+      "slug": "Umbreon",
+      "usage": 0
+    },
+    {
+      "name": "Crabominable",
+      "slug": "Crabominable",
+      "usage": 0
+    },
+    {
+      "name": "Greninja",
+      "slug": "Greninja",
+      "usage": 0
+    },
+    {
+      "name": "Houndstone",
+      "slug": "Houndstone",
+      "usage": 0
+    },
+    {
+      "name": "Klefki",
+      "slug": "Klefki",
+      "usage": 0
+    },
+    {
+      "name": "Arcanine",
+      "slug": "Arcanine",
+      "usage": 0
+    },
+    {
+      "name": "Medicham",
+      "slug": "Medicham",
+      "usage": 0
+    },
+    {
+      "name": "Drampa",
+      "slug": "Drampa",
+      "usage": 0
+    },
+    {
+      "name": "Tauros-Paldea-Aqua",
+      "slug": "Tauros-Paldea-Aqua",
+      "usage": 0
+    },
+    {
+      "name": "Snorlax",
+      "slug": "Snorlax",
+      "usage": 0
+    },
+    {
+      "name": "Serperior",
+      "slug": "Serperior",
+      "usage": 0
+    },
+    {
+      "name": "Goodra-Hisui",
+      "slug": "Goodra-Hisui",
+      "usage": 0
+    },
+    {
+      "name": "Orthworm",
+      "slug": "Orthworm",
+      "usage": 0
+    },
+    {
+      "name": "Ditto",
+      "slug": "Ditto",
+      "usage": 0
+    },
+    {
+      "name": "Sharpedo",
+      "slug": "Sharpedo",
+      "usage": 0
+    },
+    {
+      "name": "Conkeldurr",
+      "slug": "Conkeldurr",
+      "usage": 0
+    },
+    {
+      "name": "Golurk",
+      "slug": "Golurk",
+      "usage": 0
+    },
+    {
+      "name": "Starmie",
+      "slug": "Starmie",
+      "usage": 0
+    },
+    {
+      "name": "Feraligatr",
+      "slug": "Feraligatr",
+      "usage": 0
+    },
+    {
+      "name": "Manectric",
+      "slug": "Manectric",
+      "usage": 0
+    },
+    {
+      "name": "Glalie",
+      "slug": "Glalie",
+      "usage": 0
+    },
+    {
+      "name": "Empoleon",
+      "slug": "Empoleon",
+      "usage": 0
+    },
+    {
+      "name": "Reuniclus",
+      "slug": "Reuniclus",
+      "usage": 0
+    },
+    {
+      "name": "Toxicroak",
+      "slug": "Toxicroak",
+      "usage": 0
+    },
+    {
+      "name": "Hawlucha",
+      "slug": "Hawlucha",
+      "usage": 0
+    },
+    {
+      "name": "Rotom-Mow",
+      "slug": "Rotom-Mow",
+      "usage": 0
+    },
+    {
+      "name": "Bellibolt",
+      "slug": "Bellibolt",
+      "usage": 0
+    },
+    {
+      "name": "Tauros-Paldea-Blaze",
+      "slug": "Tauros-Paldea-Blaze",
+      "usage": 0
+    },
+    {
+      "name": "Hippowdon",
+      "slug": "Hippowdon",
+      "usage": 0
+    },
+    {
+      "name": "Falinks",
+      "slug": "Falinks",
+      "usage": 0
+    },
+    {
+      "name": "Hydrapple",
+      "slug": "Hydrapple",
+      "usage": 0
+    },
+    {
+      "name": "Aggron",
+      "slug": "Aggron",
+      "usage": 0
+    },
+    {
+      "name": "Ampharos",
+      "slug": "Ampharos",
+      "usage": 0
+    },
+    {
+      "name": "Torterra",
+      "slug": "Torterra",
+      "usage": 0
+    },
+    {
+      "name": "Altaria",
+      "slug": "Altaria",
+      "usage": 0
+    },
+    {
+      "name": "Skarmory",
+      "slug": "Skarmory",
+      "usage": 0
+    },
+    {
+      "name": "Barbaracle",
+      "slug": "Barbaracle",
+      "usage": 0
+    },
+    {
+      "name": "Ariados",
+      "slug": "Ariados",
+      "usage": 0
+    },
+    {
+      "name": "Luxray",
+      "slug": "Luxray",
+      "usage": 0
+    },
+    {
+      "name": "Spiritomb",
+      "slug": "Spiritomb",
+      "usage": 0
+    },
+    {
+      "name": "Lycanroc",
+      "slug": "Lycanroc",
+      "usage": 0
+    },
+    {
+      "name": "Glaceon",
+      "slug": "Glaceon",
+      "usage": 0
+    },
+    {
+      "name": "Slowbro-Galar",
+      "slug": "Slowbro-Galar",
+      "usage": 0
+    },
+    {
+      "name": "Musharna",
+      "slug": "Musharna",
+      "usage": 0
+    },
+    {
+      "name": "Chesnaught",
+      "slug": "Chesnaught",
+      "usage": 0
+    },
+    {
+      "name": "Krookodile",
+      "slug": "Krookodile",
+      "usage": 0
+    },
+    {
+      "name": "Machamp",
+      "slug": "Machamp",
+      "usage": 0
+    },
+    {
+      "name": "Pinsir",
+      "slug": "Pinsir",
+      "usage": 0
+    },
+    {
+      "name": "Heracross",
+      "slug": "Heracross",
+      "usage": 0
+    },
+    {
+      "name": "Clawitzer",
+      "slug": "Clawitzer",
+      "usage": 0
+    },
+    {
+      "name": "Alcremie",
+      "slug": "Alcremie",
+      "usage": 0
+    },
+    {
+      "name": "Pikachu",
+      "slug": "Pikachu",
+      "usage": 0
+    },
+    {
+      "name": "Banette",
+      "slug": "Banette",
+      "usage": 0
+    },
+    {
+      "name": "Chimecho",
+      "slug": "Chimecho",
+      "usage": 0
+    },
+    {
+      "name": "Abomasnow",
+      "slug": "Abomasnow",
+      "usage": 0
+    },
+    {
+      "name": "Aurorus",
+      "slug": "Aurorus",
+      "usage": 0
+    },
+    {
+      "name": "Typhlosion",
+      "slug": "Typhlosion",
+      "usage": 0
+    },
+    {
+      "name": "Gliscor",
+      "slug": "Gliscor",
+      "usage": 0
+    },
+    {
+      "name": "Runerigus",
+      "slug": "Runerigus",
+      "usage": 0
+    },
+    {
+      "name": "Rotom-Frost",
+      "slug": "Rotom-Frost",
+      "usage": 0
+    },
+    {
+      "name": "Slowbro",
+      "slug": "Slowbro",
+      "usage": 0
+    },
+    {
+      "name": "Victreebel",
+      "slug": "Victreebel",
+      "usage": 0
+    },
+    {
+      "name": "Raichu-Alola",
+      "slug": "Raichu-Alola",
+      "usage": 0
+    },
+    {
+      "name": "Salazzle",
+      "slug": "Salazzle",
+      "usage": 0
+    },
+    {
+      "name": "Audino",
+      "slug": "Audino",
+      "usage": 0
+    },
+    {
+      "name": "Goodra",
+      "slug": "Goodra",
+      "usage": 0
+    },
+    {
+      "name": "Garganacl",
+      "slug": "Garganacl",
+      "usage": 0
+    },
+    {
+      "name": "Cofagrigus",
+      "slug": "Cofagrigus",
+      "usage": 0
+    },
+    {
+      "name": "Tyrantrum",
+      "slug": "Tyrantrum",
+      "usage": 0
+    },
+    {
+      "name": "Bastiodon",
+      "slug": "Bastiodon",
+      "usage": 0
+    },
+    {
+      "name": "Steelix",
+      "slug": "Steelix",
+      "usage": 0
+    },
+    {
+      "name": "Houndoom",
+      "slug": "Houndoom",
+      "usage": 0
+    },
+    {
+      "name": "Alakazam",
+      "slug": "Alakazam",
+      "usage": 0
+    },
+    {
+      "name": "Vaporeon",
+      "slug": "Vaporeon",
+      "usage": 0
+    },
+    {
+      "name": "Infernape",
+      "slug": "Infernape",
+      "usage": 0
+    },
+    {
+      "name": "Avalugg-Hisui",
+      "slug": "Avalugg-Hisui",
+      "usage": 0
+    },
+    {
+      "name": "Noivern",
+      "slug": "Noivern",
+      "usage": 0
+    },
+    {
+      "name": "Rampardos",
+      "slug": "Rampardos",
+      "usage": 0
+    },
+    {
+      "name": "Lycanroc-Midnight",
+      "slug": "Lycanroc-Midnight",
+      "usage": 0
+    },
+    {
+      "name": "Meowstic-F",
+      "slug": "Meowstic-F",
+      "usage": 0
+    },
+    {
+      "name": "Toucannon",
+      "slug": "Toucannon",
+      "usage": 0
+    },
+    {
+      "name": "Mr. Rime",
+      "slug": "Mr. Rime",
+      "usage": 0
+    },
+    {
+      "name": "Pidgeot",
+      "slug": "Pidgeot",
+      "usage": 0
+    },
+    {
+      "name": "Quaquaval",
+      "slug": "Quaquaval",
+      "usage": 0
+    },
+    {
+      "name": "Arbok",
+      "slug": "Arbok",
+      "usage": 0
+    },
+    {
+      "name": "Absol",
+      "slug": "Absol",
+      "usage": 0
+    },
+    {
+      "name": "Diggersby",
+      "slug": "Diggersby",
+      "usage": 0
+    },
+    {
+      "name": "Espeon",
+      "slug": "Espeon",
+      "usage": 0
+    },
+    {
+      "name": "Morpeko",
+      "slug": "Morpeko",
+      "usage": 0
+    },
+    {
+      "name": "Aromatisse",
+      "slug": "Aromatisse",
+      "usage": 0
+    },
+    {
+      "name": "Qwilfish",
+      "slug": "Qwilfish",
+      "usage": 0
+    },
+    {
+      "name": "Stunfisk",
+      "slug": "Stunfisk",
+      "usage": 0
+    },
+    {
+      "name": "Slowking",
+      "slug": "Slowking",
+      "usage": 0
+    },
+    {
+      "name": "Beedrill",
+      "slug": "Beedrill",
+      "usage": 0
+    },
+    {
+      "name": "Zoroark",
+      "slug": "Zoroark",
+      "usage": 0
+    },
+    {
+      "name": "Emolga",
+      "slug": "Emolga",
+      "usage": 0
+    },
+    {
+      "name": "Appletun",
+      "slug": "Appletun",
+      "usage": 0
+    },
+    {
+      "name": "Flareon",
+      "slug": "Flareon",
+      "usage": 0
+    },
+    {
+      "name": "Castform",
+      "slug": "Castform",
+      "usage": 0
+    },
+    {
+      "name": "Roserade",
+      "slug": "Roserade",
+      "usage": 0
+    },
+    {
+      "name": "Watchog",
+      "slug": "Watchog",
+      "usage": 0
+    },
+    {
+      "name": "Beartic",
+      "slug": "Beartic",
+      "usage": 0
+    },
+    {
+      "name": "Pangoro",
+      "slug": "Pangoro",
+      "usage": 0
+    },
+    {
+      "name": "Avalugg",
+      "slug": "Avalugg",
+      "usage": 0
+    }
   ]
 }
