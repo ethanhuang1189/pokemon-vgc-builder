@@ -552,13 +552,30 @@ function SpeciesSubPicker({ subPicker }) {
           ? <div className="px-4 py-10 text-center text-gray-500 text-sm">No Pokémon found</div>
           : filteredSpecies.map(s => {
               const isSel = subPicker.currentValue?.id === s.id;
+              const abilities = [s.abilities?.[0], s.abilities?.[1]].filter(Boolean);
+              const bs = s.baseStats ?? {};
               return (
                 <button key={s.id} type="button" onClick={() => pick(s)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 border-b border-gray-800 text-left ${isSel ? 'bg-indigo-900/40' : 'hover:bg-gray-800 active:bg-gray-700'}`}>
-                  <img src={GIF_SPRITE(s.name)} alt="" className="w-9 h-9 object-contain shrink-0"
+                  className={`w-full flex items-center gap-2 px-3 py-1.5 border-b border-gray-800 text-left ${isSel ? 'bg-indigo-900/40' : 'hover:bg-gray-800 active:bg-gray-700'}`}>
+                  <img src={GIF_SPRITE(s.name)} alt="" className="w-8 h-8 object-contain shrink-0"
                     onError={e => handleSpriteError(e, s.name, s.num)} />
-                  <span className={`flex-1 text-sm font-medium ${isSel ? 'text-indigo-300' : 'text-white'}`}>{s.name}</span>
-                  <div className="flex gap-1 shrink-0">{s.types.map(t => <TypeBadge key={t} type={t} size="xs" />)}</div>
+                  <span className={`text-xs font-medium shrink-0 truncate w-20 ${isSel ? 'text-indigo-300' : 'text-white'}`}>{s.name}</span>
+                  <div className="flex flex-col gap-0.5 shrink-0 items-start">
+                    {s.types.map(t => <TypeBadge key={t} type={t} size="xs" />)}
+                  </div>
+                  <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+                    {abilities.map((a, i) => (
+                      <span key={i} className="text-[9px] text-gray-400 leading-none truncate">{a}</span>
+                    ))}
+                  </div>
+                  <div className="flex gap-1 shrink-0">
+                    {[['HP',bs.hp],['Atk',bs.atk],['Def',bs.def],['SpA',bs.spa],['SpD',bs.spd],['Spe',bs.spe]].map(([lbl,val]) => (
+                      <div key={lbl} className="flex flex-col items-center" style={{ minWidth: 16 }}>
+                        <span className="text-[6px] text-gray-500 leading-none">{lbl}</span>
+                        <span className="text-[8px] text-gray-300 font-mono leading-none mt-px">{val ?? '—'}</span>
+                      </div>
+                    ))}
+                  </div>
                 </button>
               );
             })
