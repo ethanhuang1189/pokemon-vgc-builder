@@ -8,7 +8,7 @@ import AnalysisPanel from './components/AnalysisPanel';
 import TeamExport from './components/TeamExport';
 import WeaknessChart from './components/WeaknessChart';
 import { REGULATION } from './data/regulations';
-import { LEGAL_MON_NAMES, LEGAL_ITEM_NAMES, LEGAL_MOVE_NAMES, normalize } from './data/legalLists';
+import { LEGAL_MON_NAMES, LEGAL_ITEM_NAMES, normalize } from './data/legalLists';
 import { buildMegaForms, MEGA_STONE_NAMES } from './data/megaForms';
 // Pre-compute all data once at module level (synchronous, bundled)
 const allMegas = buildMegaForms(Dex);
@@ -21,7 +21,7 @@ const allSpecies = [...baseSpeciesList, ...allMegas]
   .sort((a, b) => a.name.localeCompare(b.name));
 
 const allMoves = [...Dex.moves.all()]
-  .filter(m => m.exists && LEGAL_MOVE_NAMES.has(normalize(m.name)))
+  .filter(m => m.exists && !m.isNonstandard && !m.isZ && !m.isMax)
   .sort((a, b) => a.name.localeCompare(b.name));
 
 // Items include mega stones — selecting a stone auto-triggers the mega form

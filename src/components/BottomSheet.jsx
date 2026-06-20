@@ -180,18 +180,25 @@ function SlotPanel() {
         ?? Dex.species.get(mega.baseId);
   }
 
+  const emptyMoves = [null, null, null, null];
+  const emptyEvs   = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
+
   function handleSpeciesSelect(species) {
-    if (!species) { updateSlot(activeSlotIndex, { species: null, item: null, ability: '' }); return; }
-    const updates = { species, item: null };
-    if (species.isMega) {
-      // Auto-equip the mega stone and set the mega's ability
-      if (species.stoneItem) updates.item = species.stoneItem;
-      const a = Object.values(species.abilities ?? {})[0];
-      if (a) updates.ability = a;
-    } else {
-      const a = Object.values(species.abilities ?? {})[0];
-      if (a) updates.ability = a;
+    if (!species) {
+      updateSlot(activeSlotIndex, {
+        species: null, item: null, ability: '', nature: 'Hardy',
+        moves: emptyMoves, evs: emptyEvs,
+      });
+      return;
     }
+    // Changing to a genuinely different Pokémon — wipe the old moveset/EVs
+    const prevNum = slot?.species?.num ?? null;
+    const isSwap  = prevNum !== null && prevNum !== species.num;
+    const updates = { species, item: null };
+    if (isSwap) { updates.moves = emptyMoves; updates.evs = emptyEvs; updates.nature = 'Hardy'; }
+    const a = Object.values(species.abilities ?? {})[0];
+    if (a) updates.ability = a;
+    if (species.isMega && species.stoneItem) updates.item = species.stoneItem;
     updateSlot(activeSlotIndex, updates);
   }
 
