@@ -598,6 +598,7 @@ function SpeciesSubPicker({ subPicker }) {
 function MoveSubPicker({ subPicker }) {
   const [query, setQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState(null);
+  const [categoryFilter, setCategoryFilter] = useState(null);
   const inputRef = useRef(null);
 
   useEffect(() => { const t = setTimeout(() => inputRef.current?.focus(), 80); return () => clearTimeout(t); }, []);
@@ -605,8 +606,12 @@ function MoveSubPicker({ subPicker }) {
   const q = query.toLowerCase().trim();
   const moveTypes = useMemo(() => { const ts = new Set((subPicker.options ?? []).map(m => m.type)); return ALL_TYPES.filter(t => ts.has(t)); }, [subPicker.options]);
   const filtered  = useMemo(() =>
-    (subPicker.options ?? []).filter(m => (!q || m.name.toLowerCase().includes(q)) && (!typeFilter || m.type === typeFilter)),
-    [subPicker.options, q, typeFilter]
+    (subPicker.options ?? []).filter(m =>
+      (!q || m.name.toLowerCase().includes(q)) &&
+      (!typeFilter || m.type === typeFilter) &&
+      (!categoryFilter || m.category === categoryFilter)
+    ),
+    [subPicker.options, q, typeFilter, categoryFilter]
   );
 
   function pick(move) { subPicker.onSelect(move); setQuery(''); }
@@ -623,6 +628,16 @@ function MoveSubPicker({ subPicker }) {
         <input ref={inputRef} type="text" value={query} onChange={e => setQuery(e.target.value)}
           placeholder="Search moves…"
           className="flex-1 bg-gray-800 border border-gray-600 px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500" />
+      </div>
+      <div className="flex items-center gap-1.5 px-3 pb-2 shrink-0">
+        {['Physical', 'Special', 'Status'].map(cat => (
+          <button key={cat} type="button"
+            onClick={() => setCategoryFilter(categoryFilter === cat ? null : cat)}
+            className={`flex items-center gap-1 px-2 py-1 border text-[10px] shrink-0 ${categoryFilter === cat ? 'border-gray-500 bg-gray-700 text-white' : 'border-gray-700 text-gray-500 hover:text-gray-300'}`}>
+            <CategoryIcon category={cat} size="xs" />
+            <span>{cat}</span>
+          </button>
+        ))}
       </div>
       <div className="flex gap-1 px-3 pb-2 shrink-0 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
         <button type="button" onClick={() => setTypeFilter(null)}

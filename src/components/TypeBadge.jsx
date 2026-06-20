@@ -1,6 +1,10 @@
+import { useState } from 'react';
 import { TYPE_COLORS } from '../data/typeChart';
 
-export default function TypeBadge({ type, size = 'sm', className = '' }) {
+const ZA_ICON_URL = type =>
+  `https://bulbapedia.bulbagarden.net/wiki/Special:FilePath/${type}_type_icon_ZA.png`;
+
+function TextBadge({ type, size, className }) {
   const bg = TYPE_COLORS[type] ?? '#888';
   const padding = size === 'lg' ? 'px-3 py-1 text-sm'
     : size === 'xs' ? 'px-1 py-px text-[7px] leading-none'
@@ -17,5 +21,25 @@ export default function TypeBadge({ type, size = 'sm', className = '' }) {
     >
       {type}
     </span>
+  );
+}
+
+export default function TypeBadge({ type, size = 'sm', className = '' }) {
+  const [failed, setFailed] = useState(false);
+
+  const h = size === 'lg' ? 22 : size === 'xs' ? 13 : 16;
+
+  if (failed) return <TextBadge type={type} size={size} className={className} />;
+
+  return (
+    <img
+      src={ZA_ICON_URL(type)}
+      alt={type}
+      title={type}
+      height={h}
+      style={{ height: h, width: 'auto', display: 'inline-block', verticalAlign: 'middle', imageRendering: 'auto', flexShrink: 0 }}
+      className={className}
+      onError={() => setFailed(true)}
+    />
   );
 }

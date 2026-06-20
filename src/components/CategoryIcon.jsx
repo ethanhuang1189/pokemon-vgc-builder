@@ -1,3 +1,11 @@
+import { useState } from 'react';
+
+const ICON_URLS = {
+  Physical: 'https://archives.bulbagarden.net/media/upload/a/a8/PhysicalIC.png',
+  Special:  'https://archives.bulbagarden.net/media/upload/1/1a/SpecialIC.png',
+  Status:   'https://archives.bulbagarden.net/media/upload/5/5d/StatusIC.png',
+};
+
 const BG = { Physical: '#C03028', Special: '#6890F0', Status: '#705898' };
 
 const SYMBOL = {
@@ -21,10 +29,9 @@ const SYMBOL = {
   ),
 };
 
-export default function CategoryIcon({ category, size = 'sm' }) {
+function FallbackIcon({ category, px }) {
   const bg = BG[category];
   if (!bg) return null;
-  const px = size === 'xs' ? 13 : 16;
   return (
     <span title={category} style={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0 }}>
       <svg viewBox="0 0 16 16" width={px} height={px} style={{ imageRendering: 'pixelated', display: 'block' }}>
@@ -32,5 +39,24 @@ export default function CategoryIcon({ category, size = 'sm' }) {
         {SYMBOL[category]}
       </svg>
     </span>
+  );
+}
+
+export default function CategoryIcon({ category, size = 'sm' }) {
+  const [failed, setFailed] = useState(false);
+  const px = size === 'xs' ? 13 : size === 'md' ? 20 : 16;
+  const url = ICON_URLS[category];
+  if (!url) return null;
+  if (failed) return <FallbackIcon category={category} px={px} />;
+  return (
+    <img
+      src={url}
+      alt={category}
+      title={category}
+      width={px}
+      height={px}
+      style={{ imageRendering: 'pixelated', display: 'inline-block', verticalAlign: 'middle', flexShrink: 0 }}
+      onError={() => setFailed(true)}
+    />
   );
 }
