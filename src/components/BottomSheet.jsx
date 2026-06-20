@@ -87,8 +87,8 @@ function TeamTabs() {
             {s?.species ? (
               <div className="relative w-9 h-9 flex items-center justify-center">
                 {isMega && (
-                  <div className="absolute pointer-events-none" style={{ top: -18, left: '50%', transform: 'translateX(-50%)', filter: 'blur(3px)', zIndex: 0 }}>
-                    <div style={{ width: 48, height: 62, clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)', background: 'linear-gradient(to bottom, rgba(255,255,215,0.3) 0%, rgba(255,255,215,0.04) 100%)' }} />
+                  <div className="absolute pointer-events-none" style={{ top: 0, left: '50%', transform: 'translateX(-50%)', filter: 'blur(3px)', zIndex: 0 }}>
+                    <div style={{ width: 48, height: 46, clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)', background: 'linear-gradient(to bottom, rgba(255,255,215,0.3) 0%, rgba(255,255,215,0) 100%)' }} />
                   </div>
                 )}
                 <img
@@ -119,6 +119,7 @@ function SlotPanel() {
   const slot = team[activeSlotIndex];
   const [slotMoves, setSlotMoves] = useState(allMoves);
   const [spriteUrlIdx, setSpriteUrlIdx] = useState(0);
+  const openMoveRef = useRef(null);
 
   useEffect(() => { setSpriteUrlIdx(0); }, [activeSlotIndex]);
   useEffect(() => { setSpriteUrlIdx(0); }, [slot?.species?.id]);
@@ -256,8 +257,17 @@ function SlotPanel() {
   function openMove(mi) {
     openSubPicker({ mode: 'move', label: `Move ${mi + 1}`, options: slotMoves,
       currentValue: slot.moves[mi],
-      onSelect: (m) => handleMoveChange(mi, m) });
+      onSelect: (m) => {
+        handleMoveChange(mi, m);
+        if (m !== null && slot.moves[mi] === null) {
+          const projected = slot.moves.map((mv, i) => i === mi ? m : mv);
+          const nextEmpty = projected.findIndex((mv, i) => i > mi && mv === null);
+          if (nextEmpty !== -1) setTimeout(() => openMoveRef.current(nextEmpty), 0);
+        }
+      },
+    });
   }
+  openMoveRef.current = openMove;
   function openStats() {
     openSubPicker({ mode: 'stats', label: 'EVs / Nature' });
   }
@@ -275,8 +285,8 @@ function SlotPanel() {
           className="shrink-0 w-14 flex items-center justify-center hover:bg-white/5 transition-colors relative"
         >
           {isMega && (
-            <div className="absolute pointer-events-none" style={{ top: -25, left: '50%', transform: 'translateX(-50%)', filter: 'blur(4px)', zIndex: 0 }}>
-              <div style={{ width: 70, height: 90, clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)', background: 'linear-gradient(to bottom, rgba(255,255,215,0.3) 0%, rgba(255,255,215,0.04) 100%)' }} />
+            <div className="absolute pointer-events-none" style={{ top: 0, left: '50%', transform: 'translateX(-50%)', filter: 'blur(4px)', zIndex: 0 }}>
+              <div style={{ width: 70, height: 74, clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)', background: 'linear-gradient(to bottom, rgba(255,255,215,0.3) 0%, rgba(255,255,215,0) 100%)' }} />
             </div>
           )}
           {spriteUrl
@@ -451,10 +461,16 @@ function SpeciesSubPicker({ subPicker }) {
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      <div className="px-3 pb-2 shrink-0">
+      <div className="flex items-center gap-2 px-3 pb-2 shrink-0">
+        {subPicker.currentValue && (
+          <button type="button" onClick={() => pick(null)}
+            className="text-xs text-red-400 hover:text-red-300 px-2 py-1 border border-red-800 shrink-0">
+            Remove
+          </button>
+        )}
         <input ref={inputRef} type="text" value={query} onChange={e => setQuery(e.target.value)}
           placeholder="Name, type, move, ability, or: resist: fire water…"
-          className="w-full bg-gray-800 border border-gray-600 px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500" />
+          className="flex-1 bg-gray-800 border border-gray-600 px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500" />
       </div>
 
       {isResistMode && (
@@ -569,7 +585,7 @@ function MoveSubPicker({ subPicker }) {
     [subPicker.options, q, typeFilter]
   );
 
-  function pick(move) { subPicker.onSelect(move); }
+  function pick(move) { subPicker.onSelect(move); setQuery(''); }
 
   return (
     <div className="flex flex-col flex-1 min-h-0">

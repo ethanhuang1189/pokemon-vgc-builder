@@ -129,8 +129,8 @@ export default function TeamSlot({ index, onMoveHandlePointerDown }) {
           onClick={handleSpriteClick}
         >
           {isMega && (
-            <div className="absolute pointer-events-none" style={{ top: -22, left: '50%', transform: 'translateX(-50%)', filter: 'blur(4px)', zIndex: 0 }}>
-              <div style={{ width: 60, height: 80, clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)', background: 'linear-gradient(to bottom, rgba(255,255,215,0.3) 0%, rgba(255,255,215,0.04) 100%)' }} />
+            <div className="absolute pointer-events-none" style={{ top: 0, left: '50%', transform: 'translateX(-50%)', filter: 'blur(4px)', zIndex: 0 }}>
+              <div style={{ width: 60, height: 70, clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)', background: 'linear-gradient(to bottom, rgba(255,255,215,0.3) 0%, rgba(255,255,215,0) 100%)' }} />
             </div>
           )}
           {slot.species ? (
