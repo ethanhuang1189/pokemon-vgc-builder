@@ -264,6 +264,7 @@ function SlotPanel() {
   function openMove(mi) {
     openSubPicker({ mode: 'move', label: `Move ${mi + 1}`, options: slotMoves,
       currentValue: slot.moves[mi],
+      moveIndex: mi,
       onSelect: (m) => {
         handleMoveChange(mi, m);
         if (m !== null && slot.moves[mi] === null) {
@@ -356,15 +357,18 @@ function SlotPanel() {
 
             {/* Box 3: Moves — each row tappable */}
             <div className="shrink-0 flex flex-col" style={{ ...BOX_STYLE, minWidth: '90px' }}>
-              {slot.moves.map((move, mi) => (
-                <button key={mi} type="button" onClick={() => openMove(mi)}
-                  className={`flex-1 flex items-center px-2 hover:bg-white/5 text-left ${mi > 0 ? 'border-t' : ''}`}
-                  style={mi > 0 ? { borderColor: 'rgba(255,255,255,0.04)' } : undefined}>
-                  {move
-                    ? <span className="text-[9px] font-medium text-white truncate leading-none">{move.name}</span>
-                    : <span className="text-[9px] text-gray-600 leading-none">—</span>}
-                </button>
-              ))}
+              {slot.moves.map((move, mi) => {
+                const isActiveMoveSlot = subPicker?.mode === 'move' && subPicker?.moveIndex === mi;
+                return (
+                  <button key={mi} type="button" onClick={() => openMove(mi)}
+                    className={`flex-1 flex items-center px-2 text-left ${mi > 0 ? 'border-t' : ''} ${isActiveMoveSlot ? 'bg-indigo-600/30' : 'hover:bg-white/5'}`}
+                    style={mi > 0 ? { borderColor: isActiveMoveSlot ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.04)' } : undefined}>
+                    {move
+                      ? <span className={`text-[9px] font-medium truncate leading-none ${isActiveMoveSlot ? 'text-indigo-200' : 'text-white'}`}>{move.name}</span>
+                      : <span className={`text-[9px] leading-none ${isActiveMoveSlot ? 'text-indigo-400' : 'text-gray-600'}`}>—</span>}
+                  </button>
+                );
+              })}
             </div>
           </div>
         ) : (
