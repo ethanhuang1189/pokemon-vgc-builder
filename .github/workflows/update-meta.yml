@@ -22,7 +22,7 @@ jobs:
         run: npm install puppeteer
 
       - name: Scrape Pikalytics
-        run: node scripts/scrape-meta.js
+        run: node scripts/scrape-meta.cjs
 
       - name: Upload debug screenshot on failure
         if: failure()

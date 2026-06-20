@@ -1,14 +1,12 @@
 // Scrapes Pikalytics homepage for Pokemon Champions top usage stats.
-// Strategy 1: intercept the JSON API responses Pikalytics makes on load
-// Strategy 2: DOM parse after JS renders
-// Outputs to src/data/metaStats.json
+// .cjs extension forces CommonJS so this works even with "type":"module" in package.json
 
-import puppeteer from 'puppeteer';
-import fs        from 'fs';
-import path      from 'path';
+const puppeteer = require('puppeteer');
+const fs        = require('fs');
+const path      = require('path');
 
-const OUT_FILE   = path.join(import.meta.dirname, '..', 'src', 'data', 'metaStats.json');
-const DEBUG_SHOT = path.join(import.meta.dirname, 'debug.png');
+const OUT_FILE   = path.join(__dirname, '..', 'src', 'data', 'metaStats.json');
+const DEBUG_SHOT = path.join(__dirname, 'debug.png');
 const URL        = 'https://www.pikalytics.com/';
 
 function looksLikePokemonData(arr) {
@@ -42,22 +40,16 @@ async function scrape() {
     '(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
   );
 
-  // ── Strategy 1: intercept API JSON responses ──────────────────────────────
+  // Strategy 1: intercept API JSON responses Pikalytics fires on load
   const intercepted = [];
   page.on('response', async response => {
     const ct = response.headers()['content-type'] || '';
     if (!ct.includes('json')) return;
     try {
       const json = await response.json();
-      if (looksLikePokemonData(json)) {
-        intercepted.push(...json);
-        return;
-      }
+      if (looksLikePokemonData(json)) { intercepted.push(...json); return; }
       for (const key of ['data', 'pokemon', 'results', 'usage', 'list']) {
-        if (looksLikePokemonData(json[key])) {
-          intercepted.push(...json[key]);
-          return;
-        }
+        if (looksLikePokemonData(json[key])) { intercepted.push(...json[key]); return; }
       }
     } catch { /* non-JSON or network error */ }
   });
@@ -66,14 +58,14 @@ async function scrape() {
   try {
     await page.goto(URL, { waitUntil: 'networkidle2', timeout: 30000 });
   } catch {
-    console.log('networkidle2 timed out, continuing anyway…');
+    console.log('networkidle2 timed out, continuing…');
   }
 
   await new Promise(r => setTimeout(r, 3000));
 
   if (intercepted.length >= 3) {
     console.log(`API interception found ${intercepted.length} entries.`);
-    const seen   = new Set();
+    const seen = new Set();
     const result = [];
     for (const entry of intercepted) {
       const norm = normalizeApiEntry(entry);
@@ -89,7 +81,7 @@ async function scrape() {
 
   console.log('API interception insufficient — falling back to DOM scraping…');
 
-  // ── Strategy 2: DOM scraping ──────────────────────────────────────────────
+  // Strategy 2: wait for % text then parse DOM
   try {
     await page.waitForFunction(
       () => document.body.innerText.match(/\d+\.\d+%/),
@@ -118,10 +110,9 @@ async function scrape() {
       const href  = link.getAttribute('href') || '';
       const match = href.match(/\/pokedex\/[^/]+\/([^/?#]+)/);
       if (!match) continue;
-      const slug = decodeURIComponent(match[1]).trim();
-      if (!slug) continue;
+      const slug     = decodeURIComponent(match[1]).trim();
       const pctMatch = (link.innerText || '').match(/(\d+\.\d+)%/);
-      if (!pctMatch) continue;
+      if (!slug || !pctMatch) continue;
       const img  = link.querySelector('img');
       const name = img?.alt?.trim() || slug.replace(/-/g, ' ');
       addEntry(name, slug, pctMatch[1]);
@@ -129,7 +120,7 @@ async function scrape() {
 
     if (result.length >= 3) return result;
 
-    // 2b: find leaf elements whose text is exactly "X.XX%", walk up for img alt
+    // 2b: leaf elements whose text is exactly "X.XX%", walk up for img alt
     for (const el of document.querySelectorAll('*')) {
       if (el.children.length > 0) continue;
       const pctMatch = (el.textContent || '').trim().match(/^(\d+\.\d+)%$/);
