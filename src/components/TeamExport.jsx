@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { exportToShowdown, importFromShowdown } from '../utils/showdown';
 import { useTeam } from '../context/TeamContext';
+import { usePicker } from '../context/PickerContext';
 
 export default function TeamExport() {
-  const { team, Dex } = useTeam();
+  const { team, Dex, clearTeam, updateSlot } = useTeam();
+  const { allMegas } = usePicker();
   const [mode, setMode] = useState(null); // 'export' | 'import'
   const [importText, setImportText] = useState('');
   const [copied, setCopied] = useState(false);
-  const { clearTeam, updateSlot } = useTeam();
 
   const exportText = exportToShowdown(team);
 
@@ -19,7 +20,7 @@ export default function TeamExport() {
   }
 
   function handleImport() {
-    const slots = importFromShowdown(importText, Dex);
+    const slots = importFromShowdown(importText, Dex, allMegas);
     if (!slots.length) return;
     clearTeam();
     slots.slice(0, 6).forEach((slot, i) => updateSlot(i, slot));

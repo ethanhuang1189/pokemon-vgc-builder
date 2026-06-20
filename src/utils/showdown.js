@@ -1,30 +1,13 @@
 const STAT_LABELS = { hp:'HP', atk:'Atk', def:'Def', spa:'SpA', spd:'SpD', spe:'Spe' };
 
-// "Mega Venusaur" → "Venusaur-Mega"
-// "Mega Charizard X" → "Charizard-Mega-X"
-// "Mega Meowstic (Male)" → "Meowstic-Mega-Male"
-function toShowdownMegaName(megaName) {
-  const base = megaName.replace(/^Mega /, '');
-  const xy = base.match(/^(.+?)\s+([XY])$/);
-  if (xy) return `${xy[1]}-Mega-${xy[2]}`;
-  const form = base.match(/^(.+?)\s+\((.+)\)$/);
-  if (form) return `${form[1]}-Mega-${form[2]}`;
-  return `${base}-Mega`;
-}
-
-export function exportToShowdown(team, allMegas = []) {
+export function exportToShowdown(team) {
   return team
     .filter(s => s.species)
     .map(slot => {
       const lines = [];
 
-      // Resolve species display name (use mega form name when active)
-      let speciesDisplay = slot.species.name;
-      if (slot.megaFormId && allMegas.length) {
-        const mega = allMegas.find(m => m.id === slot.megaFormId);
-        if (mega) speciesDisplay = toShowdownMegaName(mega.name);
-      }
-
+      // species.name is already in Showdown format (e.g. "Charizard-Mega-X", "Venusaur-Mega")
+      const speciesDisplay = slot.species.name;
       const displayName = slot.nickname
         ? `${slot.nickname} (${speciesDisplay})`
         : speciesDisplay;
@@ -50,7 +33,9 @@ export function exportToShowdown(team, allMegas = []) {
     .join('\n\n');
 }
 
-export function importFromShowdown(text, Dex) {
+// megaSpecies: the array from buildMegaForms(), used to resolve custom mega names
+// that @pkmn/dex doesn't know (e.g. "Raichu-Mega-X")
+export function importFromShowdown(text, Dex, megaSpecies = []) {
   const slots = [];
   const blocks = text.trim().split(/\n\s*\n/);
 
@@ -73,8 +58,17 @@ export function importFromShowdown(text, Dex) {
     const speciesName = nicknameMatch ? nicknameMatch[2] : nameStr;
     if (nicknameMatch) slot.nickname = nicknameMatch[1];
 
-    const species = Dex.species.get(speciesName);
-    if (species?.exists) slot.species = species;
+    // Try @pkmn/dex first (handles standard species and standard megas)
+    const dexSpecies = Dex.species.get(speciesName);
+    if (dexSpecies?.exists) {
+      slot.species = dexSpecies;
+    } else {
+      // Fall back to custom mega species list
+      const mega = megaSpecies.find(
+        m => m.name.toLowerCase() === speciesName.toLowerCase()
+      );
+      if (mega) slot.species = mega;
+    }
 
     let moveIndex = 0;
     for (let i = 1; i < lines.length; i++) {
@@ -87,7 +81,7 @@ export function importFromShowdown(text, Dex) {
           const m = part.trim().match(/^(\d+)\s+(.+)$/);
           if (!m) continue;
           const key = Object.keys(STAT_LABELS).find(k => STAT_LABELS[k] === m[2].trim());
-          if (key) slot.evs[key] = Math.min(32, Math.max(0, parseInt(m[1]) || 0));
+          if (key) slot.evs[key] = Math.min(252, Math.max(0, parseInt(m[1]) || 0));
         }
       } else if (line.match(/Nature$/)) {
         slot.nature = line.replace('Nature', '').trim();

@@ -82,6 +82,16 @@ const MEGA_STONE_MAP = {
 
 export const MEGA_STONE_NAMES = new Set(Object.values(MEGA_STONE_MAP));
 
+// "Mega Venusaur" → "Venusaur-Mega", "Mega Charizard X" → "Charizard-Mega-X"
+export function toShowdownMegaName(megaName) {
+  const base = megaName.replace(/^Mega /, '');
+  const xy = base.match(/^(.+?)\s+([XY])$/);
+  if (xy) return `${xy[1]}-Mega-${xy[2]}`;
+  const form = base.match(/^(.+?)\s+\((.+)\)$/);
+  if (form) return `${form[1]}-Mega-${form[2]}`;
+  return `${base}-Mega`;
+}
+
 function parseMegaNames(raw) {
   return raw.split('\n').map(s => s.trim()).filter(Boolean);
 }
@@ -104,7 +114,7 @@ function getMegaDexId(megaName) {
   return base.toLowerCase().replace(/[^a-z0-9]/g, '') + 'mega';
 }
 
-// Converts @pkmn/dex id to Showdown CDN sprite path segment
+// Converts @pkmn/dex id to Showdown sprite path segment
 // e.g. venusaurmega → venusaur-mega, charizardmegax → charizard-mega-x
 export function toShowdownId(dexId) {
   if (dexId === 'raichuxmega') return 'raichu-mega-x';
@@ -131,16 +141,17 @@ export function buildMegaForms(Dex) {
     const source = megaDex?.exists ? megaDex : baseSpecies;
 
     return [{
-      name: megaName,
-      id: megaId,
-      num: baseSpecies.num,
-      types: source.types,
-      abilities: source.abilities,
-      baseStats: source.baseStats ?? baseSpecies.baseStats,
-      exists: true,
-      isMega: true,
-      baseId: baseSpecies.id,
-      stoneItem: MEGA_STONE_MAP[megaId] ?? null,
+      name:            toShowdownMegaName(megaName),  // e.g. "Charizard-Mega-X"
+      id:              megaId,
+      num:             baseSpecies.num,
+      types:           source.types,
+      abilities:       source.abilities,
+      baseStats:       source.baseStats ?? baseSpecies.baseStats,
+      exists:          true,
+      isMega:          true,
+      baseId:          baseSpecies.id,
+      baseSpeciesName: baseSpecies.name,
+      stoneItem:       MEGA_STONE_MAP[megaId] ?? null,
     }];
   });
 }

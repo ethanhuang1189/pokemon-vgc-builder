@@ -10,22 +10,36 @@ import WeaknessChart from './components/WeaknessChart';
 import { REGULATION } from './data/regulations';
 import { LEGAL_MON_NAMES, LEGAL_ITEM_NAMES, LEGAL_MOVE_NAMES, normalize } from './data/legalLists';
 import { buildMegaForms, MEGA_STONE_NAMES } from './data/megaForms';
-import { exportToShowdown } from './utils/showdown';
-
 // Pre-compute all data once at module level (synchronous, bundled)
 const allMegas = buildMegaForms(Dex);
 
-const allSpecies = [...Dex.species.all()]
-  .filter(s => s.exists && !s.isNonstandard && !s.battleOnly && LEGAL_MON_NAMES.has(normalize(s.name)))
+// Base species + mega species as one sorted list for the species picker
+const baseSpeciesList = [...Dex.species.all()]
+  .filter(s => s.exists && !s.isNonstandard && !s.battleOnly && LEGAL_MON_NAMES.has(normalize(s.name)));
+
+const allSpecies = [...baseSpeciesList, ...allMegas]
   .sort((a, b) => a.name.localeCompare(b.name));
 
 const allMoves = [...Dex.moves.all()]
   .filter(m => m.exists && LEGAL_MOVE_NAMES.has(normalize(m.name)))
   .sort((a, b) => a.name.localeCompare(b.name));
 
-// Mega stones are handled via the Mega button, not the item dropdown
-const allItems = [...Dex.items.all()]
-  .filter(i => i.exists && LEGAL_ITEM_NAMES.has(normalize(i.name)) && !MEGA_STONE_NAMES.has(i.name))
+// Items include mega stones — selecting a stone auto-triggers the mega form
+const dexItems = [...Dex.items.all()]
+  .filter(i => i.exists && LEGAL_ITEM_NAMES.has(normalize(i.name)));
+const dexItemNames = new Set(dexItems.map(i => i.name));
+// Synthetic entries for custom mega stones not in @pkmn/dex
+const customStoneItems = [...new Map(
+  allMegas
+    .filter(m => m.stoneItem && !dexItemNames.has(m.stoneItem) && LEGAL_ITEM_NAMES.has(normalize(m.stoneItem)))
+    .map(m => [m.stoneItem, {
+      id:        m.stoneItem.toLowerCase().replace(/[^a-z0-9]/g, ''),
+      name:      m.stoneItem,
+      shortDesc: `Mega Stone for ${m.baseSpeciesName}.`,
+      exists:    true,
+    }])
+).values()];
+const allItems = [...dexItems, ...customStoneItems]
   .sort((a, b) => a.name.localeCompare(b.name));
 
 const allAbilities = [...Dex.abilities.all()]
@@ -156,7 +170,6 @@ function TeamBuilder() {
               >
                 <TeamSlot
                   index={i}
-                  allMegas={allMegas}
                   onMoveHandlePointerDown={e => onMoveHandlePointerDown(i, e)}
                 />
               </div>
@@ -261,7 +274,7 @@ function Footer() {
 export default function App() {
   return (
     <PickerProvider allSpecies={allSpecies} allMoves={allMoves} allItems={allItems} allAbilities={allAbilities} allMegas={allMegas} Dex={Dex}>
-      <TeamProvider Dex={Dex}>
+      <TeamProvider Dex={Dex} allMegas={allMegas}>
         <div className="min-h-screen bg-gray-900 flex flex-col">
           <Header />
           <div className="flex-1">

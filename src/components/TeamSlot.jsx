@@ -4,17 +4,9 @@ import { useTeam } from '../context/TeamContext';
 import { usePicker } from '../context/PickerContext';
 import { exportToShowdown } from '../utils/showdown';
 import { BULBAPEDIA_MEGA } from '../data/megaSprites';
+import { toShowdownId } from '../data/megaForms';
 import { GIF_SPRITE, SWSH_SPRITE, SHOWDOWN_GIF, SHOWDOWN_STATIC, STATIC_SPRITE } from '../utils/sprites';
 import { NATURES } from './StatEditor';
-
-function megaNameToSlugLocal(megaName) {
-  // used only for mega sprite URLs — matches nameToSlug logic
-  const withoutPrefix = megaName.replace(/^Mega /, '');
-  const [base, ...rest] = withoutPrefix.split(' ');
-  const slug = base.toLowerCase().replace(/['''..:]/g, '').replace(/\s+/g, '-');
-  const variant = rest.join('-').toLowerCase();
-  return variant ? `${slug}-mega-${variant}` : `${slug}-mega`;
-}
 
 const STATS_LIST = [
   { key: 'hp',  label: 'HP'  },
@@ -44,7 +36,7 @@ const DeleteIcon = () => (
   </svg>
 );
 
-export default function TeamSlot({ index, allMegas, onMoveHandlePointerDown }) {
+export default function TeamSlot({ index, onMoveHandlePointerDown }) {
   const { team, updateSlot, clearSlot } = useTeam();
   const { activeSlotIndex, openSlot } = usePicker();
   const slot = team[index];
@@ -54,24 +46,29 @@ export default function TeamSlot({ index, allMegas, onMoveHandlePointerDown }) {
   const spriteHeld      = useRef(false);
   const spriteDragActive = useRef(false);
 
-  const activeMega = slot.megaFormId ? allMegas.find(m => m.id === slot.megaFormId) : null;
+  const isMega = slot.species?.isMega ?? false;
 
-  const baseGifUrl         = slot.species ? GIF_SPRITE(slot.species.name)        : null;
-  const baseSwshUrl        = slot.species ? SWSH_SPRITE(slot.species.name)       : null;
-  const baseShowdownGif    = slot.species ? SHOWDOWN_GIF(slot.species.name)      : null;
-  const baseShowdownStatic = slot.species ? SHOWDOWN_STATIC(slot.species.name)   : null;
-  const baseStaticUrl      = slot.species ? STATIC_SPRITE(slot.species.num)      : null;
-  const megaUrls = activeMega ? (() => {
-    const slug = megaNameToSlugLocal(activeMega.name);
+  const megaUrls = isMega ? (() => {
+    const slug = toShowdownId(slot.species.id);
     const bulba = BULBAPEDIA_MEGA[slug];
-    return [`https://projectpokemon.org/images/normal-sprite/${slug}.gif`, ...(bulba ? [bulba] : [])];
+    return [
+      `https://projectpokemon.org/images/normal-sprite/${slug}.gif`,
+      ...(bulba ? [bulba] : []),
+      SHOWDOWN_GIF(slot.species.name),
+      SHOWDOWN_STATIC(slot.species.name),
+    ];
   })() : [];
-  const allSpriteUrls = [...megaUrls, baseGifUrl, baseSwshUrl, baseShowdownGif, baseShowdownStatic, baseStaticUrl].filter(Boolean);
+  const fallbackName = isMega ? slot.species.baseSpeciesName : slot.species?.name;
+  const baseGifUrl      = fallbackName ? GIF_SPRITE(fallbackName)        : null;
+  const baseSwshUrl     = fallbackName ? SWSH_SPRITE(fallbackName)       : null;
+  const baseShowdownGif = fallbackName ? SHOWDOWN_GIF(fallbackName)      : null;
+  const baseStaticUrl   = slot.species ? STATIC_SPRITE(slot.species.num) : null;
+  const allSpriteUrls = [...megaUrls, baseGifUrl, baseSwshUrl, baseShowdownGif, baseStaticUrl].filter(Boolean);
   const spriteUrl = allSpriteUrls[Math.min(spriteUrlIdx, allSpriteUrls.length - 1)] ?? null;
 
   const natData = useMemo(() => NATURES[slot.nature] ?? {}, [slot.nature]);
-  const displayName  = activeMega ? (slot.nickname || activeMega.name) : slot.species ? (slot.nickname || slot.species.name) : `Slot ${index + 1}`;
-  const displayTypes = (activeMega ?? slot.species)?.types ?? null;
+  const displayName  = slot.species ? (slot.nickname || slot.species.name) : `Slot ${index + 1}`;
+  const displayTypes = slot.species?.types ?? null;
   const isActive = activeSlotIndex === index;
 
   function fallbackCopy(text) {
@@ -88,11 +85,11 @@ export default function TeamSlot({ index, allMegas, onMoveHandlePointerDown }) {
   function showToast(msg) { setToast(msg); setTimeout(() => setToast(''), 2000); }
   function handleCopySlot() {
     if (!slot.species) { showToast('No Pokémon'); return; }
-    copyText(exportToShowdown([slot], allMegas)).then(() => showToast('Copied!'));
+    copyText(exportToShowdown([slot])).then(() => showToast('Copied!'));
   }
   function handleShowdownCopy() {
     if (!slot.species) { showToast('No Pokémon'); return; }
-    copyText(exportToShowdown([slot], allMegas)).then(() => showToast('SD copied!'));
+    copyText(exportToShowdown([slot])).then(() => showToast('SD copied!'));
   }
   function handleDelete() { clearSlot(index); }
 
@@ -124,17 +121,21 @@ export default function TeamSlot({ index, allMegas, onMoveHandlePointerDown }) {
       >
         {/* Sprite — hold to drag */}
         <div
-          className="w-12 shrink-0 flex items-center justify-center self-stretch touch-none cursor-grab active:cursor-grabbing"
-          style={activeMega ? { filter: 'drop-shadow(0 0 5px rgba(168,85,247,0.85))' } : undefined}
+          className="w-12 shrink-0 flex items-center justify-center self-stretch touch-none cursor-grab active:cursor-grabbing relative"
           onPointerDown={handleSpritePointerDown}
           onPointerMove={handleSpritePointerMove}
           onPointerUp={handleSpritePointerUp}
           onPointerCancel={handleSpritePointerUp}
           onClick={handleSpriteClick}
         >
+          {isMega && (
+            <div className="absolute pointer-events-none" style={{ top: -22, left: '50%', transform: 'translateX(-50%)', filter: 'blur(4px)', zIndex: 0 }}>
+              <div style={{ width: 60, height: 80, clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)', background: 'linear-gradient(to bottom, rgba(255,255,215,0.3) 0%, rgba(255,255,215,0.04) 100%)' }} />
+            </div>
+          )}
           {slot.species ? (
-            <img key={spriteUrl} src={spriteUrl} alt={displayName} className="w-12 h-12 object-contain"
-              draggable="false" onError={() => setSpriteUrlIdx(i => i + 1)} />
+            <img key={spriteUrl} src={spriteUrl} alt={displayName} className="w-12 h-12 object-contain relative"
+              style={{ zIndex: 1 }} draggable="false" onError={() => setSpriteUrlIdx(i => i + 1)} />
           ) : (
             <div className="w-10 h-10 bg-gray-700 border-2 border-dashed border-gray-600 flex items-center justify-center">
               <span className="text-gray-500 text-lg">+</span>

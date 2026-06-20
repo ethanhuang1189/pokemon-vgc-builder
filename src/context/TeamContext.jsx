@@ -4,7 +4,6 @@ const makeEmptySlot = () => ({
   species: null,
   nickname: '',
   item: null,
-  megaFormId: null,
   ability: '',
   nature: 'Hardy',
   moves: [null, null, null, null],
@@ -21,25 +20,47 @@ function serializeTeam(team) {
   }));
 }
 
-function deserializeTeam(raw, Dex) {
+function deserializeTeam(raw, Dex, allMegas = []) {
   if (!raw || !Array.isArray(raw)) return makeDefaultTeam();
-  return raw.map(slot => ({
-    ...makeEmptySlot(),
-    ...slot,
-    species: slot.species ? (Dex.species.get(slot.species)?.exists ? Dex.species.get(slot.species) : null) : null,
-    moves: (slot.moves ?? [null, null, null, null]).map(m =>
-      m ? (Dex.moves.get(m)?.exists ? Dex.moves.get(m) : null) : null
-    ),
-  }));
+  return raw.map(rawSlot => {
+    // Strip legacy megaFormId field
+    const { megaFormId, ...slot } = rawSlot;
+
+    let species = null;
+    if (slot.species) {
+      const dexSp = Dex.species.get(slot.species);
+      if (dexSp?.exists) {
+        species = dexSp;
+      } else {
+        // Custom mega not in @pkmn/dex — look up by Showdown name
+        species = allMegas.find(m => m.name === slot.species) ?? null;
+      }
+    }
+
+    // Migrate old saves: if megaFormId was set, restore mega species
+    if (species && !species.isMega && megaFormId) {
+      const mega = allMegas.find(m => m.id === megaFormId);
+      if (mega) species = mega;
+    }
+
+    return {
+      ...makeEmptySlot(),
+      ...slot,
+      species,
+      moves: (slot.moves ?? [null, null, null, null]).map(m =>
+        m ? (Dex.moves.get(m)?.exists ? Dex.moves.get(m) : null) : null
+      ),
+    };
+  });
 }
 
 const TeamContext = createContext(null);
 
-export function TeamProvider({ children, Dex }) {
+export function TeamProvider({ children, Dex, allMegas = [] }) {
   const [team, setTeamRaw] = useState(() => {
     try {
       const saved = localStorage.getItem('vgc-team');
-      if (saved) return deserializeTeam(JSON.parse(saved), Dex);
+      if (saved) return deserializeTeam(JSON.parse(saved), Dex, allMegas);
     } catch { /* ignore */ }
     return makeDefaultTeam();
   });
