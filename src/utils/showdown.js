@@ -54,8 +54,9 @@ export function importFromShowdown(text, Dex, megaSpecies = []) {
     const nameStr = itemMatch ? itemMatch[1].trim() : firstLine.trim();
     if (itemMatch) slot.item = itemMatch[2].trim();
 
-    const nicknameMatch = nameStr.match(/^(.+)\s+\((.+)\)$/);
-    const speciesName = nicknameMatch ? nicknameMatch[2] : nameStr;
+    const genderStripped = nameStr.replace(/\s+\([MF]\)$/, '');
+    const nicknameMatch = genderStripped.match(/^(.+)\s+\((.+)\)$/);
+    const speciesName = nicknameMatch ? nicknameMatch[2] : genderStripped;
     if (nicknameMatch) slot.nickname = nicknameMatch[1];
 
     // Try @pkmn/dex first (handles standard species and standard megas)
