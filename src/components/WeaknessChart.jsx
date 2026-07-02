@@ -5,11 +5,13 @@ import { ALL_TYPES, TYPE_COLORS, getEffectiveness } from '../data/typeChart';
 import { GIF_SPRITE, handleSpriteError } from '../utils/sprites';
 
 const EFF_CONFIG = {
-  4:    { bg: 'rgba(220,38,38,0.80)',   text: '#fff',    label: '4×' },
-  2:    { bg: 'rgba(239,68,68,0.40)',   text: '#fca5a5', label: '2×' },
-  0.5:  { bg: 'rgba(34,197,94,0.25)',  text: '#86efac', label: '½×' },
-  0.25: { bg: 'rgba(34,197,94,0.55)',  text: '#4ade80', label: '¼×' },
-  0:    { bg: 'rgba(100,116,139,0.40)', text: '#cbd5e1', label: '0×' },
+  4:    { bg: 'rgba(220,38,38,0.80)',   text: '#fff',    label: '4×'  },
+  3:    { bg: 'rgba(220,38,38,0.60)',   text: '#fca5a5', label: '3×'  },
+  2:    { bg: 'rgba(239,68,68,0.40)',   text: '#fca5a5', label: '2×'  },
+  1.5:  { bg: 'rgba(239,68,68,0.22)',   text: '#fcd5a5', label: '1½×' },
+  0.5:  { bg: 'rgba(34,197,94,0.25)',  text: '#86efac', label: '½×'  },
+  0.25: { bg: 'rgba(34,197,94,0.55)',  text: '#4ade80', label: '¼×'  },
+  0:    { bg: 'rgba(100,116,139,0.40)', text: '#cbd5e1', label: '0×'  },
 };
 
 function abbrev(name, len = 6) {
@@ -27,14 +29,14 @@ export default function WeaknessChart() {
         const mega = slot.megaFormId ? allMegas.find(m => m.id === slot.megaFormId) : null;
         const types = (mega ?? slot.species).types;
         const displayName = slot.nickname || (mega ? mega.name : slot.species.name);
-        return { index, types, displayName, species: slot.species };
+        return { index, types, ability: slot.ability, displayName, species: slot.species };
       })
       .filter(Boolean);
   }, [team, allMegas]);
 
   const rows = useMemo(() => {
     return ALL_TYPES.map(type => {
-      const cells = slots.map(s => getEffectiveness(type, s.types));
+      const cells = slots.map(s => getEffectiveness(type, s.types, s.ability));
       const score = cells.reduce((acc, eff) => {
         if (eff > 1) return acc - 1;
         if (eff < 1) return acc + 1;

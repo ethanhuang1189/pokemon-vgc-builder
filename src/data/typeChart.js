@@ -1,63 +1,10 @@
+import { Dex } from '@pkmn/dex';
+
 export const ALL_TYPES = [
   'Normal','Fire','Water','Electric','Grass','Ice',
   'Fighting','Poison','Ground','Flying','Psychic','Bug',
   'Rock','Ghost','Dragon','Dark','Steel','Fairy',
 ];
-
-// For each attacking type: which defending types are hit for 2x?
-export const SUPER_EFFECTIVE = {
-  Normal:   [],
-  Fire:     ['Grass','Ice','Bug','Steel'],
-  Water:    ['Fire','Ground','Rock'],
-  Electric: ['Water','Flying'],
-  Grass:    ['Water','Ground','Rock'],
-  Ice:      ['Grass','Ground','Flying','Dragon'],
-  Fighting: ['Normal','Ice','Rock','Dark','Steel'],
-  Poison:   ['Grass','Fairy'],
-  Ground:   ['Fire','Electric','Poison','Rock','Steel'],
-  Flying:   ['Grass','Fighting','Bug'],
-  Psychic:  ['Fighting','Poison'],
-  Bug:      ['Grass','Psychic','Dark'],
-  Rock:     ['Fire','Ice','Flying','Bug'],
-  Ghost:    ['Psychic','Ghost'],
-  Dragon:   ['Dragon'],
-  Dark:     ['Psychic','Ghost'],
-  Steel:    ['Ice','Rock','Fairy'],
-  Fairy:    ['Fighting','Dragon','Dark'],
-};
-
-// For each attacking type: which defending types are immune (0x)?
-export const IMMUNE = {
-  Normal:   ['Ghost'],
-  Fighting: ['Ghost'],
-  Electric: ['Ground'],
-  Ground:   ['Flying'],
-  Ghost:    ['Normal'],
-  Dragon:   ['Fairy'],
-  Psychic:  ['Dark'],
-};
-
-// For each attacking type: which defending types resist (0.5x)?
-export const NOT_VERY_EFFECTIVE = {
-  Normal:   ['Rock','Steel'],
-  Fire:     ['Fire','Water','Rock','Dragon'],
-  Water:    ['Water','Grass','Dragon'],
-  Electric: ['Electric','Grass','Dragon'],
-  Grass:    ['Fire','Grass','Poison','Flying','Bug','Dragon','Steel'],
-  Ice:      ['Fire','Water','Ice','Steel'],
-  Fighting: ['Poison','Bug','Psychic','Flying','Fairy'],
-  Poison:   ['Poison','Ground','Rock','Ghost'],
-  Ground:   ['Grass','Bug'],
-  Flying:   ['Electric','Rock','Steel'],
-  Psychic:  ['Psychic','Steel'],
-  Bug:      ['Fire','Fighting','Flying','Ghost','Steel','Fairy'],
-  Rock:     ['Fighting','Ground','Steel'],
-  Ghost:    ['Dark'],
-  Dragon:   [],
-  Dark:     ['Fighting','Dark','Fairy'],
-  Steel:    ['Fire','Water','Electric','Steel'],
-  Fairy:    ['Fire','Poison','Steel'],
-};
 
 export const TYPE_COLORS = {
   Normal:   '#9CA3A0',
@@ -80,16 +27,81 @@ export const TYPE_COLORS = {
   Fairy:    '#EE99AC',
 };
 
-export function getEffectiveness(attackType, defTypes) {
+// Abilities that grant full immunity to an attacking type
+export const ABILITY_IMMUNITIES = {
+  'Levitate':        ['Ground'],
+  'Flash Fire':      ['Fire'],
+  'Water Absorb':    ['Water'],
+  'Storm Drain':     ['Water'],
+  'Volt Absorb':     ['Electric'],
+  'Lightning Rod':   ['Electric'],
+  'Motor Drive':     ['Electric'],
+  'Sap Sipper':      ['Grass'],
+  'Earth Eater':     ['Ground'],
+  'Well-Baked Body': ['Fire'],
+  'Dry Skin':        ['Water'],
+};
+
+// Abilities that multiply incoming damage for specific attacking types.
+// Special string '__se__' means ×0.75 applied only when the hit is super effective.
+export const ABILITY_TYPE_MULT = {
+  'Thick Fat':    { Fire: 0.5, Ice: 0.5 },
+  'Heatproof':    { Fire: 0.5 },
+  'Purifying Salt':{ Ghost: 0.5 },
+  'Fluffy':       { Fire: 2 },
+  'Filter':       '__se__',
+  'Solid Rock':   '__se__',
+  'Prism Armor':  '__se__',
+};
+
+// Abilities that change the type of moves a Pokémon uses offensively.
+// `from` → converts moves of that type; `sound` → converts sound-flagged moves; `all` → converts all moves.
+export const ABILITY_MOVE_TYPE = {
+  'Pixilate':    { from: 'Normal',   to: 'Fairy'    },
+  'Aerilate':    { from: 'Normal',   to: 'Flying'   },
+  'Refrigerate': { from: 'Normal',   to: 'Ice'      },
+  'Galvanize':   { from: 'Normal',   to: 'Electric' },
+  'Liquid Voice':{ sound: true,      to: 'Water'    },
+  'Normalize':   { all: true,        to: 'Normal'   },
+};
+
+// damageTaken codes from @pkmn/dex: 0=normal(1×), 1=2×, 2=0.5×, 3=immune(0×)
+export function getEffectiveness(attackType, defTypes, ability = null) {
   if (!attackType || !defTypes?.length) return 1;
-  const immune = IMMUNE[attackType] ?? [];
-  const se = SUPER_EFFECTIVE[attackType] ?? [];
-  const nve = NOT_VERY_EFFECTIVE[attackType] ?? [];
+
+  // Ability-granted immunity overrides everything
+  if (ability && ABILITY_IMMUNITIES[ability]?.includes(attackType)) return 0;
+
   let mult = 1;
-  for (const def of defTypes) {
-    if (immune.includes(def)) return 0;
-    if (se.includes(def)) mult *= 2;
-    else if (nve.includes(def)) mult *= 0.5;
+  for (const defType of defTypes) {
+    const info = Dex.types.get(defType);
+    if (!info?.exists) continue;
+    const code = info.damageTaken[attackType] ?? 0;
+    if (code === 1) mult *= 2;
+    else if (code === 2) mult *= 0.5;
+    else if (code === 3) return 0;
   }
+
+  if (ability && mult > 0) {
+    const rule = ABILITY_TYPE_MULT[ability];
+    if (rule === '__se__') {
+      if (mult > 1) mult *= 0.75;
+    } else if (rule?.[attackType] != null) {
+      mult *= rule[attackType];
+    }
+  }
+
   return mult;
+}
+
+// Returns the effective type of a move after applying offensive ability modifiers.
+export function getEffectiveMoveType(move, ability) {
+  if (!move) return null;
+  if (!ability) return move.type;
+  const rule = ABILITY_MOVE_TYPE[ability];
+  if (!rule) return move.type;
+  if (rule.all) return rule.to;
+  if (rule.sound && move.flags?.sound) return rule.to;
+  if (rule.from && move.type === rule.from) return rule.to;
+  return move.type;
 }

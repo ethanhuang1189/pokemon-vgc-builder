@@ -13,6 +13,7 @@ import {
 } from '../utils/sprites';
 import { MEGA_LEARNSETS } from '../data/megaLearnsets';
 import { MEGA_STONE_NAMES, toShowdownId } from '../data/megaForms';
+import { getEffectiveness, getEffectiveMoveType } from '../data/typeChart';
 
 const ALL_TYPES = [
   'Normal','Fire','Water','Electric','Grass','Ice','Fighting','Poison',
@@ -265,6 +266,7 @@ function SlotPanel() {
     openSubPicker({ mode: 'move', label: `Move ${mi + 1}`, options: slotMoves,
       currentValue: slot.moves[mi],
       moveIndex: mi,
+      slotAbility: slot.ability || null,
       onSelect: (m) => {
         handleMoveChange(mi, m);
         if (m !== null && slot.moves[mi] === null) {
@@ -400,21 +402,6 @@ function SlotPanel() {
   );
 }
 
-// ─── Type effectiveness helper ────────────────────────────────────────────────
-
-function typeEffectiveness(Dex, attackType, defenderTypes) {
-  let mult = 1;
-  for (const defType of defenderTypes) {
-    const info = Dex.types.get(defType);
-    if (!info?.exists) continue;
-    const code = info.damageTaken[attackType] ?? 0;
-    if (code === 1) mult *= 2;
-    else if (code === 2) mult *= 0.5;
-    else if (code === 3) { mult = 0; break; }
-  }
-  return mult;
-}
-
 // ─── Species Sub-Picker ───────────────────────────────────────────────────────
 
 function SpeciesSubPicker({ subPicker }) {
@@ -451,7 +438,7 @@ function SpeciesSubPicker({ subPicker }) {
     (subPicker.options ?? []).filter(s => {
       if (isResistMode) {
         for (const rType of resistTypeNames) {
-          if (typeEffectiveness(Dex, rType, s.types) >= 1) return false;
+          if (getEffectiveness(rType, s.types) >= 1) return false;
         }
         return true;
       }
@@ -657,11 +644,14 @@ function MoveSubPicker({ subPicker }) {
           ? <div className="px-4 py-10 text-center text-gray-500 text-sm">No moves found</div>
           : filtered.map(move => {
               const isSel = subPicker.currentValue?.id === move.id;
+              const effType = getEffectiveMoveType(move, subPicker.slotAbility);
+              const typeChanged = effType !== move.type;
               return (
                 <button key={move.id} type="button" onClick={() => pick(move)}
                   className={`w-full flex items-center gap-1.5 px-3 py-2 border-b border-gray-800 text-left ${isSel ? 'bg-indigo-900/40' : 'hover:bg-gray-800 active:bg-gray-700'}`}>
                   <span className={`text-[11px] font-semibold shrink-0 w-28 truncate ${isSel ? 'text-indigo-300' : 'text-white'}`}>{move.name}</span>
-                  <TypeBadge type={move.type} size="xs" />
+                  <TypeBadge type={effType} size="xs" />
+                  {typeChanged && <TypeBadge type={move.type} size="xs" className="opacity-35" />}
                   <CategoryIcon category={move.category} size="xs" />
                   <div className="flex gap-px shrink-0">
                     <StatStack label="Power" value={move.category === 'Status' ? '—' : (move.basePower || '—')} />

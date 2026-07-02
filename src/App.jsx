@@ -15,7 +15,10 @@ const allMegas = buildMegaForms(Dex);
 
 // Base species + mega species as one sorted list for the species picker
 const baseSpeciesList = [...Dex.species.all()]
-  .filter(s => s.exists && !s.battleOnly && LEGAL_MON_NAMES.has(normalize(s.name)));
+  .filter(s => s.exists && !s.battleOnly && (
+    LEGAL_MON_NAMES.has(normalize(s.name)) ||
+    (s.baseSpecies && s.baseSpecies !== s.name && LEGAL_MON_NAMES.has(normalize(s.baseSpecies)))
+  ));
 
 const allSpecies = [...baseSpeciesList, ...allMegas]
   .sort((a, b) => a.name.localeCompare(b.name));

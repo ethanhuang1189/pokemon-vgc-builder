@@ -1,4 +1,4 @@
-import { ALL_TYPES, SUPER_EFFECTIVE, IMMUNE, getEffectiveness } from '../data/typeChart';
+import { ALL_TYPES, getEffectiveness, getEffectiveMoveType } from '../data/typeChart';
 
 // Which defending types the team can and cannot hit super effectively (damage moves only)
 export function getCoverage(team) {
@@ -11,20 +11,23 @@ export function getCoverage(team) {
 
   const covered = new Set();
   const uncovered = new Set();
+  // Build effective attack types accounting for offensive ability type changes
+  const effectiveAtkTypes = new Set();
+  for (const slot of team) {
+    for (const move of slot.moves) {
+      if (move?.type && move.category !== 'Status')
+        effectiveAtkTypes.add(getEffectiveMoveType(move, slot.ability));
+    }
+  }
   for (const defType of ALL_TYPES) {
     let canHit = false;
-    for (const atkType of attackTypes) {
-      const immunes = IMMUNE[atkType] ?? [];
-      const ses = SUPER_EFFECTIVE[atkType] ?? [];
-      if (!immunes.includes(defType) && ses.includes(defType)) {
-        canHit = true;
-        break;
-      }
+    for (const atkType of effectiveAtkTypes) {
+      if (getEffectiveness(atkType, [defType]) > 1) { canHit = true; break; }
     }
     if (canHit) covered.add(defType);
     else uncovered.add(defType);
   }
-  return { covered, uncovered, attackTypes };
+  return { covered, uncovered, attackTypes: effectiveAtkTypes };
 }
 
 // For each defending type: which Pokemon/move can hit it SE
@@ -35,13 +38,12 @@ export function getCoverageDetails(team) {
     const pokeName = slot.nickname || slot.species.name;
     for (const move of slot.moves) {
       if (!move?.type || move.category === 'Status') continue;
+      const effType = getEffectiveMoveType(move, slot.ability);
       for (const defType of ALL_TYPES) {
-        const immunes = IMMUNE[move.type] ?? [];
-        const ses = SUPER_EFFECTIVE[move.type] ?? [];
-        if (!immunes.includes(defType) && ses.includes(defType)) {
+        if (getEffectiveness(effType, [defType]) > 1) {
           if (!details[defType]) details[defType] = [];
           const exists = details[defType].some(d => d.pokeName === pokeName && d.moveName === move.name);
-          if (!exists) details[defType].push({ pokeName, moveName: move.name, moveType: move.type });
+          if (!exists) details[defType].push({ pokeName, moveName: move.name, moveType: effType });
         }
       }
     }
@@ -56,7 +58,7 @@ export function getTeamWeaknesses(team) {
   for (const slot of team) {
     if (!slot.species) continue;
     for (const atkType of ALL_TYPES) {
-      const eff = getEffectiveness(atkType, slot.species.types);
+      const eff = getEffectiveness(atkType, slot.species.types, slot.ability);
       if (eff > 1) counts[atkType]++;
     }
   }
@@ -70,7 +72,7 @@ export function getWeaknessDetails(team) {
     if (!slot.species) continue;
     const pokeName = slot.nickname || slot.species.name;
     for (const atkType of ALL_TYPES) {
-      const eff = getEffectiveness(atkType, slot.species.types);
+      const eff = getEffectiveness(atkType, slot.species.types, slot.ability);
       if (eff > 1) {
         if (!details[atkType]) details[atkType] = [];
         details[atkType].push({ pokeName, types: slot.species.types, eff });
@@ -118,10 +120,11 @@ export function analyzeMetaList(team, metaList) {
       const pokeName = slot.nickname || slot.species.name;
       for (const move of slot.moves) {
         if (!move?.type || move.category === 'Status') continue;
-        const eff = getEffectiveness(move.type, meta.types);
+        const effType = getEffectiveMoveType(move, slot.ability);
+        const eff = getEffectiveness(effType, meta.types);
         if (eff > 1) {
           const exists = coveringMoves.some(m => m.pokeName === pokeName && m.moveName === move.name);
-          if (!exists) coveringMoves.push({ pokeName, moveName: move.name, moveType: move.type, eff });
+          if (!exists) coveringMoves.push({ pokeName, moveName: move.name, moveType: effType, eff });
         }
       }
     }
@@ -132,7 +135,7 @@ export function analyzeMetaList(team, metaList) {
       if (!slot.species) continue;
       const pokeName = slot.nickname || slot.species.name;
       for (const stabType of meta.types) {
-        const eff = getEffectiveness(stabType, slot.species.types);
+        const eff = getEffectiveness(stabType, slot.species.types, slot.ability);
         if (eff > 1) {
           const exists = threatened.some(t => t.pokeName === pokeName && t.via === stabType);
           if (!exists) threatened.push({ pokeName, types: slot.species.types, eff, via: stabType });
