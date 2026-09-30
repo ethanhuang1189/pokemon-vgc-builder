@@ -1,351 +1,346 @@
 {
   "label": "Pikalytics · Reg M-B",
-  "updatedAt": "2026-09-29",
+  "updatedAt": "2026-09-30",
   "data": [
     {
       "name": "Rillaboom",
       "slug": "Rillaboom",
-      "usage": 37.18
+      "usage": 35.2
     },
     {
       "name": "Sneasler",
       "slug": "Sneasler",
-      "usage": 34.29
+      "usage": 31.76
     },
     {
       "name": "Incineroar",
       "slug": "Incineroar",
-      "usage": 26.77
-    },
-    {
-      "name": "Salamence",
-      "slug": "Salamence",
-      "usage": 23.15
-    },
-    {
-      "name": "Kingambit",
-      "slug": "Kingambit",
-      "usage": 22.44
-    },
-    {
-      "name": "Indeedee-F",
-      "slug": "Indeedee-F",
-      "usage": 21.78
-    },
-    {
-      "name": "Basculegion",
-      "slug": "Basculegion",
-      "usage": 21.21
+      "usage": 25.12
     },
     {
       "name": "Golisopod",
       "slug": "Golisopod",
-      "usage": 18.49
+      "usage": 20.78
     },
     {
-      "name": "Garchomp",
-      "slug": "Garchomp",
-      "usage": 17.12
+      "name": "Salamence",
+      "slug": "Salamence",
+      "usage": 20.76
+    },
+    {
+      "name": "Indeedee-F",
+      "slug": "Indeedee-F",
+      "usage": 20.25
+    },
+    {
+      "name": "Kingambit",
+      "slug": "Kingambit",
+      "usage": 20.11
     },
     {
       "name": "Farigiraf",
       "slug": "Farigiraf",
-      "usage": 15.9
+      "usage": 19.66
     },
     {
-      "name": "Gholdengo",
-      "slug": "Gholdengo",
-      "usage": 15.23
+      "name": "Basculegion",
+      "slug": "Basculegion",
+      "usage": 18.48
     },
     {
-      "name": "Pelipper",
-      "slug": "Pelipper",
-      "usage": 13.09
-    },
-    {
-      "name": "Whimsicott",
-      "slug": "Whimsicott",
-      "usage": 12.65
+      "name": "Garchomp",
+      "slug": "Garchomp",
+      "usage": 16.76
     },
     {
       "name": "Charizard",
       "slug": "Charizard",
-      "usage": 11.89
+      "usage": 15.8
     },
     {
-      "name": "Milotic",
-      "slug": "Milotic",
-      "usage": 11.42
-    },
-    {
-      "name": "Sylveon",
-      "slug": "Sylveon",
-      "usage": 10.63
+      "name": "Gholdengo",
+      "slug": "Gholdengo",
+      "usage": 15.1
     },
     {
       "name": "Archaludon",
       "slug": "Archaludon",
-      "usage": 9.98
+      "usage": 15.02
     },
     {
-      "name": "Arcanine-Hisui",
-      "slug": "Arcanine-Hisui",
-      "usage": 9.38
+      "name": "Pelipper",
+      "slug": "Pelipper",
+      "usage": 12.05
+    },
+    {
+      "name": "Whimsicott",
+      "slug": "Whimsicott",
+      "usage": 11.43
+    },
+    {
+      "name": "Milotic",
+      "slug": "Milotic",
+      "usage": 11.22
     },
     {
       "name": "Raichu",
       "slug": "Raichu",
-      "usage": 9.2
+      "usage": 10.55
     },
     {
-      "name": "Staraptor",
-      "slug": "Staraptor",
-      "usage": 8.94
-    },
-    {
-      "name": "Tyranitar",
-      "slug": "Tyranitar",
-      "usage": 8.59
-    },
-    {
-      "name": "Gardevoir",
-      "slug": "Gardevoir",
-      "usage": 8.41
-    },
-    {
-      "name": "Sinistcha",
-      "slug": "Sinistcha",
-      "usage": 8.1
-    },
-    {
-      "name": "Floette-Eternal",
-      "slug": "Floette-Eternal",
-      "usage": 7.72
-    },
-    {
-      "name": "Torkoal",
-      "slug": "Torkoal",
-      "usage": 6.31
-    },
-    {
-      "name": "Armarouge",
-      "slug": "Armarouge",
-      "usage": 6.29
-    },
-    {
-      "name": "Lucario",
-      "slug": "Lucario",
-      "usage": 6.19
-    },
-    {
-      "name": "Excadrill",
-      "slug": "Excadrill",
-      "usage": 5.87
-    },
-    {
-      "name": "Baxcalibur",
-      "slug": "Baxcalibur",
-      "usage": 5.7
-    },
-    {
-      "name": "Volcarona",
-      "slug": "Volcarona",
-      "usage": 5.42
-    },
-    {
-      "name": "Ninetales-Alola",
-      "slug": "Ninetales-Alola",
-      "usage": 5.42
-    },
-    {
-      "name": "Indeedee",
-      "slug": "Indeedee",
-      "usage": 5.19
-    },
-    {
-      "name": "Froslass",
-      "slug": "Froslass",
-      "usage": 5.03
-    },
-    {
-      "name": "Metagross",
-      "slug": "Metagross",
-      "usage": 5.03
+      "name": "Sylveon",
+      "slug": "Sylveon",
+      "usage": 9.61
     },
     {
       "name": "Politoed",
       "slug": "Politoed",
-      "usage": 4.45
+      "usage": 9.6
     },
     {
-      "name": "Pawmot",
-      "slug": "Pawmot",
-      "usage": 4.35
+      "name": "Arcanine-Hisui",
+      "slug": "Arcanine-Hisui",
+      "usage": 9.31
+    },
+    {
+      "name": "Staraptor",
+      "slug": "Staraptor",
+      "usage": 9.04
     },
     {
       "name": "Grimmsnarl",
       "slug": "Grimmsnarl",
-      "usage": 4.2
+      "usage": 8.97
     },
     {
-      "name": "Dragonite",
-      "slug": "Dragonite",
-      "usage": 4.07
+      "name": "Tyranitar",
+      "slug": "Tyranitar",
+      "usage": 8.52
     },
     {
-      "name": "Glimmora",
-      "slug": "Glimmora",
-      "usage": 4.05
+      "name": "Gardevoir",
+      "slug": "Gardevoir",
+      "usage": 7.68
+    },
+    {
+      "name": "Sinistcha",
+      "slug": "Sinistcha",
+      "usage": 7.41
+    },
+    {
+      "name": "Floette-Eternal",
+      "slug": "Floette-Eternal",
+      "usage": 6.84
+    },
+    {
+      "name": "Volcarona",
+      "slug": "Volcarona",
+      "usage": 6.33
+    },
+    {
+      "name": "Torkoal",
+      "slug": "Torkoal",
+      "usage": 5.96
+    },
+    {
+      "name": "Excadrill",
+      "slug": "Excadrill",
+      "usage": 5.96
+    },
+    {
+      "name": "Armarouge",
+      "slug": "Armarouge",
+      "usage": 5.7
+    },
+    {
+      "name": "Lucario",
+      "slug": "Lucario",
+      "usage": 5.49
+    },
+    {
+      "name": "Indeedee",
+      "slug": "Indeedee",
+      "usage": 5.48
+    },
+    {
+      "name": "Metagross",
+      "slug": "Metagross",
+      "usage": 5.16
+    },
+    {
+      "name": "Ninetales-Alola",
+      "slug": "Ninetales-Alola",
+      "usage": 5.08
+    },
+    {
+      "name": "Froslass",
+      "slug": "Froslass",
+      "usage": 4.82
+    },
+    {
+      "name": "Baxcalibur",
+      "slug": "Baxcalibur",
+      "usage": 4.8
     },
     {
       "name": "Gengar",
       "slug": "Gengar",
-      "usage": 4.02
+      "usage": 4.16
+    },
+    {
+      "name": "Dragonite",
+      "slug": "Dragonite",
+      "usage": 3.97
+    },
+    {
+      "name": "Glimmora",
+      "slug": "Glimmora",
+      "usage": 3.9
     },
     {
       "name": "Aerodactyl",
       "slug": "Aerodactyl",
-      "usage": 3.87
+      "usage": 3.66
+    },
+    {
+      "name": "Pawmot",
+      "slug": "Pawmot",
+      "usage": 3.65
     },
     {
       "name": "Primarina",
       "slug": "Primarina",
-      "usage": 3.77
-    },
-    {
-      "name": "Hatterene",
-      "slug": "Hatterene",
-      "usage": 3.58
+      "usage": 3.54
     },
     {
       "name": "Swampert",
       "slug": "Swampert",
-      "usage": 3.54
-    },
-    {
-      "name": "Absol",
-      "slug": "Absol",
-      "usage": 3.31
+      "usage": 3.53
     },
     {
       "name": "Delphox",
       "slug": "Delphox",
-      "usage": 3.22
+      "usage": 3.1
+    },
+    {
+      "name": "Hatterene",
+      "slug": "Hatterene",
+      "usage": 3.09
+    },
+    {
+      "name": "Absol",
+      "slug": "Absol",
+      "usage": 2.89
     },
     {
       "name": "Sableye",
       "slug": "Sableye",
-      "usage": 3.12
-    },
-    {
-      "name": "Talonflame",
-      "slug": "Talonflame",
-      "usage": 2.9
-    },
-    {
-      "name": "Venusaur",
-      "slug": "Venusaur",
-      "usage": 2.56
+      "usage": 2.82
     },
     {
       "name": "Corviknight",
       "slug": "Corviknight",
-      "usage": 2.5
+      "usage": 2.8
+    },
+    {
+      "name": "Talonflame",
+      "slug": "Talonflame",
+      "usage": 2.65
     },
     {
       "name": "Annihilape",
       "slug": "Annihilape",
-      "usage": 2.47
+      "usage": 2.56
     },
     {
-      "name": "Blastoise",
-      "slug": "Blastoise",
-      "usage": 2.44
-    },
-    {
-      "name": "Sinistcha-Masterpiece",
-      "slug": "Sinistcha-Masterpiece",
-      "usage": 2.33
-    },
-    {
-      "name": "Ceruledge",
-      "slug": "Ceruledge",
-      "usage": 2.19
-    },
-    {
-      "name": "Camerupt",
-      "slug": "Camerupt",
-      "usage": 2.13
+      "name": "Venusaur",
+      "slug": "Venusaur",
+      "usage": 2.53
     },
     {
       "name": "Dragapult",
       "slug": "Dragapult",
-      "usage": 1.95
+      "usage": 2.35
+    },
+    {
+      "name": "Blastoise",
+      "slug": "Blastoise",
+      "usage": 2.32
+    },
+    {
+      "name": "Ceruledge",
+      "slug": "Ceruledge",
+      "usage": 2.27
+    },
+    {
+      "name": "Sinistcha-Masterpiece",
+      "slug": "Sinistcha-Masterpiece",
+      "usage": 2.23
+    },
+    {
+      "name": "Camerupt",
+      "slug": "Camerupt",
+      "usage": 2.03
     },
     {
       "name": "Kommo-o",
       "slug": "Kommo-o",
-      "usage": 1.89
+      "usage": 2.02
     },
     {
       "name": "Typhlosion-Hisui",
       "slug": "Typhlosion-Hisui",
-      "usage": 1.83
+      "usage": 1.84
     },
     {
       "name": "Blaziken",
       "slug": "Blaziken",
-      "usage": 1.81
-    },
-    {
-      "name": "Rotom-Wash",
-      "slug": "Rotom-Wash",
-      "usage": 1.76
+      "usage": 1.82
     },
     {
       "name": "Hydreigon",
       "slug": "Hydreigon",
-      "usage": 1.68
+      "usage": 1.63
     },
     {
-      "name": "Sirfetch’d",
-      "slug": "Sirfetch’d",
+      "name": "Rotom-Wash",
+      "slug": "Rotom-Wash",
       "usage": 1.59
     },
     {
       "name": "Mawile",
       "slug": "Mawile",
-      "usage": 1.57
-    },
-    {
-      "name": "Pincurchin",
-      "slug": "Pincurchin",
-      "usage": 1.5
+      "usage": 1.58
     },
     {
       "name": "Clefable",
       "slug": "Clefable",
-      "usage": 1.5
+      "usage": 1.51
+    },
+    {
+      "name": "Sirfetch’d",
+      "slug": "Sirfetch’d",
+      "usage": 1.45
+    },
+    {
+      "name": "Pincurchin",
+      "slug": "Pincurchin",
+      "usage": 1.4
     },
     {
       "name": "Alakazam",
       "slug": "Alakazam",
-      "usage": 1.48
-    },
-    {
-      "name": "Maushold-Four",
-      "slug": "Maushold-Four",
-      "usage": 1.48
+      "usage": 1.36
     },
     {
       "name": "Gallade",
       "slug": "Gallade",
-      "usage": 1.45
+      "usage": 1.33
     },
     {
-      "name": "Toxapex",
-      "slug": "Toxapex",
-      "usage": 1.3
+      "name": "Maushold-Four",
+      "slug": "Maushold-Four",
+      "usage": 1.31
     },
     {
       "name": "Golurk",
@@ -353,84 +348,99 @@
       "usage": 1.29
     },
     {
-      "name": "Scovillain",
-      "slug": "Scovillain",
-      "usage": 1.28
+      "name": "Grapploct",
+      "slug": "Grapploct",
+      "usage": 1.24
     },
     {
       "name": "Tsareena",
       "slug": "Tsareena",
-      "usage": 1.26
+      "usage": 1.22
     },
     {
-      "name": "Weavile",
-      "slug": "Weavile",
-      "usage": 1.21
+      "name": "Toxapex",
+      "slug": "Toxapex",
+      "usage": 1.2
     },
     {
-      "name": "Aegislash",
-      "slug": "Aegislash",
-      "usage": 1.16
-    },
-    {
-      "name": "Grapploct",
-      "slug": "Grapploct",
-      "usage": 1.15
-    },
-    {
-      "name": "Meganium",
-      "slug": "Meganium",
-      "usage": 1.14
-    },
-    {
-      "name": "Mamoswine",
-      "slug": "Mamoswine",
-      "usage": 1.12
-    },
-    {
-      "name": "Maushold",
-      "slug": "Maushold",
-      "usage": 1.1
+      "name": "Scovillain",
+      "slug": "Scovillain",
+      "usage": 1.18
     },
     {
       "name": "Inteleon",
       "slug": "Inteleon",
+      "usage": 1.12
+    },
+    {
+      "name": "Aegislash",
+      "slug": "Aegislash",
+      "usage": 1.12
+    },
+    {
+      "name": "Meganium",
+      "slug": "Meganium",
       "usage": 1.09
+    },
+    {
+      "name": "Weavile",
+      "slug": "Weavile",
+      "usage": 1.08
+    },
+    {
+      "name": "Maushold",
+      "slug": "Maushold",
+      "usage": 1.06
+    },
+    {
+      "name": "Mamoswine",
+      "slug": "Mamoswine",
+      "usage": 1.05
     },
     {
       "name": "Araquanid",
       "slug": "Araquanid",
-      "usage": 1.06
+      "usage": 1.04
+    },
+    {
+      "name": "Espathra",
+      "slug": "Espathra",
+      "usage": 0.99
     },
     {
       "name": "Empoleon",
       "slug": "Empoleon",
-      "usage": 1.06
+      "usage": 0.99
     },
     {
       "name": "Zoroark-Hisui",
       "slug": "Zoroark-Hisui",
-      "usage": 1.03
+      "usage": 0.99
     },
     {
-      "name": "Tinkaton",
-      "slug": "Tinkaton",
-      "usage": 0.98
-    },
-    {
-      "name": "Gyarados",
-      "slug": "Gyarados",
-      "usage": 0.94
-    },
-    {
-      "name": "Scizor",
-      "slug": "Scizor",
-      "usage": 0.93
+      "name": "Chandelure",
+      "slug": "Chandelure",
+      "usage": 0.96
     },
     {
       "name": "Scrafty",
       "slug": "Scrafty",
-      "usage": 0.9
+      "usage": 0.93
+    },
+    {
+      "name": "Tinkaton",
+      "slug": "Tinkaton",
+      "usage": 0.89
+    },
+    {
+      "name": "Gyarados",
+      "slug": "Gyarados",
+      "usage": 0.89
+    },
+    {
+      "name": "Scizor",
+      "slug": "Scizor",
+      "usage": 0.89
     },
     {
       "name": "Rotom-Heat",
@@ -438,203 +448,188 @@
       "usage": 0.88
     },
     {
-      "name": "Starmie",
-      "slug": "Starmie",
-      "usage": 0.88
-    },
-    {
-      "name": "Lycanroc",
-      "slug": "Lycanroc",
-      "usage": 0.86
-    },
-    {
       "name": "Malamar",
       "slug": "Malamar",
-      "usage": 0.84
-    },
-    {
-      "name": "Kleavor",
-      "slug": "Kleavor",
-      "usage": 0.83
-    },
-    {
-      "name": "Samurott-Hisui",
-      "slug": "Samurott-Hisui",
-      "usage": 0.82
-    },
-    {
-      "name": "Meowscarada",
-      "slug": "Meowscarada",
-      "usage": 0.8
-    },
-    {
-      "name": "Chandelure",
-      "slug": "Chandelure",
-      "usage": 0.78
-    },
-    {
-      "name": "Toxtricity",
-      "slug": "Toxtricity",
-      "usage": 0.77
-    },
-    {
-      "name": "Espathra",
-      "slug": "Espathra",
-      "usage": 0.77
-    },
-    {
-      "name": "Oranguru",
-      "slug": "Oranguru",
-      "usage": 0.75
-    },
-    {
-      "name": "Crabominable",
-      "slug": "Crabominable",
-      "usage": 0.71
-    },
-    {
-      "name": "Vivillon",
-      "slug": "Vivillon",
-      "usage": 0.71
-    },
-    {
-      "name": "Slowking-Galar",
-      "slug": "Slowking-Galar",
-      "usage": 0.69
-    },
-    {
-      "name": "Overqwil",
-      "slug": "Overqwil",
-      "usage": 0.68
-    },
-    {
-      "name": "Bellibolt",
-      "slug": "Bellibolt",
-      "usage": 0.66
-    },
-    {
-      "name": "Sceptile",
-      "slug": "Sceptile",
-      "usage": 0.65
-    },
-    {
-      "name": "Pyroar",
-      "slug": "Pyroar",
-      "usage": 0.62
+      "usage": 0.86
     },
     {
       "name": "Lopunny",
       "slug": "Lopunny",
+      "usage": 0.84
+    },
+    {
+      "name": "Starmie",
+      "slug": "Starmie",
+      "usage": 0.83
+    },
+    {
+      "name": "Meowscarada",
+      "slug": "Meowscarada",
+      "usage": 0.82
+    },
+    {
+      "name": "Vivillon",
+      "slug": "Vivillon",
+      "usage": 0.81
+    },
+    {
+      "name": "Lycanroc",
+      "slug": "Lycanroc",
+      "usage": 0.76
+    },
+    {
+      "name": "Kleavor",
+      "slug": "Kleavor",
+      "usage": 0.76
+    },
+    {
+      "name": "Overqwil",
+      "slug": "Overqwil",
+      "usage": 0.74
+    },
+    {
+      "name": "Toxtricity",
+      "slug": "Toxtricity",
+      "usage": 0.74
+    },
+    {
+      "name": "Altaria",
+      "slug": "Altaria",
+      "usage": 0.73
+    },
+    {
+      "name": "Pyroar",
+      "slug": "Pyroar",
+      "usage": 0.73
+    },
+    {
+      "name": "Oranguru",
+      "slug": "Oranguru",
+      "usage": 0.72
+    },
+    {
+      "name": "Samurott-Hisui",
+      "slug": "Samurott-Hisui",
+      "usage": 0.71
+    },
+    {
+      "name": "Sceptile",
+      "slug": "Sceptile",
+      "usage": 0.66
+    },
+    {
+      "name": "Slowking-Galar",
+      "slug": "Slowking-Galar",
+      "usage": 0.64
+    },
+    {
+      "name": "Drampa",
+      "slug": "Drampa",
+      "usage": 0.63
+    },
+    {
+      "name": "Crabominable",
+      "slug": "Crabominable",
       "usage": 0.62
     },
     {
       "name": "Vanilluxe",
       "slug": "Vanilluxe",
-      "usage": 0.6
-    },
-    {
-      "name": "Altaria",
-      "slug": "Altaria",
-      "usage": 0.58
-    },
-    {
-      "name": "Snorlax",
-      "slug": "Snorlax",
-      "usage": 0.57
-    },
-    {
-      "name": "Drampa",
-      "slug": "Drampa",
-      "usage": 0.57
+      "usage": 0.62
     },
     {
       "name": "Klefki",
       "slug": "Klefki",
-      "usage": 0.57
+      "usage": 0.59
     },
     {
-      "name": "Cinderace",
-      "slug": "Cinderace",
-      "usage": 0.54
+      "name": "Greninja",
+      "slug": "Greninja",
+      "usage": 0.58
     },
     {
-      "name": "Heliolisk",
-      "slug": "Heliolisk",
-      "usage": 0.54
-    },
-    {
-      "name": "Slowbro",
-      "slug": "Slowbro",
-      "usage": 0.51
+      "name": "Bellibolt",
+      "slug": "Bellibolt",
+      "usage": 0.56
     },
     {
       "name": "Kangaskhan",
       "slug": "Kangaskhan",
-      "usage": 0.51
+      "usage": 0.55
     },
     {
-      "name": "Skarmory",
-      "slug": "Skarmory",
-      "usage": 0.51
+      "name": "Meowstic-F",
+      "slug": "Meowstic-F",
+      "usage": 0.54
+    },
+    {
+      "name": "Cinderace",
+      "slug": "Cinderace",
+      "usage": 0.52
+    },
+    {
+      "name": "Heliolisk",
+      "slug": "Heliolisk",
+      "usage": 0.52
     },
     {
       "name": "Goodra-Hisui",
       "slug": "Goodra-Hisui",
-      "usage": 0.49
-    },
-    {
-      "name": "Glalie",
-      "slug": "Glalie",
-      "usage": 0.49
-    },
-    {
-      "name": "Decidueye-Hisui",
-      "slug": "Decidueye-Hisui",
-      "usage": 0.49
-    },
-    {
-      "name": "Noivern",
-      "slug": "Noivern",
-      "usage": 0.47
+      "usage": 0.52
     },
     {
       "name": "Hawlucha",
       "slug": "Hawlucha",
+      "usage": 0.5
+    },
+    {
+      "name": "Snorlax",
+      "slug": "Snorlax",
+      "usage": 0.5
+    },
+    {
+      "name": "Skarmory",
+      "slug": "Skarmory",
+      "usage": 0.49
+    },
+    {
+      "name": "Slowbro",
+      "slug": "Slowbro",
       "usage": 0.47
     },
     {
       "name": "Raichu-Alola",
       "slug": "Raichu-Alola",
-      "usage": 0.47
+      "usage": 0.46
     },
     {
-      "name": "Greninja",
-      "slug": "Greninja",
-      "usage": 0.46
+      "name": "Eelektross",
+      "slug": "Eelektross",
+      "usage": 0.45
+    },
+    {
+      "name": "Noivern",
+      "slug": "Noivern",
+      "usage": 0.44
+    },
+    {
+      "name": "Squawkabilly",
+      "slug": "Squawkabilly",
+      "usage": 0.43
     },
     {
       "name": "Perrserker",
       "slug": "Perrserker",
-      "usage": 0.46
+      "usage": 0.42
+    },
+    {
+      "name": "Decidueye-Hisui",
+      "slug": "Decidueye-Hisui",
+      "usage": 0.42
     },
     {
       "name": "Dragalge",
       "slug": "Dragalge",
-      "usage": 0.43
-    },
-    {
-      "name": "Palafin-Hero",
-      "slug": "Palafin-Hero",
-      "usage": 0.42
-    },
-    {
-      "name": "Meowstic-F",
-      "slug": "Meowstic-F",
-      "usage": 0.41
-    },
-    {
-      "name": "Vileplume",
-      "slug": "Vileplume",
       "usage": 0.41
     },
     {
@@ -643,8 +638,8 @@
       "usage": 0.41
     },
     {
-      "name": "Ampharos",
-      "slug": "Ampharos",
+      "name": "Palafin-Hero",
+      "slug": "Palafin-Hero",
       "usage": 0.41
     },
     {
@@ -653,58 +648,43 @@
       "usage": 0.41
     },
     {
-      "name": "Palafin",
-      "slug": "Palafin",
+      "name": "Ampharos",
+      "slug": "Ampharos",
       "usage": 0.4
+    },
+    {
+      "name": "Glalie",
+      "slug": "Glalie",
+      "usage": 0.39
+    },
+    {
+      "name": "Vileplume",
+      "slug": "Vileplume",
+      "usage": 0.39
     },
     {
       "name": "Ditto",
       "slug": "Ditto",
-      "usage": 0.39
-    },
-    {
-      "name": "Eelektross",
-      "slug": "Eelektross",
-      "usage": 0.39
-    },
-    {
-      "name": "Houndoom",
-      "slug": "Houndoom",
-      "usage": 0.39
-    },
-    {
-      "name": "Infernape",
-      "slug": "Infernape",
-      "usage": 0.37
+      "usage": 0.38
     },
     {
       "name": "Meowstic",
       "slug": "Meowstic",
-      "usage": 0.37
+      "usage": 0.38
     },
     {
-      "name": "Salazzle",
-      "slug": "Salazzle",
-      "usage": 0.37
+      "name": "Palafin",
+      "slug": "Palafin",
+      "usage": 0.36
     },
     {
       "name": "Chesnaught",
       "slug": "Chesnaught",
-      "usage": 0.36
-    },
-    {
-      "name": "Squawkabilly",
-      "slug": "Squawkabilly",
-      "usage": 0.36
-    },
-    {
-      "name": "Scolipede",
-      "slug": "Scolipede",
       "usage": 0.35
     },
     {
-      "name": "Arboliva",
-      "slug": "Arboliva",
+      "name": "Houndoom",
+      "slug": "Houndoom",
       "usage": 0.34
     },
     {
@@ -718,18 +698,28 @@
       "usage": 0.34
     },
     {
-      "name": "Mimikyu-Busted",
-      "slug": "Mimikyu-Busted",
+      "name": "Scolipede",
+      "slug": "Scolipede",
       "usage": 0.34
     },
     {
       "name": "Toxtricity-Low-Key",
       "slug": "Toxtricity-Low-Key",
+      "usage": 0.34
+    },
+    {
+      "name": "Audino",
+      "slug": "Audino",
+      "usage": 0.34
+    },
+    {
+      "name": "Mimikyu-Busted",
+      "slug": "Mimikyu-Busted",
       "usage": 0.33
     },
     {
-      "name": "Feraligatr",
-      "slug": "Feraligatr",
+      "name": "Skeledirge",
+      "slug": "Skeledirge",
       "usage": 0.33
     },
     {
@@ -738,54 +728,34 @@
       "usage": 0.33
     },
     {
-      "name": "Serperior",
-      "slug": "Serperior",
+      "name": "Salazzle",
+      "slug": "Salazzle",
+      "usage": 0.33
+    },
+    {
+      "name": "Infernape",
+      "slug": "Infernape",
       "usage": 0.32
-    },
-    {
-      "name": "Skeledirge",
-      "slug": "Skeledirge",
-      "usage": 0.32
-    },
-    {
-      "name": "Audino",
-      "slug": "Audino",
-      "usage": 0.31
-    },
-    {
-      "name": "Spiritomb",
-      "slug": "Spiritomb",
-      "usage": 0.3
-    },
-    {
-      "name": "Persian-Alola",
-      "slug": "Persian-Alola",
-      "usage": 0.3
     },
     {
       "name": "Wyrdeer",
       "slug": "Wyrdeer",
-      "usage": 0.3
+      "usage": 0.32
     },
     {
-      "name": "Arcanine",
-      "slug": "Arcanine",
-      "usage": 0.29
+      "name": "Feraligatr",
+      "slug": "Feraligatr",
+      "usage": 0.31
     },
     {
-      "name": "Mr. Mime",
-      "slug": "Mr. Mime",
-      "usage": 0.29
+      "name": "Persian-Alola",
+      "slug": "Persian-Alola",
+      "usage": 0.31
     },
     {
-      "name": "Cofagrigus",
-      "slug": "Cofagrigus",
-      "usage": 0.29
-    },
-    {
-      "name": "Wigglytuff",
-      "slug": "Wigglytuff",
-      "usage": 0.29
+      "name": "Arboliva",
+      "slug": "Arboliva",
+      "usage": 0.31
     },
     {
       "name": "Beedrill",
@@ -793,68 +763,108 @@
       "usage": 0.29
     },
     {
-      "name": "Clawitzer",
-      "slug": "Clawitzer",
+      "name": "Gliscor",
+      "slug": "Gliscor",
+      "usage": 0.29
+    },
+    {
+      "name": "Serperior",
+      "slug": "Serperior",
+      "usage": 0.29
+    },
+    {
+      "name": "Cofagrigus",
+      "slug": "Cofagrigus",
       "usage": 0.28
     },
     {
-      "name": "Jolteon",
-      "slug": "Jolteon",
+      "name": "Houndstone",
+      "slug": "Houndstone",
+      "usage": 0.28
+    },
+    {
+      "name": "Hippowdon",
+      "slug": "Hippowdon",
+      "usage": 0.28
+    },
+    {
+      "name": "Mr. Mime",
+      "slug": "Mr. Mime",
       "usage": 0.28
     },
     {
       "name": "Basculegion-F",
       "slug": "Basculegion-F",
-      "usage": 0.27
+      "usage": 0.28
     },
     {
-      "name": "Houndstone",
-      "slug": "Houndstone",
-      "usage": 0.27
-    },
-    {
-      "name": "Hippowdon",
-      "slug": "Hippowdon",
-      "usage": 0.26
+      "name": "Clawitzer",
+      "slug": "Clawitzer",
+      "usage": 0.28
     },
     {
       "name": "Umbreon",
       "slug": "Umbreon",
+      "usage": 0.28
+    },
+    {
+      "name": "Arcanine",
+      "slug": "Arcanine",
+      "usage": 0.27
+    },
+    {
+      "name": "Jolteon",
+      "slug": "Jolteon",
+      "usage": 0.27
+    },
+    {
+      "name": "Manectric",
+      "slug": "Manectric",
+      "usage": 0.27
+    },
+    {
+      "name": "Spiritomb",
+      "slug": "Spiritomb",
+      "usage": 0.27
+    },
+    {
+      "name": "Mudsdale",
+      "slug": "Mudsdale",
       "usage": 0.26
     },
     {
       "name": "Runerigus",
       "slug": "Runerigus",
+      "usage": 0.26
+    },
+    {
+      "name": "Wigglytuff",
+      "slug": "Wigglytuff",
+      "usage": 0.26
+    },
+    {
+      "name": "Rhyperior",
+      "slug": "Rhyperior",
       "usage": 0.25
     },
     {
-      "name": "Gliscor",
-      "slug": "Gliscor",
-      "usage": 0.25
-    },
-    {
-      "name": "Manectric",
-      "slug": "Manectric",
-      "usage": 0.25
+      "name": "Heracross",
+      "slug": "Heracross",
+      "usage": 0.24
     },
     {
       "name": "Mimikyu",
       "slug": "Mimikyu",
-      "usage": 0.24
+      "usage": 0.23
     },
     {
-      "name": "Mudsdale",
-      "slug": "Mudsdale",
-      "usage": 0.24
+      "name": "Slurpuff",
+      "slug": "Slurpuff",
+      "usage": 0.23
     },
     {
       "name": "Garganacl",
       "slug": "Garganacl",
-      "usage": 0.23
-    },
-    {
-      "name": "Orthworm",
-      "slug": "Orthworm",
       "usage": 0.23
     },
     {
@@ -863,14 +873,9 @@
       "usage": 0.23
     },
     {
-      "name": "Heracross",
-      "slug": "Heracross",
-      "usage": 0.23
-    },
-    {
-      "name": "Medicham",
-      "slug": "Medicham",
-      "usage": 0.23
+      "name": "Chimecho",
+      "slug": "Chimecho",
+      "usage": 0.22
     },
     {
       "name": "Reuniclus",
@@ -878,8 +883,8 @@
       "usage": 0.22
     },
     {
-      "name": "Rhyperior",
-      "slug": "Rhyperior",
+      "name": "Orthworm",
+      "slug": "Orthworm",
       "usage": 0.22
     },
     {
@@ -888,38 +893,33 @@
       "usage": 0.21
     },
     {
-      "name": "Emboar",
-      "slug": "Emboar",
-      "usage": 0.21
-    },
-    {
       "name": "Tauros-Paldea-Aqua",
       "slug": "Tauros-Paldea-Aqua",
-      "usage": 0.21
-    },
-    {
-      "name": "Farfetch’d",
-      "slug": "Farfetch’d",
-      "usage": 0.21
-    },
-    {
-      "name": "Chimecho",
-      "slug": "Chimecho",
       "usage": 0.2
     },
     {
-      "name": "Gogoat",
-      "slug": "Gogoat",
+      "name": "Alcremie",
+      "slug": "Alcremie",
       "usage": 0.2
+    },
+    {
+      "name": "Torterra",
+      "slug": "Torterra",
+      "usage": 0.19
+    },
+    {
+      "name": "Medicham",
+      "slug": "Medicham",
+      "usage": 0.19
+    },
+    {
+      "name": "Victreebel",
+      "slug": "Victreebel",
+      "usage": 0.19
     },
     {
       "name": "Ariados",
       "slug": "Ariados",
-      "usage": 0.2
-    },
-    {
-      "name": "Aurorus",
-      "slug": "Aurorus",
       "usage": 0.19
     },
     {
@@ -928,18 +928,13 @@
       "usage": 0.19
     },
     {
-      "name": "Torterra",
-      "slug": "Torterra",
+      "name": "Emboar",
+      "slug": "Emboar",
       "usage": 0.19
     },
     {
-      "name": "Alcremie",
-      "slug": "Alcremie",
-      "usage": 0.19
-    },
-    {
-      "name": "Banette",
-      "slug": "Banette",
+      "name": "Aurorus",
+      "slug": "Aurorus",
       "usage": 0.18
     },
     {
@@ -948,28 +943,33 @@
       "usage": 0.18
     },
     {
-      "name": "Victreebel",
-      "slug": "Victreebel",
+      "name": "Quaquaval",
+      "slug": "Quaquaval",
       "usage": 0.18
     },
     {
-      "name": "Slowking",
-      "slug": "Slowking",
+      "name": "Farfetch’d",
+      "slug": "Farfetch’d",
       "usage": 0.18
+    },
+    {
+      "name": "Gogoat",
+      "slug": "Gogoat",
+      "usage": 0.18
+    },
+    {
+      "name": "Banette",
+      "slug": "Banette",
+      "usage": 0.17
     },
     {
       "name": "Liepard",
       "slug": "Liepard",
-      "usage": 0.18
-    },
-    {
-      "name": "Rotom-Frost",
-      "slug": "Rotom-Frost",
       "usage": 0.17
     },
     {
-      "name": "Slurpuff",
-      "slug": "Slurpuff",
+      "name": "Pikachu",
+      "slug": "Pikachu",
       "usage": 0.17
     },
     {
@@ -978,19 +978,19 @@
       "usage": 0.16
     },
     {
-      "name": "Diggersby",
-      "slug": "Diggersby",
-      "usage": 0.16
-    },
-    {
       "name": "Vaporeon",
       "slug": "Vaporeon",
       "usage": 0.16
     },
     {
-      "name": "Thievul",
-      "slug": "Thievul",
-      "usage": 0.15
+      "name": "Morpeko",
+      "slug": "Morpeko",
+      "usage": 0.16
+    },
+    {
+      "name": "Slowking",
+      "slug": "Slowking",
+      "usage": 0.16
     },
     {
       "name": "Toxicroak",
@@ -998,43 +998,58 @@
       "usage": 0.15
     },
     {
-      "name": "Quaquaval",
-      "slug": "Quaquaval",
+      "name": "Vivillon-Pokeball",
+      "slug": "Vivillon-Pokeball",
       "usage": 0.15
-    },
-    {
-      "name": "Typhlosion",
-      "slug": "Typhlosion",
-      "usage": 0.14
     },
     {
       "name": "Emolga",
       "slug": "Emolga",
-      "usage": 0.14
+      "usage": 0.15
     },
     {
-      "name": "Vivillon-Pokeball",
-      "slug": "Vivillon-Pokeball",
-      "usage": 0.13
+      "name": "Rotom-Frost",
+      "slug": "Rotom-Frost",
+      "usage": 0.15
     },
     {
       "name": "Tauros-Paldea-Blaze",
       "slug": "Tauros-Paldea-Blaze",
-      "usage": 0.12
+      "usage": 0.14
     },
     {
-      "name": "Pikachu",
-      "slug": "Pikachu",
-      "usage": 0.12
+      "name": "Slowbro-Galar",
+      "slug": "Slowbro-Galar",
+      "usage": 0.14
     },
     {
-      "name": "Florges",
-      "slug": "Florges",
-      "usage": 0.12
+      "name": "Thievul",
+      "slug": "Thievul",
+      "usage": 0.14
+    },
+    {
+      "name": "Pidgeot",
+      "slug": "Pidgeot",
+      "usage": 0.13
+    },
+    {
+      "name": "Diggersby",
+      "slug": "Diggersby",
+      "usage": 0.13
     },
     {
       "name": "Rampardos",
       "slug": "Rampardos",
+      "usage": 0.13
+    },
+    {
+      "name": "Dedenne",
+      "slug": "Dedenne",
+      "usage": 0.13
+    },
+    {
+      "name": "Typhlosion",
+      "slug": "Typhlosion",
       "usage": 0.12
     },
     {
@@ -1048,28 +1063,28 @@
       "usage": 0.12
     },
     {
-      "name": "Pidgeot",
-      "slug": "Pidgeot",
+      "name": "Glaceon",
+      "slug": "Glaceon",
       "usage": 0.12
     },
     {
-      "name": "Slowbro-Galar",
-      "slug": "Slowbro-Galar",
+      "name": "Florges",
+      "slug": "Florges",
+      "usage": 0.12
+    },
+    {
+      "name": "Vivillon-Fancy",
+      "slug": "Vivillon-Fancy",
       "usage": 0.11
     },
     {
-      "name": "Glaceon",
-      "slug": "Glaceon",
+      "name": "Luxray",
+      "slug": "Luxray",
       "usage": 0.11
     },
     {
-      "name": "Mabosstiff",
-      "slug": "Mabosstiff",
-      "usage": 0.11
-    },
-    {
-      "name": "Pangoro",
-      "slug": "Pangoro",
+      "name": "Aromatisse",
+      "slug": "Aromatisse",
       "usage": 0.11
     },
     {
@@ -1078,38 +1093,28 @@
       "usage": 0.11
     },
     {
-      "name": "Luxray",
-      "slug": "Luxray",
+      "name": "Goodra",
+      "slug": "Goodra",
       "usage": 0.1
     },
     {
-      "name": "Aromatisse",
-      "slug": "Aromatisse",
+      "name": "Mabosstiff",
+      "slug": "Mabosstiff",
       "usage": 0.1
     },
     {
-      "name": "Morpeko",
-      "slug": "Morpeko",
+      "name": "Pangoro",
+      "slug": "Pangoro",
       "usage": 0.1
     },
     {
       "name": "Sharpedo",
       "slug": "Sharpedo",
-      "usage": 0.1
-    },
-    {
-      "name": "Vivillon-Fancy",
-      "slug": "Vivillon-Fancy",
-      "usage": 0.1
+      "usage": 0.09
     },
     {
       "name": "Zoroark",
       "slug": "Zoroark",
-      "usage": 0.09
-    },
-    {
-      "name": "Goodra",
-      "slug": "Goodra",
       "usage": 0.09
     },
     {
@@ -1118,24 +1123,19 @@
       "usage": 0.09
     },
     {
-      "name": "Dedenne",
-      "slug": "Dedenne",
+      "name": "Tyrantrum",
+      "slug": "Tyrantrum",
       "usage": 0.08
     },
     {
-      "name": "Swalot",
-      "slug": "Swalot",
-      "usage": 0.07
+      "name": "Roserade",
+      "slug": "Roserade",
+      "usage": 0.08
     },
     {
-      "name": "Tyrantrum",
-      "slug": "Tyrantrum",
-      "usage": 0.07
-    },
-    {
-      "name": "Pinsir",
-      "slug": "Pinsir",
-      "usage": 0.07
+      "name": "Bastiodon",
+      "slug": "Bastiodon",
+      "usage": 0.08
     },
     {
       "name": "Barbaracle",
@@ -1148,18 +1148,38 @@
       "usage": 0.07
     },
     {
+      "name": "Swalot",
+      "slug": "Swalot",
+      "usage": 0.07
+    },
+    {
+      "name": "Sandaconda",
+      "slug": "Sandaconda",
+      "usage": 0.07
+    },
+    {
+      "name": "Flapple",
+      "slug": "Flapple",
+      "usage": 0.07
+    },
+    {
       "name": "Machamp",
       "slug": "Machamp",
       "usage": 0.07
     },
     {
-      "name": "Gourgeist-Super",
-      "slug": "Gourgeist-Super",
-      "usage": 0.07
+      "name": "Pinsir",
+      "slug": "Pinsir",
+      "usage": 0.06
     },
     {
-      "name": "Roserade",
-      "slug": "Roserade",
+      "name": "Gourgeist-Super",
+      "slug": "Gourgeist-Super",
+      "usage": 0.06
+    },
+    {
+      "name": "Leafeon",
+      "slug": "Leafeon",
       "usage": 0.06
     },
     {
@@ -1168,38 +1188,8 @@
       "usage": 0.06
     },
     {
-      "name": "Bastiodon",
-      "slug": "Bastiodon",
-      "usage": 0.06
-    },
-    {
-      "name": "Flapple",
-      "slug": "Flapple",
-      "usage": 0.06
-    },
-    {
       "name": "Lycanroc-Midnight",
       "slug": "Lycanroc-Midnight",
-      "usage": 0.06
-    },
-    {
-      "name": "Sandaconda",
-      "slug": "Sandaconda",
-      "usage": 0.06
-    },
-    {
-      "name": "Persian",
-      "slug": "Persian",
-      "usage": 0.05
-    },
-    {
-      "name": "Leafeon",
-      "slug": "Leafeon",
-      "usage": 0.05
-    },
-    {
-      "name": "Avalugg-Hisui",
-      "slug": "Avalugg-Hisui",
       "usage": 0.05
     },
     {
@@ -1208,28 +1198,23 @@
       "usage": 0.05
     },
     {
-      "name": "Rotom-Fan",
-      "slug": "Rotom-Fan",
+      "name": "Persian",
+      "slug": "Persian",
+      "usage": 0.05
+    },
+    {
+      "name": "Avalugg-Hisui",
+      "slug": "Avalugg-Hisui",
       "usage": 0.05
     },
     {
       "name": "Arbok",
       "slug": "Arbok",
-      "usage": 0.04
-    },
-    {
-      "name": "Musharna",
-      "slug": "Musharna",
-      "usage": 0.04
+      "usage": 0.05
     },
     {
       "name": "Passimian",
       "slug": "Passimian",
-      "usage": 0.04
-    },
-    {
-      "name": "Flareon",
-      "slug": "Flareon",
       "usage": 0.04
     },
     {
@@ -1238,18 +1223,33 @@
       "usage": 0.04
     },
     {
+      "name": "Rotom-Fan",
+      "slug": "Rotom-Fan",
+      "usage": 0.04
+    },
+    {
+      "name": "Musharna",
+      "slug": "Musharna",
+      "usage": 0.04
+    },
+    {
+      "name": "Flareon",
+      "slug": "Flareon",
+      "usage": 0.04
+    },
+    {
       "name": "Avalugg",
       "slug": "Avalugg",
       "usage": 0.04
     },
     {
-      "name": "Appletun",
-      "slug": "Appletun",
-      "usage": 0.03
-    },
-    {
       "name": "Decidueye",
       "slug": "Decidueye",
+      "usage": 0.04
+    },
+    {
+      "name": "Castform",
+      "slug": "Castform",
       "usage": 0.03
     },
     {
@@ -1263,33 +1263,28 @@
       "usage": 0.03
     },
     {
-      "name": "Castform",
-      "slug": "Castform",
-      "usage": 0.03
-    },
-    {
-      "name": "Vivillon-Icy Snow",
-      "slug": "Vivillon-Icy Snow",
-      "usage": 0.03
-    },
-    {
       "name": "Rotom",
       "slug": "Rotom",
-      "usage": 0.02
+      "usage": 0.03
+    },
+    {
+      "name": "Appletun",
+      "slug": "Appletun",
+      "usage": 0.03
+    },
+    {
+      "name": "Simisear",
+      "slug": "Simisear",
+      "usage": 0.03
     },
     {
       "name": "Alcremie-Ruby-Swirl",
       "slug": "Alcremie-Ruby-Swirl",
-      "usage": 0.02
+      "usage": 0.03
     },
     {
-      "name": "Gourgeist-Small",
-      "slug": "Gourgeist-Small",
-      "usage": 0.02
-    },
-    {
-      "name": "Meowstic-M",
-      "slug": "Meowstic-M",
+      "name": "Simisage",
+      "slug": "Simisage",
       "usage": 0.02
     },
     {
@@ -1303,8 +1298,8 @@
       "usage": 0.02
     },
     {
-      "name": "Alcremie-Mint-Cream",
-      "slug": "Alcremie-Mint-Cream",
+      "name": "Vivillon-Icy Snow",
+      "slug": "Vivillon-Icy Snow",
       "usage": 0.02
     },
     {
@@ -1313,83 +1308,33 @@
       "usage": 0.02
     },
     {
-      "name": "Simisage",
-      "slug": "Simisage",
-      "usage": 0.01
+      "name": "Meowstic-M",
+      "slug": "Meowstic-M",
+      "usage": 0.02
     },
     {
-      "name": "Simisear",
-      "slug": "Simisear",
-      "usage": 0.01
+      "name": "Gourgeist-Small",
+      "slug": "Gourgeist-Small",
+      "usage": 0.02
     },
     {
-      "name": "Alcremie-Lemon-Cream",
-      "slug": "Alcremie-Lemon-Cream",
-      "usage": 0.01
-    },
-    {
-      "name": "Vivillon-Jungle",
-      "slug": "Vivillon-Jungle",
-      "usage": 0.01
-    },
-    {
-      "name": "Alcremie-Salted-Cream",
-      "slug": "Alcremie-Salted-Cream",
-      "usage": 0.01
-    },
-    {
-      "name": "Vivillon-Continental",
-      "slug": "Vivillon-Continental",
-      "usage": 0.01
-    },
-    {
-      "name": "Alcremie-Matcha-Cream",
-      "slug": "Alcremie-Matcha-Cream",
-      "usage": 0.01
-    },
-    {
-      "name": "Qwilfish",
-      "slug": "Qwilfish",
-      "usage": 0.01
+      "name": "Tauros-Paldea-Combat",
+      "slug": "Tauros-Paldea-Combat",
+      "usage": 0.02
     },
     {
       "name": "Samurott",
       "slug": "Samurott",
-      "usage": 0.01
+      "usage": 0.02
     },
     {
       "name": "Vivillon-Sandstorm",
       "slug": "Vivillon-Sandstorm",
-      "usage": 0.01
+      "usage": 0.02
     },
     {
-      "name": "Gourgeist",
-      "slug": "Gourgeist",
-      "usage": 0.01
-    },
-    {
-      "name": "Polteageist-Antique",
-      "slug": "Polteageist-Antique",
-      "usage": 0.01
-    },
-    {
-      "name": "Tornadus",
-      "slug": "Tornadus",
-      "usage": 0.01
-    },
-    {
-      "name": "Vivillon-High Plains",
-      "slug": "Vivillon-High Plains",
-      "usage": 0.01
-    },
-    {
-      "name": "Barraskewda",
-      "slug": "Barraskewda",
-      "usage": 0.01
-    },
-    {
-      "name": "Entei",
-      "slug": "Entei",
+      "name": "Alcremie-Mint-Cream",
+      "slug": "Alcremie-Mint-Cream",
       "usage": 0.01
     },
     {
@@ -1398,38 +1343,53 @@
       "usage": 0.01
     },
     {
-      "name": "Gastrodon",
-      "slug": "Gastrodon",
+      "name": "Vivillon-High Plains",
+      "slug": "Vivillon-High Plains",
       "usage": 0.01
     },
     {
-      "name": "Iron Hands",
-      "slug": "Iron Hands",
+      "name": "Alcremie-Lemon-Cream",
+      "slug": "Alcremie-Lemon-Cream",
       "usage": 0.01
     },
     {
-      "name": "Lilligant",
-      "slug": "Lilligant",
+      "name": "Gourgeist",
+      "slug": "Gourgeist",
       "usage": 0.01
     },
     {
-      "name": "Murkrow",
-      "slug": "Murkrow",
+      "name": "Qwilfish",
+      "slug": "Qwilfish",
       "usage": 0.01
     },
     {
-      "name": "Tauros-Paldea-Combat",
-      "slug": "Tauros-Paldea-Combat",
+      "name": "Polteageist-Antique",
+      "slug": "Polteageist-Antique",
       "usage": 0.01
     },
     {
-      "name": "Cresselia",
-      "slug": "Cresselia",
+      "name": "Vivillon-Continental",
+      "slug": "Vivillon-Continental",
       "usage": 0.01
     },
     {
-      "name": "Furfrou-Dandy",
-      "slug": "Furfrou-Dandy",
+      "name": "Alcremie-Salted-Cream",
+      "slug": "Alcremie-Salted-Cream",
+      "usage": 0.01
+    },
+    {
+      "name": "Vivillon-Jungle",
+      "slug": "Vivillon-Jungle",
+      "usage": 0.01
+    },
+    {
+      "name": "Alcremie-Matcha-Cream",
+      "slug": "Alcremie-Matcha-Cream",
+      "usage": 0.01
+    },
+    {
+      "name": "Tornadus",
+      "slug": "Tornadus",
       "usage": 0.01
     },
     {
@@ -1438,18 +1398,28 @@
       "usage": 0.01
     },
     {
-      "name": "Alcremie-Ruby-Cream",
-      "slug": "Alcremie-Ruby-Cream",
+      "name": "Tapu Lele",
+      "slug": "Tapu Lele",
+      "usage": 0.01
+    },
+    {
+      "name": "Barraskewda",
+      "slug": "Barraskewda",
       "usage": 0
     },
     {
-      "name": "Furfrou",
-      "slug": "Furfrou",
+      "name": "Entei",
+      "slug": "Entei",
       "usage": 0
     },
     {
-      "name": "Furfrou-Heart",
-      "slug": "Furfrou-Heart",
+      "name": "Gastrodon",
+      "slug": "Gastrodon",
+      "usage": 0
+    },
+    {
+      "name": "Iron Hands",
+      "slug": "Iron Hands",
       "usage": 0
     },
     {
@@ -1458,8 +1428,43 @@
       "usage": 0
     },
     {
-      "name": "Ogerpon-Cornerstone",
-      "slug": "Ogerpon-Cornerstone",
+      "name": "Lilligant",
+      "slug": "Lilligant",
+      "usage": 0
+    },
+    {
+      "name": "Murkrow",
+      "slug": "Murkrow",
+      "usage": 0
+    },
+    {
+      "name": "Regidrago",
+      "slug": "Regidrago",
+      "usage": 0
+    },
+    {
+      "name": "Suicune",
+      "slug": "Suicune",
+      "usage": 0
+    },
+    {
+      "name": "Cresselia",
+      "slug": "Cresselia",
+      "usage": 0
+    },
+    {
+      "name": "Furfrou",
+      "slug": "Furfrou",
+      "usage": 0
+    },
+    {
+      "name": "Furfrou-Dandy",
+      "slug": "Furfrou-Dandy",
+      "usage": 0
+    },
+    {
+      "name": "Furfrou-Debutante",
+      "slug": "Furfrou-Debutante",
       "usage": 0
     },
     {
@@ -1468,8 +1473,18 @@
       "usage": 0
     },
     {
-      "name": "Suicune",
-      "slug": "Suicune",
+      "name": "Alcremie-Ruby-Cream",
+      "slug": "Alcremie-Ruby-Cream",
+      "usage": 0
+    },
+    {
+      "name": "Furfrou-Heart",
+      "slug": "Furfrou-Heart",
+      "usage": 0
+    },
+    {
+      "name": "Ogerpon-Cornerstone",
+      "slug": "Ogerpon-Cornerstone",
       "usage": 0
     },
     {
@@ -1488,8 +1503,28 @@
       "usage": 0
     },
     {
+      "name": "Alcremie-Caramel-Swirl",
+      "slug": "Alcremie-Caramel-Swirl",
+      "usage": 0
+    },
+    {
       "name": "Chien-Pao",
       "slug": "Chien-Pao",
+      "usage": 0
+    },
+    {
+      "name": "Clamperl",
+      "slug": "Clamperl",
+      "usage": 0
+    },
+    {
+      "name": "Dusclops",
+      "slug": "Dusclops",
+      "usage": 0
+    },
+    {
+      "name": "Eldegoss",
+      "slug": "Eldegoss",
       "usage": 0
     },
     {
@@ -1498,8 +1533,13 @@
       "usage": 0
     },
     {
-      "name": "Furfrou-Debutante",
-      "slug": "Furfrou-Debutante",
+      "name": "Genesect",
+      "slug": "Genesect",
+      "usage": 0
+    },
+    {
+      "name": "Glastrier",
+      "slug": "Glastrier",
       "usage": 0
     },
     {
@@ -1528,13 +1568,13 @@
       "usage": 0
     },
     {
-      "name": "Regidrago",
-      "slug": "Regidrago",
+      "name": "Porygon2",
+      "slug": "Porygon2",
       "usage": 0
     },
     {
-      "name": "Alcremie-Caramel-Swirl",
-      "slug": "Alcremie-Caramel-Swirl",
+      "name": "Sirfetch��d",
+      "slug": "Sirfetch��d",
       "usage": 0
     },
     {
@@ -1550,16 +1590,6 @@
     {
       "name": "Heatran",
       "slug": "Heatran",
-      "usage": 0
-    },
-    {
-      "name": "Sirfetch��d",
-      "slug": "Sirfetch��d",
-      "usage": 0
-    },
-    {
-      "name": "Tapu Lele",
-      "slug": "Tapu Lele",
       "usage": 0
     }
   ]
