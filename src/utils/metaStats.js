@@ -1,58 +1,57 @@
-// Meta stats source priority:
-// 1. GitHub raw URL — always the latest committed JSON (updated daily by Actions)
-// 2. Bundled static JSON — fallback if fetch fails or offline
-// Results are cached in localStorage for 12 hours.
-
+// Usage stats source priority:
+//   1. localStorage cache (12 hours)
+//   2. GitHub raw — the latest committed JSON (refreshed daily by the update-meta workflow)
+//   3. The JSON bundled at build time
 import bundled from '../data/metaStats.json';
 
 const GITHUB_RAW = 'https://raw.githubusercontent.com/ethanhuang1189/pokemon-vgc-builder/main/src/data/metaStats.json';
-const CACHE_KEY  = 'pkmn_meta_v4';
-const CACHE_TTL  = 12 * 60 * 60 * 1000; // 12 hours
+const CACHE_KEY = 'pkmn_meta_v4';
+const LEGACY_CACHE_KEYS = ['pkmn_meta_pika_v1', 'pkmn_meta_pika_v2', 'pkmn_meta_pika_v3'];
+const CACHE_TTL_MS = 12 * 60 * 60 * 1000;
 
-export async function fetchMetaStats() {
-  // Return fresh cache
+const hasData = (json) => Array.isArray(json?.data) && json.data.length > 0;
+
+function readCache() {
   try {
-    const raw = localStorage.getItem(CACHE_KEY);
-    if (raw) {
-      const c = JSON.parse(raw);
-      if (Date.now() - c.timestamp < CACHE_TTL && c.data?.length > 0) {
-        return { data: c.data, label: c.label };
-      }
+    const cached = JSON.parse(localStorage.getItem(CACHE_KEY));
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS && hasData(cached)) {
+      return { data: cached.data, label: cached.label };
     }
-  } catch { /* corrupt cache */ }
+  } catch { /* missing or corrupt cache */ }
+  return null;
+}
 
-  // Try GitHub raw URL for latest committed data
+function writeCache({ data, label }) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data, label }));
+  } catch { /* storage full */ }
+}
+
+async function fetchLatest() {
   try {
     const res = await fetch(GITHUB_RAW, { cache: 'no-cache' });
-    if (res.ok) {
-      const json = await res.json();
-      if (json?.data?.length > 0) {
-        try {
-          localStorage.setItem(CACHE_KEY, JSON.stringify({
-            timestamp: Date.now(),
-            data:  json.data,
-            label: json.label,
-          }));
-        } catch { /* storage full */ }
-        return { data: json.data, label: json.label };
-      }
-    }
-  } catch { /* offline or private repo */ }
-
-  // Fall back to the bundled static JSON
-  if (bundled?.data?.length > 0) {
-    return { data: bundled.data, label: bundled.label + ' (cached)' };
+    const json = res.ok ? await res.json() : null;
+    return hasData(json) ? { data: json.data, label: json.label } : null;
+  } catch {
+    return null; // offline
   }
+}
 
-  return null;
+/** { data: [{ name, slug, usage }], label } or null when no source has data. */
+export async function fetchMetaStats() {
+  const cached = readCache();
+  if (cached) return cached;
+
+  const latest = await fetchLatest();
+  if (latest) {
+    writeCache(latest);
+    return latest;
+  }
+  return hasData(bundled) ? { data: bundled.data, label: `${bundled.label} (cached)` } : null;
 }
 
 export function clearMetaCache() {
   try {
-    localStorage.removeItem(CACHE_KEY);
-    // Clear old cache keys from previous versions
-    localStorage.removeItem('pkmn_meta_pika_v1');
-    localStorage.removeItem('pkmn_meta_pika_v2');
-    localStorage.removeItem('pkmn_meta_pika_v3');
-  } catch { /* ignore */ }
+    [CACHE_KEY, ...LEGACY_CACHE_KEYS].forEach(key => localStorage.removeItem(key));
+  } catch { /* storage unavailable */ }
 }

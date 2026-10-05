@@ -167,8 +167,10 @@ async function main() {
     console.log(`  ${String(i + 1).padStart(2)}. ${p.name.padEnd(20)} ${p.usage}%`)
   );
 
+  // The regulation modules are ESM, so load them with a dynamic import from this CommonJS script.
+  const { CURRENT_REGULATION } = await import('../src/regulations/index.js');
   const out = {
-    label:     'Pikalytics · Reg M-B',
+    label:     `Pikalytics · Reg ${CURRENT_REGULATION.id}`,
     updatedAt: new Date().toISOString().slice(0, 10),
     data:      sorted,
   };

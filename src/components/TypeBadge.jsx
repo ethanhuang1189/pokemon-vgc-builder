@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { TYPE_COLORS } from '../data/typeChart';
+import { TYPE_COLORS } from './typeColors.js';
 
 const ZA_ICON_URL = type =>
   `https://bulbapedia.bulbagarden.net/wiki/Special:FilePath/${type}_type_icon_ZA.png`;
