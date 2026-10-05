@@ -1,13 +1,46 @@
 // Scrapes Pikalytics homepage for Pokemon Champions top usage stats.
 // .cjs extension forces CommonJS so this works even with "type":"module" in package.json
 
-const puppeteer = require('puppeteer');
+// puppeteer-core drives an already-installed Chrome, so installing it runs no download scripts.
+const puppeteer = require('puppeteer-core');
 const fs        = require('fs');
 const path      = require('path');
 
-const OUT_FILE   = path.join(__dirname, '..', 'src', 'data', 'metaStats.json');
+const OUT_FILE   = path.join(__dirname, '..', '..', 'src', 'data', 'metaStats.json');
 const DEBUG_SHOT = path.join(__dirname, 'debug.png');
 const URL        = 'https://www.pikalytics.com/';
+
+// GitHub's Ubuntu runners ship Google Chrome; set CHROME_PATH to run elsewhere.
+function findChrome() {
+  const candidates = [
+    process.env.CHROME_PATH,
+    '/usr/bin/google-chrome',
+    '/usr/bin/google-chrome-stable',
+    '/usr/bin/chromium-browser',
+    'C:/Program Files/Google/Chrome/Application/chrome.exe',
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+  ].filter(Boolean);
+  const found = candidates.find(p => fs.existsSync(p));
+  if (!found) throw new Error('Chrome not found — set CHROME_PATH to a Chrome/Chromium executable');
+  return found;
+}
+
+// Pikalytics sometimes serves mis-encoded apostrophes ("Sirfetch��d"); restore them,
+// then drop duplicates that only differed by that garbling, keeping the higher usage.
+function cleanName(name) {
+  return String(name).replace(/�+/g, '’').replace(/\s+/g, ' ').trim();
+}
+
+function cleanEntries(entries) {
+  const best = new Map();
+  for (const entry of entries) {
+    const name = cleanName(entry.name);
+    const cleaned = { name, slug: cleanName(entry.slug || name), usage: entry.usage };
+    const key = name.toLowerCase();
+    if (!best.has(key) || best.get(key).usage < cleaned.usage) best.set(key, cleaned);
+  }
+  return [...best.values()];
+}
 
 function looksLikePokemonData(arr) {
   if (!Array.isArray(arr) || arr.length < 3) return false;
@@ -29,7 +62,8 @@ function normalizeApiEntry(entry) {
 
 async function scrape() {
   const browser = await puppeteer.launch({
-    headless: 'new',
+    executablePath: findChrome(),
+    headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
   });
 
@@ -154,7 +188,7 @@ async function main() {
     process.exit(1);
   }
 
-  const sorted = (data || []).sort((a, b) => b.usage - a.usage);
+  const sorted = cleanEntries(data || []).sort((a, b) => b.usage - a.usage);
 
   if (sorted.length < 3) {
     console.error(`Only ${sorted.length} entries — aborting to preserve existing data.`);
@@ -168,7 +202,7 @@ async function main() {
   );
 
   // The regulation modules are ESM, so load them with a dynamic import from this CommonJS script.
-  const { CURRENT_REGULATION } = await import('../src/regulations/index.js');
+  const { CURRENT_REGULATION } = await import('../../src/regulations/index.js');
   const out = {
     label:     `Pikalytics · Reg ${CURRENT_REGULATION.id}`,
     updatedAt: new Date().toISOString().slice(0, 10),

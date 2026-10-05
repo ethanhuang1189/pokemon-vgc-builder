@@ -1,0 +1,11 @@
+{
+  "name": "meta-scraper",
+  "private": true,
+  "description": "Pikalytics usage-stats scraper run by .github/workflows/update-meta.yml. Kept separate so the app install stays light and the workflow installs only this, from the lockfile.",
+  "scripts": {
+    "scrape": "node scrape-meta.cjs"
+  },
+  "dependencies": {
+    "puppeteer-core": "25.12.0"
+  }
+}

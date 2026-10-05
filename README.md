@@ -33,7 +33,8 @@ src/
   components/    UI only — team/, sheet/, pickers/, stats/, analysis/, layout/
   utils/         browser-side helpers (storage, clipboard, meta fetch)
 tests/           node:test suite for regulations and domain logic
-scripts/         legality CLI, sprite audit, meta scraper, stat-table generator
+scripts/         legality CLI, sprite audit, stat-table generator, meta validator
+  scraper/       Pikalytics scraper — its own package so the app install stays light
 ```
 
 The rule of thumb: anything that can be expressed without React lives in `domain/` and has tests.
@@ -118,3 +119,14 @@ for newer stones.
 
 `.github/workflows/update-meta.yml` scrapes Pikalytics daily into `src/data/metaStats.json`; the
 app fetches the latest committed copy and falls back to the bundled one.
+
+The workflow is split so third-party code never holds write access:
+
+- **scrape** (read-only token) installs `scripts/scraper` from its lockfile with
+  `npm ci --ignore-scripts` and drives the runner's preinstalled Chrome via `puppeteer-core`.
+- **commit** (the only job that can push) installs nothing; it runs `scripts/validate-meta.mjs`
+  on the scraped file and commits only `metaStats.json`.
+
+Actions are pinned to commit SHAs and Dependabot (`.github/dependabot.yml`) opens weekly update PRs.
+To run the scraper locally: `cd scripts/scraper && npm ci --ignore-scripts && npm run scrape`
+(set `CHROME_PATH` if Chrome isn't in a standard location).

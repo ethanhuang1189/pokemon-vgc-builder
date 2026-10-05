@@ -8,6 +8,9 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+
+# Scraper failure screenshot (uploaded as a workflow artifact instead)
+scripts/scraper/debug.png
 dist
 dist-ssr
 *.local
