@@ -62,7 +62,7 @@ describe('groupByTeam', () => {
     ]);
     assert.equal(groups.length, 2);
     assert.deepEqual(groups[0].record, { games: 2, wins: 1, losses: 1, ties: 0, winRate: 0.5 });
-    assert.deepEqual(groups[0].team, TEAM_A); // order from the newest game
+    assert.deepEqual(groups[0].species, TEAM_A); // order from the newest game
   });
 
   it('orders teams by most recent game', () => {
@@ -72,11 +72,11 @@ describe('groupByTeam', () => {
 
   it('treats a one-Pokémon change as a different team', () => {
     const changed = [...TEAM_A.slice(0, 5), 'Kingambit'];
-    assert.equal(groupByTeam([game(TEAM_A, 'win', '1'), game(changed, 'win', '2')]).length, 2);
+    assert.equal(groupByTeam([game(TEAM_A, 'win', '2026-01-01'), game(changed, 'win', '2026-01-02')]).length, 2);
   });
 
   it('handles battles without a team, and no battles', () => {
-    assert.equal(groupByTeam([{ result: 'win', played_at: '1' }])[0].team.length, 0);
+    assert.equal(groupByTeam([{ result: 'win', played_at: '2026-01-01' }])[0].species.length, 0);
     assert.deepEqual(groupByTeam([]), []);
   });
 });

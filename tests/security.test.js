@@ -51,8 +51,22 @@ describe('database policies', () => {
     }
   });
 
-  it('gives browsers no way to write battles (only the server can)', () => {
-    assert.equal(/policy[^;]*on public\.battles\s+for (insert|update|all)/i.test(sql), false);
+  it('never lets browsers create battles (only the server can)', () => {
+    assert.equal(/policy[^;]*on public\.battles\s+for (insert|all)/i.test(sql), false);
+    assert.match(sql, /revoke insert, update on public\.battles from anon, authenticated/);
+  });
+
+  it('lets browsers change only which team a battle is in — never its result or Pokémon', () => {
+    const battleGrants = [...sql.matchAll(/grant ([^;]*) on public\.battles to/g)].map(m => m[1].trim());
+    assert.deepEqual(battleGrants, ['update (team_id)']);
+  });
+
+  it("only allows moving battles to, and switching to, the user's own teams", () => {
+    const ownTeam = /exists \(select 1 from public\.teams t where t\.id = team_id and t\.user_id = \(select auth\.uid\(\)\)\)/;
+    for (const name of ['Users move their own battles between their teams', 'Users switch to their own teams']) {
+      const policy = sql.match(new RegExp(`create policy "${name}"[\\s\\S]*?;`))?.[0] ?? '';
+      assert.match(policy, ownTeam, name);
+    }
   });
 });
 

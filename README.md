@@ -53,7 +53,7 @@ Battle tracking needs a free [Supabase](https://supabase.com) project and runs i
 Vercel functions. Without the environment variables the Battles tab just says it isn't set up.
 
 1. **Create a Supabase project**, open the SQL editor and run each file in
-   `supabase/migrations/` in order (`0001_…`, then `0002_…`).
+   `supabase/migrations/` in order (`0001_…`, `0002_…`, `0003_…`).
 2. **Authentication → Sign In / Providers → Email:** keep email/password on, and turn on
    *Confirm email*. Under password settings set the **minimum length to 8 or more**. Supabase's
    default is 6. If you're on the Pro plan, turn on **leaked password protection**, which rejects
@@ -81,6 +81,12 @@ Vercel functions. Without the environment variables the Battles tab just says it
   ~500 games), imports oldest first in batches of 10, and records replays it can't use in
   `skipped_replays` so they aren't fetched again. The Battles tab syncs on open, at most every
   two minutes per browser.
+- **Teams:** the user keeps a list of saved teams (from a PokéPaste link, pasted Showdown text
+  or the Team tab) and one is *current*. A team owns the games played from each time it was
+  made current until the next switch; that's computed from dates (`src/domain/teams.js`), so
+  switching never rewrites battles. Games before any saved team are grouped by their exact six
+  Pokémon. A battle's `team_id` is a manual override, and it's the only battle column browsers
+  can change (column grants in migration 0003, guarded by `tests/security.test.js`).
 - **The bookmarklet carries no secrets.** It presses Showdown's upload button and opens
   `/?import=<replay>`; everything else happens on our server.
 - **Content-Security-Policy** (`vercel.json`) allows only our own scripts and the listed image
@@ -138,7 +144,8 @@ Names are Showdown/@pkmn names: `Persian-Alola`, `Toxtricity-Low-Key`, `Indeedee
 | `sprites.test.js` | sprite file naming and fallback order |
 | `search.test.js` | picker filters, "resist:" search, drag-reorder math |
 | `replay.test.js` | replay ids, battle-log parsing (real anonymized replay), stored records |
-| `battleStats.test.js` | record and per-Pokémon win rates |
+| `battleStats.test.js` | record, per-Pokémon win rates, grouping by six Pokémon |
+| `teams.test.js` | PokéPaste links, paste parsing, current-team assignment |
 | `bookmarklet.test.js` | bookmarklet run against a fake Showdown page |
 | `passwordPolicy.test.js` | password rules |
 | `server.test.js` | API auth and errors, import/sync logic, Showdown client limits |

@@ -5,12 +5,13 @@ import { AuthPanel, SetPasswordForm } from './AuthPanel';
 import ShowdownNames from './ShowdownNames';
 import AddBattles from './AddBattles';
 import BattleStats from './BattleStats';
-import TeamList from './TeamList';
+import TeamsSection from './TeamsSection';
 import BookmarkletSetup from './BookmarkletSetup';
 import { useAuth } from '../../context/AuthContext';
 import { useRemoteList } from '../../hooks/useRemoteList.js';
 import { takeImportParam } from '../../hooks/useHashTab.js';
 import { listBattles, listShowdownNames, deleteBattle } from '../../services/battles.js';
+import { listTeams, listTeamPeriods } from '../../services/teams.js';
 import { signOut } from '../../services/auth.js';
 import { formatsIn } from '../../domain/battleStats.js';
 
@@ -31,6 +32,9 @@ function Dashboard({ pendingImport }) {
   const { user } = useAuth();
   const names = useRemoteList(listShowdownNames);
   const battles = useRemoteList(listBattles);
+  const teams = useRemoteList(listTeams);
+  const periods = useRemoteList(listTeamPeriods);
+  const reloadTeams = () => Promise.all([teams.reload(), periods.reload(), battles.reload()]);
   const [format, setFormat] = useState(ALL_FORMATS);
 
   const formats = useMemo(() => formatsIn(battles.items), [battles.items]);
@@ -54,7 +58,9 @@ function Dashboard({ pendingImport }) {
       <ShowdownNames names={names} />
       <AddBattles userId={user.id} canSync={names.items.length > 0} pendingImport={pendingImport} onImported={battles.reload} />
       <FormatFilter formats={formats} value={format} onChange={setFormat} />
-      <TeamList battles={shown} loading={battles.loading} error={battles.error} onDelete={handleDelete} />
+      <TeamsSection battles={shown} teams={teams.items} periods={periods.items}
+        loading={battles.loading || teams.loading} error={battles.error || teams.error}
+        onChanged={reloadTeams} onDelete={handleDelete} />
       <BattleStats battles={shown} />
       <BookmarkletSetup />
     </div>

@@ -23,8 +23,8 @@ export const exportToShowdown = (team) => filledSlots(team).map(exportSlot).join
 
 const STAT_BY_LABEL = Object.fromEntries(STAT_KEYS.map(k => [STAT_LABELS[k].toLowerCase(), k]));
 
-// "Nick (Species) (F) @ Item" → { nickname, speciesName, itemName }
-function parseHeader(line) {
+/** "Nick (Species) (F) @ Item" → { nickname, speciesName, itemName } */
+export function parseHeader(line) {
   const [namePart, itemPart] = line.split(/\s+@\s+/, 2);
   const withoutGender = namePart.trim().replace(/\s+\([MF]\)$/, '');
   const nicknamed = withoutGender.match(/^(.+?)\s+\((.+)\)$/);

@@ -13,7 +13,21 @@ const RESULT_STYLE = {
 
 const formatDate = (iso) => new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 
-function BattleRow({ battle, onDelete }) {
+const AUTOMATIC = '';
+
+/** "Move to…" picker: a saved team, or automatic (by date / six Pokémon). */
+function MoveSelect({ battle, moveTargets, onMove }) {
+  return (
+    <select aria-label="Move to team" value={battle.team_id ?? AUTOMATIC}
+      onChange={e => onMove(battle, e.target.value === AUTOMATIC ? null : Number(e.target.value))}
+      className="bg-gray-800 border border-gray-700 rounded text-[10px] text-gray-300 px-1 py-0.5 max-w-[9rem]">
+      <option value={AUTOMATIC}>Team: automatic</option>
+      {moveTargets.map(t => <option key={t.id} value={t.id}>Team: {t.name}</option>)}
+    </select>
+  );
+}
+
+function BattleRow({ battle, moveTargets, onMove, onDelete }) {
   const result = RESULT_STYLE[battle.result];
   return (
     <li className="border-t border-gray-700/60 py-2 space-y-1">
@@ -30,17 +44,20 @@ function BattleRow({ battle, onDelete }) {
         <SpeciesIcons names={battle.brought} />
         <span>vs</span>
         <SpeciesIcons names={battle.opponent_brought} />
+        {moveTargets?.length > 0 && <span className="ml-auto"><MoveSelect battle={battle} moveTargets={moveTargets} onMove={onMove} /></span>}
       </div>
     </li>
   );
 }
 
 /** A battle list, newest first, revealed a page at a time. */
-export default function BattleRows({ battles, onDelete }) {
+export default function BattleRows({ battles, moveTargets, onMove, onDelete }) {
   const [shown, setShown] = useState(PAGE_SIZE);
   return (
     <>
-      <ul>{battles.slice(0, shown).map(b => <BattleRow key={b.id} battle={b} onDelete={onDelete} />)}</ul>
+      <ul>{battles.slice(0, shown).map(b => (
+        <BattleRow key={b.id} battle={b} moveTargets={moveTargets} onMove={onMove} onDelete={onDelete} />
+      ))}</ul>
       {battles.length > shown && (
         <Button tone="secondary" className="mt-2 w-full" onClick={() => setShown(n => n + PAGE_SIZE)}>
           Show more ({battles.length - shown} left)
