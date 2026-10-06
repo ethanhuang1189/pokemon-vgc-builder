@@ -13,7 +13,7 @@
     "check:sprites": "node scripts/check-sprites.mjs"
   },
   "dependencies": {
-    "@pkmn/data": "^0.10.9",
+    "@pkmn/data": "^0.10.11",
     "@pkmn/dex": "^0.10.9",
     "@supabase/supabase-js": "2.117.2",
     "react": "^19.2.6",
