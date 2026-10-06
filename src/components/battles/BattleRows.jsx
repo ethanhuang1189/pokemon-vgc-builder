@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import Card from '../ui/Card';
 import { Button } from '../ui/controls';
 import SpeciesIcons from './SpeciesIcons';
 import { replayUrl } from '../../domain/replay.js';
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
 
 const RESULT_STYLE = {
   win: { label: 'W', className: 'bg-green-500/20 text-green-300' },
@@ -36,20 +35,17 @@ function BattleRow({ battle, onDelete }) {
   );
 }
 
-export default function BattleList({ battles, loading, error, onDelete }) {
+/** A battle list, newest first, revealed a page at a time. */
+export default function BattleRows({ battles, onDelete }) {
   const [shown, setShown] = useState(PAGE_SIZE);
-
   return (
-    <Card title="Recent battles">
-      {loading && <p className="text-xs text-gray-500">Loading…</p>}
-      {error && <p className="text-xs text-red-300">{error}</p>}
-      {!loading && !error && !battles.length && <p className="text-xs text-gray-500">No battles yet — add one above.</p>}
-      <ul>
-        {battles.slice(0, shown).map(b => <BattleRow key={b.id} battle={b} onDelete={onDelete} />)}
-      </ul>
+    <>
+      <ul>{battles.slice(0, shown).map(b => <BattleRow key={b.id} battle={b} onDelete={onDelete} />)}</ul>
       {battles.length > shown && (
-        <Button tone="secondary" className="mt-2 w-full" onClick={() => setShown(n => n + PAGE_SIZE)}>Show more</Button>
+        <Button tone="secondary" className="mt-2 w-full" onClick={() => setShown(n => n + PAGE_SIZE)}>
+          Show more ({battles.length - shown} left)
+        </Button>
       )}
-    </Card>
+    </>
   );
 }

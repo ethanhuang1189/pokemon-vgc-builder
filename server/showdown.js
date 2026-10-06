@@ -35,9 +35,10 @@ export function createShowdownClient(fetchImpl = fetch) {
       return valid ? replay : null;
     },
 
-    /** Recent public replays a player appears in (newest first). */
-    async searchReplays(nameId) {
-      const results = await getJson(`${REPLAY_HOST}/search.json?user=${encodeURIComponent(nameId)}`, fetchImpl);
+    /** One page of public replays a player appears in, newest first. */
+    async searchReplays(nameId, page = 1) {
+      const query = new URLSearchParams({ user: nameId, page: String(page) });
+      const results = await getJson(`${REPLAY_HOST}/search.json?${query}`, fetchImpl);
       return Array.isArray(results) ? results : [];
     },
   };

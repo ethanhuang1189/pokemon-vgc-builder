@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { summarizeBattles, formatsIn, formatPercent } from '../src/domain/battleStats.js';
+import { summarizeBattles, groupByTeam, formatsIn, formatPercent, formatRecord } from '../src/domain/battleStats.js';
 
 const battle = (result, brought, opponent_brought, format = 'Reg M-C') => ({ result, brought, opponent_brought, format });
 
@@ -46,5 +46,44 @@ describe('helpers', () => {
   it('formatPercent rounds to whole percent', () => {
     assert.equal(formatPercent(2 / 3), '67%');
     assert.equal(formatPercent(0), '0%');
+  });
+});
+
+describe('groupByTeam', () => {
+  const TEAM_A = ['Rillaboom', 'Incineroar', 'Salamence', 'Sneasler', 'Garchomp', 'Gholdengo'];
+  const TEAM_B = ['Basculegion', 'Pelipper', 'Archaludon', 'Sneasler', 'Kingambit', 'Farigiraf'];
+  const game = (team, result, played_at) => ({ team, result, played_at, brought: team.slice(0, 4), opponent_brought: [] });
+
+  it('groups by the six Pokémon regardless of preview order', () => {
+    const groups = groupByTeam([
+      game(TEAM_A, 'win', '2026-10-05'),
+      game([...TEAM_A].reverse(), 'loss', '2026-10-04'),
+      game(TEAM_B, 'win', '2026-10-03'),
+    ]);
+    assert.equal(groups.length, 2);
+    assert.deepEqual(groups[0].record, { games: 2, wins: 1, losses: 1, ties: 0, winRate: 0.5 });
+    assert.deepEqual(groups[0].team, TEAM_A); // order from the newest game
+  });
+
+  it('orders teams by most recent game', () => {
+    const groups = groupByTeam([game(TEAM_A, 'win', '2026-10-01'), game(TEAM_B, 'win', '2026-10-06')]);
+    assert.deepEqual(groups.map(g => g.lastPlayed), ['2026-10-06', '2026-10-01']);
+  });
+
+  it('treats a one-Pokémon change as a different team', () => {
+    const changed = [...TEAM_A.slice(0, 5), 'Kingambit'];
+    assert.equal(groupByTeam([game(TEAM_A, 'win', '1'), game(changed, 'win', '2')]).length, 2);
+  });
+
+  it('handles battles without a team, and no battles', () => {
+    assert.equal(groupByTeam([{ result: 'win', played_at: '1' }])[0].team.length, 0);
+    assert.deepEqual(groupByTeam([]), []);
+  });
+});
+
+describe('formatRecord', () => {
+  it('shows ties only when there are some', () => {
+    assert.equal(formatRecord({ wins: 3, losses: 1, ties: 0 }), '3-1');
+    assert.equal(formatRecord({ wins: 3, losses: 1, ties: 2 }), '3-1-2');
   });
 });

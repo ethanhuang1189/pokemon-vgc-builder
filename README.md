@@ -52,8 +52,8 @@ The rule of thumb: anything that can be expressed without React lives in `domain
 Battle tracking needs a free [Supabase](https://supabase.com) project and runs its API as
 Vercel functions. Without the environment variables the Battles tab just says it isn't set up.
 
-1. **Create a Supabase project**, open the SQL editor and run
-   `supabase/migrations/0001_battle_tracking.sql`.
+1. **Create a Supabase project**, open the SQL editor and run each file in
+   `supabase/migrations/` in order (`0001_…`, then `0002_…`).
 2. **Authentication → Sign In / Providers → Email:** keep email/password on, and turn on
    *Confirm email*. Under password settings set the **minimum length to 8 or more**. Supabase's
    default is 6. If you're on the Pro plan, turn on **leaked password protection**, which rejects
@@ -77,6 +77,10 @@ Vercel functions. Without the environment variables the Battles tab just says it
 - **Battles can't be forged.** Browsers have no permission to insert battles. Only the
   `/api` functions can, after fetching the replay from Showdown's own server and checking that
   one of the user's linked names played it.
+- **Sync** pages back through each linked name's public Showdown replays (up to 10 pages,
+  ~500 games), imports oldest first in batches of 10, and records replays it can't use in
+  `skipped_replays` so they aren't fetched again. The Battles tab syncs on open, at most every
+  two minutes per browser.
 - **The bookmarklet carries no secrets.** It presses Showdown's upload button and opens
   `/?import=<replay>`; everything else happens on our server.
 - **Content-Security-Policy** (`vercel.json`) allows only our own scripts and the listed image

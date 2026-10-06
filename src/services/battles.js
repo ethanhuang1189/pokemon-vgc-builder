@@ -18,8 +18,21 @@ async function callApi(path, body = {}) {
   return result;
 }
 
+// Safety cap on sync calls per run (each imports up to 10 replays).
+const MAX_SYNC_ROUNDS = 20;
+
 export const importReplay = (replay) => callApi('/api/import-replay', { replay });
-export const syncReplays = () => callApi('/api/sync-replays');
+
+/** Syncs until Showdown has nothing new left (or the round cap). Resolves to { imported, remaining }. */
+export async function syncAllReplays() {
+  let imported = 0;
+  for (let round = 0; round < MAX_SYNC_ROUNDS; round++) {
+    const result = await callApi('/api/sync-replays');
+    imported += result.imported;
+    if (!result.remaining) return { imported, remaining: 0 };
+  }
+  return { imported, remaining: 1 };
+}
 
 export async function listBattles() {
   return unwrap(await supabase.from('battles').select('*').order('played_at', { ascending: false }).limit(MAX_BATTLES));

@@ -33,7 +33,7 @@ describe('secrets', () => {
 });
 
 describe('database policies', () => {
-  const sql = read('supabase/migrations/0001_battle_tracking.sql');
+  const sql = filesUnder('supabase/migrations').map(read).join('\n');
   const tables = [...sql.matchAll(/create table public\.(\w+)/g)].map(m => m[1]);
 
   it('enables row-level security on every table', () => {

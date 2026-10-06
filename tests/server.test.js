@@ -2,7 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { replayFixture } from './helpers.js';
 import { authedPost, HttpError } from '../server/http.js';
-import { createReplayService, MAX_SYNC_IMPORTS } from '../server/replays.js';
+import { createReplayService, MAX_SYNC_IMPORTS, MAX_SEARCH_PAGES } from '../server/replays.js';
 import { createShowdownClient } from '../server/showdown.js';
 
 const REPLAY_ID = replayFixture.id;
@@ -13,18 +13,29 @@ const fakeAuth = { getUser: async (token) => (token === 'good' ? { data: { user:
 
 function fakeStore({ names = ['playerone'], existing = [] } = {}) {
   const saved = [];
+  const skipped = [];
   return {
     saved,
+    skipped,
     linkedNameIds: async () => new Set(names),
-    existingReplayIds: async (_, ids) => new Set(ids.filter(id => existing.includes(id))),
+    handledReplayIds: async (_, ids) => new Set(ids.filter(id =>
+      existing.includes(id) || saved.some(s => s.replay_id === id) || skipped.includes(id))),
     saveBattle: async (userId, record) => { saved.push({ userId, ...record }); return { id: saved.length, ...record }; },
+    skipReplay: async (_, id) => { skipped.push(id); },
   };
 }
 
-function fakeShowdown({ replays = { [REPLAY_ID]: replayFixture }, search = [] } = {}) {
+// `search` is the full newest-first result list, served 50 per page plus the
+// "more pages" sentinel entry, like Showdown.
+function fakeShowdown({ replays = { [REPLAY_ID]: replayFixture }, search = [], fetchReplay } = {}) {
+  const pagesRequested = [];
   return {
-    fetchReplay: async (id) => replays[id] ?? null,
-    searchReplays: async () => search,
+    pagesRequested,
+    fetchReplay: fetchReplay ?? (async (id) => replays[id] ?? null),
+    searchReplays: async (_, page = 1) => {
+      pagesRequested.push(page);
+      return search.slice((page - 1) * 50, page * 50 + 1);
+    },
   };
 }
 
@@ -104,32 +115,86 @@ describe('importReplay', () => {
 });
 
 describe('syncRecent', () => {
-  const entry = (n, format = 'gen9championsvgc2026regmc') => ({ id: `${format}-${n}` });
-  const replaysFor = (entries) => Object.fromEntries(entries.map(e => [e.id, { ...replayFixture, id: e.id }]));
+  // Newest first, like Showdown; uploadtime decreases with the index.
+  const entry = (n, format = 'gen9championsvgc2026regmc') => ({ id: `${format}-${n}`, uploadtime: 1_000_000 - n });
+  const entries = (count, from = 0) => Array.from({ length: count }, (_, i) => entry(from + i));
+  const replaysFor = (list) => Object.fromEntries(list.map(e => [e.id, { ...replayFixture, id: e.id }]));
+  const serviceFor = (search, storeOpts, showdownOpts = {}) => {
+    const store = fakeStore(storeOpts);
+    const showdown = fakeShowdown({ search, replays: replaysFor(search), ...showdownOpts });
+    return { store, showdown, service: createReplayService({ store, showdown }) };
+  };
 
   it('imports new Champions replays only, skipping known ones and other formats', async () => {
     const search = [entry(1), entry(2), entry(3, 'gen9ou')];
-    const store = fakeStore({ existing: [entry(1).id] });
-    const service = createReplayService({ store, showdown: fakeShowdown({ search, replays: replaysFor(search) }) });
+    const { store, service } = serviceFor(search, { existing: [entry(1).id] });
     assert.deepEqual(await service.syncRecent(USER.id), { imported: 1, remaining: 0 });
     assert.deepEqual(store.saved.map(s => s.replay_id), [entry(2).id]);
   });
 
-  it('caps imports per sync and reports what is left', async () => {
-    const search = Array.from({ length: MAX_SYNC_IMPORTS + 5 }, (_, i) => entry(i));
-    const service = createReplayService({ store: fakeStore(), showdown: fakeShowdown({ search, replays: replaysFor(search) }) });
+  it('imports oldest first, a batch per call, until nothing remains', async () => {
+    const search = entries(MAX_SYNC_IMPORTS + 5);
+    const { store, service } = serviceFor(search);
     assert.deepEqual(await service.syncRecent(USER.id), { imported: MAX_SYNC_IMPORTS, remaining: 5 });
+    assert.equal(store.saved[0].replay_id, search.at(-1).id); // the oldest
+    assert.deepEqual(await service.syncRecent(USER.id), { imported: 5, remaining: 0 });
+    assert.deepEqual(await service.syncRecent(USER.id), { imported: 0, remaining: 0 });
+    assert.equal(new Set(store.saved.map(s => s.replay_id)).size, search.length);
   });
 
-  it('skips replays that cannot be imported instead of failing the sync', async () => {
+  it("reads further back through Showdown's pages", async () => {
+    const search = entries(130);
+    const { store, showdown, service } = serviceFor(search);
+    while ((await service.syncRecent(USER.id)).remaining > 0) { /* keep syncing */ }
+    assert.equal(store.saved.length, 130);
+    assert.ok(showdown.pagesRequested.includes(3));
+  });
+
+  it('stops paging at a page that is already fully imported', async () => {
+    const search = entries(200);
+    const { showdown, service } = serviceFor(search, { existing: search.slice(50).map(e => e.id) });
+    await service.syncRecent(USER.id);
+    assert.deepEqual(showdown.pagesRequested, [1, 2]);
+  });
+
+  it('keeps paging past pages with no Champions games, up to the page limit', async () => {
+    const search = [...Array.from({ length: 120 }, (_, i) => entry(i, 'gen9ou')), entry(500)];
+    const { store, showdown, service } = serviceFor(search);
+    await service.syncRecent(USER.id);
+    assert.equal(store.saved.length, 1);
+    assert.ok(Math.max(...showdown.pagesRequested) <= MAX_SEARCH_PAGES);
+  });
+
+  it('remembers replays that can never be imported instead of retrying them', async () => {
     const search = [entry(1), entry(2)];
-    const replays = { [entry(2).id]: { ...replayFixture, id: entry(2).id } }; // entry 1 vanished
-    const service = createReplayService({ store: fakeStore(), showdown: fakeShowdown({ search, replays }) });
+    const replays = { [entry(2).id]: { ...replayFixture, id: entry(2).id } }; // entry 1 vanished (404)
+    const { store, service } = serviceFor(search, {}, { replays });
     assert.deepEqual(await service.syncRecent(USER.id), { imported: 1, remaining: 0 });
+    assert.deepEqual(store.skipped, [entry(1).id]);
+    assert.deepEqual(await service.syncRecent(USER.id), { imported: 0, remaining: 0 });
+  });
+
+  it('skips replays from battles the user did not play in', async () => {
+    const other = { ...replayFixture, id: entry(1).id, log: replayFixture.log.replaceAll('Player One', 'Someone Else') };
+    const { store, service } = serviceFor([entry(1)], {}, { replays: { [entry(1).id]: other } });
+    await service.syncRecent(USER.id);
+    assert.deepEqual(store.skipped, [entry(1).id]);
+  });
+
+  it('stops and reports when Showdown is unreachable, without skipping anything', async () => {
+    const { store, service } = serviceFor([entry(1)], {}, { fetchReplay: async () => { throw new HttpError(502, 'down'); } });
+    assert.equal(await statusOf(service.syncRecent(USER.id)), 502);
+    assert.deepEqual(store.skipped, []);
+  });
+
+  it('merges replays found under several linked names without duplicates', async () => {
+    const { store, service } = serviceFor([entry(1), entry(2)], { names: ['playerone', 'altname'] });
+    assert.deepEqual(await service.syncRecent(USER.id), { imported: 2, remaining: 0 });
+    assert.equal(store.saved.length, 2);
   });
 
   it('needs at least one linked name', async () => {
-    const service = createReplayService({ store: fakeStore({ names: [] }), showdown: fakeShowdown() });
+    const { service } = serviceFor([], { names: [] });
     assert.equal(await statusOf(service.syncRecent(USER.id)), 422);
   });
 });
@@ -151,10 +216,10 @@ describe('createShowdownClient', () => {
     }
   });
 
-  it('requests the encoded URL and treats non-array search results as empty', async () => {
+  it('requests the encoded URL with a page and treats non-array search results as empty', async () => {
     let requested;
     const client = createShowdownClient(async (url) => { requested = url; return new Response('{"not":"array"}'); });
-    assert.deepEqual(await client.searchReplays('ash ketchum&x=1'), []);
-    assert.equal(requested, 'https://replay.pokemonshowdown.com/search.json?user=ash%20ketchum%26x%3D1');
+    assert.deepEqual(await client.searchReplays('ash ketchum&x=1', 3), []);
+    assert.equal(requested, 'https://replay.pokemonshowdown.com/search.json?user=ash+ketchum%26x%3D1&page=3');
   });
 });

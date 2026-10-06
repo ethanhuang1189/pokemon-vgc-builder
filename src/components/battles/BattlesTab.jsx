@@ -5,7 +5,7 @@ import { AuthPanel, SetPasswordForm } from './AuthPanel';
 import ShowdownNames from './ShowdownNames';
 import AddBattles from './AddBattles';
 import BattleStats from './BattleStats';
-import BattleList from './BattleList';
+import TeamList from './TeamList';
 import BookmarkletSetup from './BookmarkletSetup';
 import { useAuth } from '../../context/AuthContext';
 import { useRemoteList } from '../../hooks/useRemoteList.js';
@@ -52,10 +52,10 @@ function Dashboard({ pendingImport }) {
         <Button tone="secondary" onClick={signOut}>Sign out</Button>
       </div>
       <ShowdownNames names={names} />
-      <AddBattles pendingImport={pendingImport} onImported={battles.reload} />
+      <AddBattles userId={user.id} canSync={names.items.length > 0} pendingImport={pendingImport} onImported={battles.reload} />
       <FormatFilter formats={formats} value={format} onChange={setFormat} />
+      <TeamList battles={shown} loading={battles.loading} error={battles.error} onDelete={handleDelete} />
       <BattleStats battles={shown} />
-      <BattleList battles={shown} loading={battles.loading} error={battles.error} onDelete={handleDelete} />
       <BookmarkletSetup />
     </div>
   );

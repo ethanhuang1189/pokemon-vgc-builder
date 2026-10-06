@@ -6,8 +6,14 @@ import { parseReplayId, toBattleRecord } from '../src/domain/replay.js';
 
 // Only Champions formats are picked up by sync; single imports accept any format.
 const SYNC_FORMAT_PREFIX = 'gen9champions';
-// New replays imported per sync, to keep each call short and polite to Showdown.
+// Replays imported per sync call, to keep each call short and polite to Showdown.
 export const MAX_SYNC_IMPORTS = 10;
+// How far back sync looks per linked name (Showdown returns 50 replays per page).
+export const MAX_SEARCH_PAGES = 10;
+const SEARCH_PAGE_SIZE = 50; // Showdown adds a 51st entry when another page exists
+
+// Failures that won't change on retry; sync remembers these instead of retrying forever.
+const PERMANENT_FAILURES = new Set([404, 422]);
 
 export function createReplayService({ store, showdown }) {
   async function requireLinkedNames(userId) {
@@ -24,6 +30,25 @@ export function createReplayService({ store, showdown }) {
     return store.saveBattle(userId, record);
   }
 
+  /**
+   * Champions replays a name appears in that we haven't imported or skipped, oldest first.
+   * Paging stops at the end of the results or at a page that's already fully handled —
+   * importing oldest-first guarantees nothing unhandled sits beyond such a page.
+   */
+  async function unhandledReplays(userId, nameId) {
+    const found = [];
+    for (let page = 1; page <= MAX_SEARCH_PAGES; page++) {
+      const results = await showdown.searchReplays(nameId, page);
+      const entries = results.slice(0, SEARCH_PAGE_SIZE).filter(e => String(e.id).startsWith(SYNC_FORMAT_PREFIX));
+      const handled = await store.handledReplayIds(userId, entries.map(e => e.id));
+      const fresh = entries.filter(e => !handled.has(e.id));
+      found.push(...fresh);
+      const lastPage = results.length <= SEARCH_PAGE_SIZE;
+      if (lastPage || (entries.length > 0 && fresh.length === 0)) break;
+    }
+    return found;
+  }
+
   return {
     /** Imports one replay from a pasted link/id or the bookmarklet. */
     async importReplay(userId, input) {
@@ -33,29 +58,27 @@ export function createReplayService({ store, showdown }) {
       return { battle };
     },
 
-    /** Imports recent uploaded Champions replays for every linked name. */
+    /** Imports up to MAX_SYNC_IMPORTS uploaded Champions replays; call again while `remaining` > 0. */
     async syncRecent(userId) {
       const nameIds = await requireLinkedNames(userId);
-      const found = new Map();
+      const byId = new Map();
       for (const nameId of nameIds) {
-        for (const entry of await showdown.searchReplays(nameId)) {
-          if (String(entry.id).startsWith(SYNC_FORMAT_PREFIX)) found.set(entry.id, entry);
-        }
+        for (const entry of await unhandledReplays(userId, nameId)) byId.set(entry.id, entry);
       }
-
-      const known = await store.existingReplayIds(userId, [...found.keys()]);
-      const fresh = [...found.keys()].filter(id => !known.has(id)).slice(0, MAX_SYNC_IMPORTS);
+      const queue = [...byId.values()].sort((a, b) => (a.uploadtime ?? 0) - (b.uploadtime ?? 0));
+      const batch = queue.slice(0, MAX_SYNC_IMPORTS);
 
       let imported = 0;
-      for (const replayId of fresh) {
+      for (const { id } of batch) {
         try {
-          await importById(userId, replayId, nameIds);
+          await importById(userId, id, nameIds);
           imported++;
         } catch (err) {
-          if (!(err instanceof HttpError)) throw err; // skip replays that can't be imported
+          if (!PERMANENT_FAILURES.has(err.status)) throw err; // e.g. Showdown is down: stop and report
+          await store.skipReplay(userId, id, err.message);
         }
       }
-      return { imported, remaining: Math.max(0, found.size - known.size - fresh.length) };
+      return { imported, remaining: queue.length - batch.length };
     },
   };
 }

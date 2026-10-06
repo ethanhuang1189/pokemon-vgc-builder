@@ -13,10 +13,16 @@ export function createBattleStore(supabase) {
       return new Set(rows.map(r => r.name_id));
     },
 
-    async existingReplayIds(userId, replayIds) {
+    /** Replays already imported or skipped (out of `replayIds`). */
+    async handledReplayIds(userId, replayIds) {
       if (!replayIds.length) return new Set();
-      const rows = unwrap(await supabase.from('battles').select('replay_id').eq('user_id', userId).in('replay_id', replayIds));
-      return new Set(rows.map(r => r.replay_id));
+      const ids = (table) => supabase.from(table).select('replay_id').eq('user_id', userId).in('replay_id', replayIds);
+      const [imported, skipped] = await Promise.all([ids('battles'), ids('skipped_replays')]);
+      return new Set([...unwrap(imported), ...unwrap(skipped)].map(r => r.replay_id));
+    },
+
+    async skipReplay(userId, replayId, reason) {
+      unwrap(await supabase.from('skipped_replays').upsert({ user_id: userId, replay_id: replayId, reason: reason.slice(0, 200) }));
     },
 
     async saveBattle(userId, record) {
