@@ -1,5 +1,5 @@
 import { HttpError } from './http.js';
-import { parseReplayId, toBattleRecord } from '../src/domain/replay.js';
+import { parseReplayId, toBattleRecord, PARSE_VERSION } from '../src/domain/replay.js';
 
 // Importing battles. Data always comes from Showdown's replay server — never from the client —
 // so a user can't store a battle that didn't happen.
@@ -58,7 +58,10 @@ export function createReplayService({ store, showdown }) {
       return { battle };
     },
 
-    /** Imports up to MAX_SYNC_IMPORTS uploaded Champions replays; call again while `remaining` > 0. */
+    /**
+     * Imports up to MAX_SYNC_IMPORTS uploaded Champions replays, then uses any room left to
+     * re-read battles stored by an older parser. Call again while `remaining` > 0.
+     */
     async syncRecent(userId) {
       const nameIds = await requireLinkedNames(userId);
       const byId = new Map();
@@ -68,17 +71,33 @@ export function createReplayService({ store, showdown }) {
       const queue = [...byId.values()].sort((a, b) => (a.uploadtime ?? 0) - (b.uploadtime ?? 0));
       const batch = queue.slice(0, MAX_SYNC_IMPORTS);
 
-      let imported = 0;
-      for (const { id } of batch) {
+      // Imports one replay; on a permanent failure runs `onPermanentFailure` instead of throwing
+      // (other failures, e.g. Showdown being down, stop the sync and are reported).
+      const attempt = async (id, onPermanentFailure) => {
         try {
           await importById(userId, id, nameIds);
-          imported++;
+          return true;
         } catch (err) {
-          if (!PERMANENT_FAILURES.has(err.status)) throw err; // e.g. Showdown is down: stop and report
-          await store.skipReplay(userId, id, err.message);
+          if (!PERMANENT_FAILURES.has(err.status)) throw err;
+          await onPermanentFailure(err);
+          return false;
         }
+      };
+
+      let imported = 0;
+      for (const { id } of batch) {
+        if (await attempt(id, err => store.skipReplay(userId, id, err.message))) imported++;
       }
-      return { imported, remaining: queue.length - batch.length };
+
+      // Use any room left to re-read battles stored by an older parser, so new stats cover them.
+      const room = MAX_SYNC_IMPORTS - batch.length;
+      const outdated = room > 0 ? await store.outdatedReplayIds(userId, PARSE_VERSION, room + 1) : [];
+      for (const id of outdated.slice(0, room)) {
+        await attempt(id, () => store.markParsed(userId, id, PARSE_VERSION)); // keep what we have
+      }
+
+      const moreOutdated = Math.max(0, outdated.length - room);
+      return { imported, remaining: queue.length - batch.length + moreOutdated };
     },
   };
 }

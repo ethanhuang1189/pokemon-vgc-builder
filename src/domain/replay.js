@@ -26,44 +26,77 @@ export function parseReplayId(input) {
 
 export const replayUrl = (replayId) => `${REPLAY_HOST}/${encodeURIComponent(replayId)}`;
 
+/** The replay id without an unlisted replay's "-<password>pw" suffix (how Showdown's JSON reports it). */
+export const withoutPassword = (replayId) => String(replayId).replace(/-[a-z0-9]+pw$/, '');
+
 // "Garchomp-Mega-Z, L50, F" → "Garchomp-Mega-Z"; team preview's "Urshifu-*" → "Urshifu"
-const speciesOf = (details) => details.split(',')[0].replace(/-\*$/, '').trim();
+const speciesOf = (details) => String(details ?? '').split(',')[0].replace(/-\*$/, '').trim();
 
 /** The forme a mega evolved from: "Metagross-Mega" → "Metagross", "Meowstic-F-Mega" → "Meowstic-F". */
 export const baseOfMega = (species) => species.split('-Mega')[0];
 
-const sideOf = (ident) => ident.slice(0, 2); // "p1a: Nickname" → "p1"
+const sideOf = (ident) => String(ident ?? '').slice(0, 2); // "p1a: Nickname" → "p1"
+
+// "Ash's rating: 1134 &rarr; <strong>1161</strong>" — Showdown's post-game ladder update.
+const RATING_LINE = /^(.+)'s rating: (\d+) &rarr; <strong>(\d+)<\/strong>/;
+
+const emptySides = (make) => ({ p1: make(), p2: make() });
 
 /**
- * Pulls what we track out of a battle log: players, the six on each team, the Pokémon
- * actually brought, who mega evolved, turn count and the outcome.
+ * Pulls what we track out of a battle log: players and their ratings, the six on each team,
+ * the Pokémon actually brought and led with, who mega evolved, moves used, turns and outcome.
  */
 export function parseBattleLog(log) {
   const players = {};
-  const teams = { p1: [], p2: [] };
-  const brought = { p1: new Set(), p2: new Set() };
-  const megas = { p1: null, p2: null };
+  const ratings = emptySides(() => ({ before: null, after: null }));
+  const teams = emptySides(() => []);
+  const brought = emptySides(() => new Set());
+  const leads = emptySides(() => []);
+  const moves = emptySides(() => ({}));
+  const megas = emptySides(() => null);
   let turns = 0;
   let winner = null;
   let tie = false;
+
+  const sideNamed = (name) => Object.keys(players).find(side => players[side] === name);
 
   for (const line of String(log ?? '').split('\n')) {
     const [, type, ...args] = line.split('|');
     switch (type) {
       case 'player':
-        if (args[1]) players[args[0]] = args[1];
+        if (!args[1]) break;
+        players[args[0]] = args[1];
+        if (ratings[args[0]] && Number(args[3])) ratings[args[0]].before = Number(args[3]);
         break;
       case 'poke':
         teams[args[0]]?.push(speciesOf(args[1]));
         break;
       case 'switch':
       case 'drag':
-      case 'replace':
-        brought[sideOf(args[0])]?.add(baseOfMega(speciesOf(args[1])));
+      case 'replace': {
+        const side = sideOf(args[0]);
+        const species = baseOfMega(speciesOf(args[1]));
+        if (!brought[side] || !species) break;
+        brought[side].add(species);
+        if (turns === 0 && type === 'switch') leads[side].push(species);
         break;
+      }
+      case 'move': {
+        // Moves called by something else (Dancer, locked-in repeats) aren't choices.
+        if (line.includes('[from]')) break;
+        const used = moves[sideOf(args[0])];
+        if (used && args[1]) used[args[1]] = (used[args[1]] ?? 0) + 1;
+        break;
+      }
       case 'detailschange':
         if (speciesOf(args[1]).includes('-Mega')) megas[sideOf(args[0])] = speciesOf(args[1]);
         break;
+      case 'raw': {
+        const [, name, before, after] = args[0]?.match(RATING_LINE) ?? [];
+        const side = name && sideNamed(name);
+        if (side) ratings[side] = { before: Number(before), after: Number(after) };
+        break;
+      }
       case 'turn':
         turns = Math.max(turns, Number(args[0]) || 0);
         break;
@@ -78,14 +111,20 @@ export function parseBattleLog(log) {
 
   return {
     players,
+    ratings,
     teams,
     brought: { p1: [...brought.p1], p2: [...brought.p2] },
+    leads,
+    moves,
     megas,
     turns,
     winner,
     tie,
   };
 }
+
+// Bump when parseBattleLog learns something new: sync re-reads older battles to fill it in.
+export const PARSE_VERSION = 2;
 
 export const IMPORT_ERRORS = Object.freeze({
   notYourBattle: 'None of your linked Showdown names played in this battle.',
@@ -125,6 +164,12 @@ export function toBattleRecord(replay, linkedNameIds) {
       opponent_brought: battle.brought[opponent],
       opponent_mega: battle.megas[opponent],
       turns: battle.turns,
+      rating_before: battle.ratings[side].before,
+      rating_after: battle.ratings[side].after,
+      leads: battle.leads[side],
+      opponent_leads: battle.leads[opponent],
+      moves: battle.moves[side],
+      parse_version: PARSE_VERSION,
     },
   };
 }

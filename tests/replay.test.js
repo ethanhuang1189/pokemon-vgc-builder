@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { replayFixture as fixture } from './helpers.js';
-import { parseReplayId, parseBattleLog, toBattleRecord, baseOfMega, replayUrl, IMPORT_ERRORS } from '../src/domain/replay.js';
+import { parseReplayId, parseBattleLog, toBattleRecord, baseOfMega, replayUrl, withoutPassword, IMPORT_ERRORS, PARSE_VERSION } from '../src/domain/replay.js';
 
 const ID = 'gen9championsvgc2026regmc-2693320870';
 
@@ -41,6 +41,11 @@ describe('parseReplayId', () => {
     }
   });
 
+  it("strips only an unlisted replay's password suffix", () => {
+    assert.equal(withoutPassword(`${ID}-abc123pw`), ID);
+    assert.equal(withoutPassword(ID), ID);
+  });
+
   it('builds safe replay URLs', () => {
     assert.equal(replayUrl(ID), `https://replay.pokemonshowdown.com/${ID}`);
   });
@@ -70,6 +75,41 @@ describe('parseBattleLog (real replay)', () => {
   it('records the four brought, with megas counted as their base forme', () => {
     assert.deepEqual(new Set(battle.brought.p1), new Set(['Metagross', 'Whimsicott', 'Indeedee-F', 'Sneasler']));
     assert.deepEqual(new Set(battle.brought.p2), new Set(['Farigiraf', 'Incineroar', 'Torkoal', 'Garchomp']));
+  });
+
+  it('reads both ladder ratings from the post-game update', () => {
+    assert.deepEqual(battle.ratings, { p1: { before: 1134, after: 1161 }, p2: { before: 1160, after: 1133 } });
+  });
+
+  it('records the two leads on each side', () => {
+    assert.deepEqual(battle.leads, { p1: ['Metagross', 'Whimsicott'], p2: ['Farigiraf', 'Incineroar'] });
+  });
+
+  it('counts each move chosen per side', () => {
+    assert.equal(battle.moves.p1['Steel Roller'], 2);
+    assert.equal(battle.moves.p2['Flare Blitz'], 2);
+    assert.equal(Object.values(battle.moves.p1).reduce((a, b) => a + b, 0), 8);
+  });
+
+  it('ignores moves called by something else and switches after turn 1 for leads', () => {
+    const log = [
+      '|player|p1|Ann|1|', '|switch|p1a: X|Rillaboom, L50|100/100', '|switch|p1b: Y|Incineroar, L50|100/100',
+      '|turn|1', '|move|p1a: X|Fake Out|p2a: Z', '|move|p1a: X|Outrage|p2a: Z|[from]lockedmove',
+      '|switch|p1a: W|Sneasler, L50|100/100',
+    ].join('\n');
+    const parsed = parseBattleLog(log);
+    assert.deepEqual(parsed.leads.p1, ['Rillaboom', 'Incineroar']);
+    assert.deepEqual(parsed.moves.p1, { 'Fake Out': 1 });
+  });
+
+  it('uses the |player| rating as "before" when there is no post-game update', () => {
+    assert.deepEqual(parseBattleLog('|player|p1|Ann|1|1500').ratings.p1, { before: 1500, after: null });
+    assert.deepEqual(parseBattleLog('|player|p1|Ann|1|').ratings.p1, { before: null, after: null });
+  });
+
+  it('ignores rating lines for names that are not in the battle', () => {
+    const log = "|player|p1|Ann|1|1000\n|raw|Bob's rating: 1000 &rarr; <strong>1020</strong>";
+    assert.equal(parseBattleLog(log).ratings.p1.after, null);
   });
 
   it('records who mega evolved into what', () => {
@@ -107,6 +147,12 @@ describe('toBattleRecord', () => {
     assert.equal(record.format_id, 'gen9championsvgc2026regmc');
     assert.equal(record.played_at, new Date(fixture.uploadtime * 1000).toISOString());
     assert.equal(record.rating, fixture.rating);
+    assert.equal(record.rating_before, 1134);
+    assert.equal(record.rating_after, 1161);
+    assert.deepEqual(record.leads, ['Metagross', 'Whimsicott']);
+    assert.deepEqual(record.opponent_leads, ['Farigiraf', 'Incineroar']);
+    assert.equal(record.moves['Steel Roller'], 2);
+    assert.equal(record.parse_version, PARSE_VERSION);
   });
 
   it('builds a record from the loser\'s side', () => {

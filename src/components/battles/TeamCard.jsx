@@ -1,5 +1,5 @@
 import SpeciesIcons from './SpeciesIcons';
-import PokemonTable from './PokemonTable';
+import StatsPanel from './StatsPanel';
 import BattleRows from './BattleRows';
 import { formatPercent, formatRecord } from '../../domain/battleStats.js';
 
@@ -27,12 +27,7 @@ export default function TeamCard({ group, title, badge, expanded, onToggle, acti
       {expanded && (
         <div className="px-3 pb-3 space-y-3">
           {actions && <div className="flex flex-wrap gap-2 pt-2">{actions}</div>}
-          {record.games > 0 && (
-            <div className="grid gap-4 sm:grid-cols-2 pt-1">
-              <PokemonTable title="Brought" rows={group.yourPokemon} countLabel="Games" limit={6} />
-              <PokemonTable title="Faced most" rows={group.opponentPokemon} countLabel="Faced" limit={6} />
-            </div>
-          )}
+          <div className="pt-1"><StatsPanel battles={group.battles} /></div>
           <BattleRows battles={group.battles} moveTargets={moveTargets} onMove={onMove} onDelete={onDelete} />
         </div>
       )}

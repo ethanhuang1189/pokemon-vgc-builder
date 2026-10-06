@@ -20,8 +20,17 @@ function fakeStore({ names = ['playerone'], existing = [] } = {}) {
     linkedNameIds: async () => new Set(names),
     handledReplayIds: async (_, ids) => new Set(ids.filter(id =>
       existing.includes(id) || saved.some(s => s.replay_id === id) || skipped.includes(id))),
-    saveBattle: async (userId, record) => { saved.push({ userId, ...record }); return { id: saved.length, ...record }; },
+    // Upsert by replay id, like the real table.
+    saveBattle: async (userId, record) => {
+      const row = { userId, ...record };
+      const at = saved.findIndex(s => s.replay_id === record.replay_id);
+      if (at === -1) saved.push(row); else saved[at] = { ...saved[at], ...row };
+      return { id: saved.length, ...record };
+    },
     skipReplay: async (_, id) => { skipped.push(id); },
+    outdatedReplayIds: async (_, version, limit) =>
+      saved.filter(s => (s.parse_version ?? 1) < version).slice(0, limit).map(s => s.replay_id),
+    markParsed: async (_, id, version) => { saved.find(s => s.replay_id === id).parse_version = version; },
   };
 }
 
@@ -193,6 +202,26 @@ describe('syncRecent', () => {
     assert.equal(store.saved.length, 2);
   });
 
+  it('re-reads battles stored by an older parser, filling in new fields', async () => {
+    const { store, service } = serviceFor([]);
+    store.saved.push({ replay_id: REPLAY_ID, parse_version: 1, team_id: 7 });
+    const showdown = fakeShowdown();
+    const svc = createReplayService({ store, showdown });
+    assert.deepEqual(await svc.syncRecent(USER.id), { imported: 0, remaining: 0 });
+    assert.equal(store.saved[0].parse_version, 2);
+    assert.equal(store.saved[0].rating_after, 1161);
+    assert.equal(store.saved[0].team_id, 7, 'a manual team move survives re-reading');
+    void service;
+  });
+
+  it('marks an old battle as re-read when its replay is gone, keeping its data', async () => {
+    const store = fakeStore();
+    store.saved.push({ replay_id: 'gen9championsvgc2026regmc-1', parse_version: 1, result: 'win' });
+    const svc = createReplayService({ store, showdown: fakeShowdown({ replays: {} }) });
+    await svc.syncRecent(USER.id);
+    assert.deepEqual([store.saved[0].parse_version, store.saved[0].result], [2, 'win']);
+  });
+
   it('needs at least one linked name', async () => {
     const { service } = serviceFor([], { names: [] });
     assert.equal(await statusOf(service.syncRecent(USER.id)), 422);
@@ -207,6 +236,12 @@ describe('createShowdownClient', () => {
     assert.equal((await createShowdownClient(respond(replayFixture)).fetchReplay(REPLAY_ID)).id, REPLAY_ID);
     assert.equal(await createShowdownClient(respond(replayFixture)).fetchReplay('gen9other-1'), null);
     assert.equal(await createShowdownClient(respond({ id: REPLAY_ID })).fetchReplay(REPLAY_ID), null); // no log
+  });
+
+  it('accepts private replays, whose JSON reports the id without the password', async () => {
+    const replay = await createShowdownClient(respond(replayFixture)).fetchReplay(`${REPLAY_ID}-abc123pw`);
+    assert.equal(replay.id, `${REPLAY_ID}-abc123pw`, 'keeps the link that opens it');
+    assert.equal(await createShowdownClient(respond(replayFixture)).fetchReplay('gen9other-1-abc123pw'), null);
   });
 
   it('maps 404 to null and other failures to 502', async () => {

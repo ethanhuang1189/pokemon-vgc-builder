@@ -154,6 +154,18 @@ export function buildFormat(regulation, Dex) {
     return isDynamaxForme(dexSpecies) ? findSpecies(dexSpecies.changesFrom ?? dexSpecies.baseSpecies) : null;
   };
 
+  // Any real species for display (e.g. cosmetic formes like Vivillon-Fancy seen in replays).
+  const displayCache = new Map();
+  const displaySpecies = (name) => {
+    const legal = getSpecies(name);
+    if (legal || !name) return legal;
+    if (!displayCache.has(name)) {
+      const dexSpecies = Dex.species.get(name);
+      displayCache.set(name, dexSpecies?.exists ? speciesEntry(dexSpecies, Dex) : null);
+    }
+    return displayCache.get(name);
+  };
+
   return Object.freeze({
     regulation,
     species,
@@ -162,6 +174,8 @@ export function buildFormat(regulation, Dex) {
     moves,
     abilities,
     getSpecies,
+    /** Like getSpecies, but also returns entries for species outside the format (for sprites). */
+    displaySpecies,
     getItem: lookup(itemsById, Dex.items),
     getMove: lookup(movesById, Dex.moves),
     getAbility: (name) => {

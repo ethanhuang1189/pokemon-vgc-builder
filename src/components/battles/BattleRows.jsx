@@ -13,6 +13,16 @@ const RESULT_STYLE = {
 
 const formatDate = (iso) => new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 
+// "1161 (+27)" — the rating after the game, and the change when known.
+function RatingChange({ battle }) {
+  const change = Number.isInteger(battle.rating_before) ? battle.rating_after - battle.rating_before : null;
+  return (
+    <span className="text-gray-400 shrink-0 font-mono text-[10px]">
+      {battle.rating_after}{change !== null && ` (${change > 0 ? '+' : ''}${change})`}
+    </span>
+  );
+}
+
 const AUTOMATIC = '';
 
 /** "Move to…" picker: a saved team, or automatic (by date / six Pokémon). */
@@ -35,15 +45,18 @@ function BattleRow({ battle, moveTargets, onMove, onDelete }) {
         <span className={`w-5 h-5 shrink-0 rounded flex items-center justify-center font-bold ${result.className}`}>{result.label}</span>
         <span className="text-white truncate">vs {battle.opponent_name}</span>
         <span className="text-gray-500 shrink-0">{formatDate(battle.played_at)}</span>
+        {Number.isInteger(battle.rating_after) && <RatingChange battle={battle} />}
         <a href={replayUrl(battle.replay_id)} target="_blank" rel="noopener noreferrer"
           className="ml-auto text-indigo-400 hover:text-indigo-300 shrink-0">Replay</a>
         <button type="button" onClick={() => onDelete(battle)} aria-label="Delete battle"
           className="text-gray-500 hover:text-red-300 shrink-0">×</button>
       </div>
-      <div className="flex items-center gap-2 text-[10px] text-gray-500">
-        <SpeciesIcons names={battle.brought} />
-        <span>vs</span>
-        <SpeciesIcons names={battle.opponent_brought} />
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] text-gray-500">
+        <span className="flex items-center gap-1.5 whitespace-nowrap">
+          <SpeciesIcons names={battle.brought} size={24} />
+          <span>vs</span>
+          <SpeciesIcons names={battle.opponent_brought} size={24} />
+        </span>
         {moveTargets?.length > 0 && <span className="ml-auto"><MoveSelect battle={battle} moveTargets={moveTargets} onMove={onMove} /></span>}
       </div>
     </li>

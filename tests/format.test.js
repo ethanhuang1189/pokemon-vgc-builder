@@ -127,6 +127,23 @@ describe('buildFormat: lookups', () => {
   });
 });
 
+describe('displaySpecies', () => {
+  it('returns legal species unchanged', () => {
+    assert.equal(format.displaySpecies('Rillaboom'), format.getSpecies('Rillaboom'));
+  });
+
+  it('describes real species outside the format so they can show a sprite', () => {
+    const fancy = format.displaySpecies('Vivillon-Fancy');
+    assert.equal(format.getSpecies('Vivillon-Fancy'), null);
+    assert.deepEqual([fancy.name, fancy.num, fancy.forme], ['Vivillon-Fancy', 666, 'Fancy']);
+    assert.equal(format.displaySpecies('Vivillon-Fancy'), fancy, 'cached');
+  });
+
+  it('returns null for names the dex does not know', () => {
+    for (const name of ['Notamon', '', null]) assert.equal(format.displaySpecies(name), null, String(name));
+  });
+});
+
 describe('buildFormat: items, moves, abilities', () => {
   it('lists exactly the regulation items, with stones flagged', () => {
     assert.equal(format.items.length, regMC.items.length);

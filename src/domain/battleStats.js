@@ -1,6 +1,7 @@
 // Aggregates stored battles (rows from the `battles` table) for the Battles tab.
 
-const winRate = (wins, games) => (games ? wins / games : 0);
+/** part / whole, or 0 when there's nothing to divide by. */
+export const ratio = (part, whole) => (whole ? part / whole : 0);
 
 /** Per-species games played and wins, most-played first. `key` is 'brought' or 'opponent_brought'. */
 function tallyPokemon(battles, key) {
@@ -14,7 +15,7 @@ function tallyPokemon(battles, key) {
     }
   }
   return [...bySpecies.values()]
-    .map(entry => ({ ...entry, winRate: winRate(entry.wins, entry.games) }))
+    .map(entry => ({ ...entry, winRate: ratio(entry.wins, entry.games) }))
     .sort((a, b) => b.games - a.games || b.wins - a.wins || a.name.localeCompare(b.name));
 }
 
@@ -23,7 +24,7 @@ export function summarizeBattles(battles) {
   const count = (result) => battles.filter(b => b.result === result).length;
   const wins = count('win');
   return {
-    record: { games: battles.length, wins, losses: count('loss'), ties: count('tie'), winRate: winRate(wins, battles.length) },
+    record: { games: battles.length, wins, losses: count('loss'), ties: count('tie'), winRate: ratio(wins, battles.length) },
     yourPokemon: tallyPokemon(battles, 'brought'),
     opponentPokemon: tallyPokemon(battles, 'opponent_brought'),
   };

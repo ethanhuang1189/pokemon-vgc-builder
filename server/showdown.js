@@ -1,5 +1,5 @@
 import { HttpError } from './http.js';
-import { REPLAY_HOST } from '../src/domain/replay.js';
+import { REPLAY_HOST, withoutPassword } from '../src/domain/replay.js';
 
 // Read-only access to Showdown's public replay API, with a timeout and size cap so a slow or
 // oversized response can't tie up the function.
@@ -28,11 +28,15 @@ async function getJson(url, fetchImpl) {
 
 export function createShowdownClient(fetchImpl = fetch) {
   return {
-    /** The replay with this id, or null if it doesn't exist (yet). */
+    /**
+     * The replay with this id, or null if it doesn't exist (yet). Private replays are requested
+     * with their password suffix but Showdown reports the id without it, so compare without it
+     * and keep the requested id (the only link that opens a private replay).
+     */
     async fetchReplay(replayId) {
       const replay = await getJson(`${REPLAY_HOST}/${encodeURIComponent(replayId)}.json`, fetchImpl);
-      const valid = replay && replay.id === replayId && typeof replay.log === 'string';
-      return valid ? replay : null;
+      const valid = replay && withoutPassword(replay.id) === withoutPassword(replayId) && typeof replay.log === 'string';
+      return valid ? { ...replay, id: replayId } : null;
     },
 
     /** One page of public replays a player appears in, newest first. */

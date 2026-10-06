@@ -53,7 +53,7 @@ Battle tracking needs a free [Supabase](https://supabase.com) project and runs i
 Vercel functions. Without the environment variables the Battles tab just says it isn't set up.
 
 1. **Create a Supabase project**, open the SQL editor and run each file in
-   `supabase/migrations/` in order (`0001_…`, `0002_…`, `0003_…`).
+   `supabase/migrations/` in order (`0001_…` through `0004_…`).
 2. **Authentication → Sign In / Providers → Email:** keep email/password on, and turn on
    *Confirm email*. Under password settings set the **minimum length to 8 or more**. Supabase's
    default is 6. If you're on the Pro plan, turn on **leaked password protection**, which rejects
@@ -87,6 +87,11 @@ Vercel functions. Without the environment variables the Battles tab just says it
   switching never rewrites battles. Games before any saved team are grouped by their exact six
   Pokémon. A battle's `team_id` is a manual override, and it's the only battle column browsers
   can change (column grants in migration 0003, guarded by `tests/security.test.js`).
+- **Stats** (`src/domain/battleInsights.js`, charts in `src/components/charts/`): ladder rating
+  per game, best/worst matchups, attendance, common leads and move usage, read from each replay's
+  log. `PARSE_VERSION` in `src/domain/replay.js` marks which parser wrote a battle; bumping it
+  makes sync re-read older battles to fill in new fields. Chart colors are validated for
+  colorblind separation against the dark card surface (`src/components/charts/palette.js`).
 - **The bookmarklet carries no secrets.** It presses Showdown's upload button and opens
   `/?import=<replay>`; everything else happens on our server.
 - **Content-Security-Policy** (`vercel.json`) allows only our own scripts and the listed image
@@ -146,6 +151,7 @@ Names are Showdown/@pkmn names: `Persian-Alola`, `Toxtricity-Low-Key`, `Indeedee
 | `replay.test.js` | replay ids, battle-log parsing (real anonymized replay), stored records |
 | `battleStats.test.js` | record, per-Pokémon win rates, grouping by six Pokémon |
 | `teams.test.js` | PokéPaste links, paste parsing, current-team assignment |
+| `battleInsights.test.js` | rating series, matchups, attendance, leads, move usage, chart axes |
 | `bookmarklet.test.js` | bookmarklet run against a fake Showdown page |
 | `passwordPolicy.test.js` | password rules |
 | `server.test.js` | API auth and errors, import/sync logic, Showdown client limits |

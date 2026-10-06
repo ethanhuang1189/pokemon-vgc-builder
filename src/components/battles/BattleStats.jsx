@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import Card from '../ui/Card';
-import PokemonTable from './PokemonTable';
+import StatsPanel from './StatsPanel';
 import { summarizeBattles, formatPercent, formatRecord } from '../../domain/battleStats.js';
 
 function Stat({ label, value }) {
@@ -12,9 +12,9 @@ function Stat({ label, value }) {
   );
 }
 
-/** Totals across every battle shown. */
+/** Totals and stats across every battle shown. */
 export default function BattleStats({ battles }) {
-  const { record, yourPokemon, opponentPokemon } = useMemo(() => summarizeBattles(battles), [battles]);
+  const { record } = useMemo(() => summarizeBattles(battles), [battles]);
   if (!record.games) return null;
 
   return (
@@ -24,10 +24,7 @@ export default function BattleStats({ battles }) {
         <Stat label="Record" value={formatRecord(record)} />
         <Stat label="Win rate" value={formatPercent(record.winRate)} />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <PokemonTable title="Your Pokémon" rows={yourPokemon} countLabel="Brought" limit={6} />
-        <PokemonTable title="Opponents' Pokémon" rows={opponentPokemon} countLabel="Faced" limit={6} />
-      </div>
+      <StatsPanel battles={battles} />
     </Card>
   );
 }
