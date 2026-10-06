@@ -36,6 +36,8 @@ const speciesOf = (details) => String(details ?? '').split(',')[0].replace(/-\*$
 export const baseOfMega = (species) => species.split('-Mega')[0];
 
 const sideOf = (ident) => String(ident ?? '').slice(0, 2); // "p1a: Nickname" → "p1"
+// "p1a: Nickname" and "p1b: Nickname" are the same Pokémon in different slots.
+const pokemonKey = (ident) => `${sideOf(ident)}|${String(ident ?? '').split(': ').slice(1).join(': ')}`;
 
 // "Ash's rating: 1134 &rarr; <strong>1161</strong>" — Showdown's post-game ladder update.
 const RATING_LINE = /^(.+)'s rating: (\d+) &rarr; <strong>(\d+)<\/strong>/;
@@ -44,7 +46,8 @@ const emptySides = (make) => ({ p1: make(), p2: make() });
 
 /**
  * Pulls what we track out of a battle log: players and their ratings, the six on each team,
- * the Pokémon actually brought and led with, who mega evolved, moves used, turns and outcome.
+ * the Pokémon actually brought and led with, who mega evolved, each Pokémon's moves
+ * ({ species: { move: uses } }), turns and outcome.
  */
 export function parseBattleLog(log) {
   const players = {};
@@ -58,6 +61,7 @@ export function parseBattleLog(log) {
   let winner = null;
   let tie = false;
 
+  const speciesByPokemon = new Map(); // pokemonKey → species, from switch-ins
   const sideNamed = (name) => Object.keys(players).find(side => players[side] === name);
 
   for (const line of String(log ?? '').split('\n')) {
@@ -78,14 +82,18 @@ export function parseBattleLog(log) {
         const species = baseOfMega(speciesOf(args[1]));
         if (!brought[side] || !species) break;
         brought[side].add(species);
+        speciesByPokemon.set(pokemonKey(args[0]), species);
         if (turns === 0 && type === 'switch') leads[side].push(species);
         break;
       }
       case 'move': {
         // Moves called by something else (Dancer, locked-in repeats) aren't choices.
         if (line.includes('[from]')) break;
-        const used = moves[sideOf(args[0])];
-        if (used && args[1]) used[args[1]] = (used[args[1]] ?? 0) + 1;
+        const sideMoves = moves[sideOf(args[0])];
+        const species = speciesByPokemon.get(pokemonKey(args[0]));
+        if (!sideMoves || !species || !args[1]) break;
+        const used = (sideMoves[species] ??= {});
+        used[args[1]] = (used[args[1]] ?? 0) + 1;
         break;
       }
       case 'detailschange':
@@ -124,7 +132,7 @@ export function parseBattleLog(log) {
 }
 
 // Bump when parseBattleLog learns something new: sync re-reads older battles to fill it in.
-export const PARSE_VERSION = 2;
+export const PARSE_VERSION = 3;
 
 export const IMPORT_ERRORS = Object.freeze({
   notYourBattle: 'None of your linked Showdown names played in this battle.',

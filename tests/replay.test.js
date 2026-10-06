@@ -85,10 +85,19 @@ describe('parseBattleLog (real replay)', () => {
     assert.deepEqual(battle.leads, { p1: ['Metagross', 'Whimsicott'], p2: ['Farigiraf', 'Incineroar'] });
   });
 
-  it('counts each move chosen per side', () => {
-    assert.equal(battle.moves.p1['Steel Roller'], 2);
-    assert.equal(battle.moves.p2['Flare Blitz'], 2);
-    assert.equal(Object.values(battle.moves.p1).reduce((a, b) => a + b, 0), 8);
+  it('counts each move per Pokémon, following nicknames across slots', () => {
+    assert.deepEqual(battle.moves.p1.Metagross, { 'Steel Roller': 2, Protect: 1, 'Bullet Punch': 1 });
+    assert.deepEqual(battle.moves.p1['Indeedee-F'], { Psychic: 2, 'Helping Hand': 1 });
+    assert.equal(battle.moves.p2.Incineroar['Flare Blitz'], 2);
+  });
+
+  it('keeps two Pokémon of one side apart even when they share a slot over time', () => {
+    const log = [
+      '|switch|p1a: Ace|Rillaboom, L50|100/100', '|move|p1a: Ace|Fake Out|p2a: Z',
+      '|switch|p1a: Cat|Incineroar, L50|100/100', '|move|p1a: Cat|Fake Out|p2a: Z',
+      '|move|p1b: Ace|Grassy Glide|p2a: Z',
+    ].join('\n');
+    assert.deepEqual(parseBattleLog(log).moves.p1, { Rillaboom: { 'Fake Out': 1, 'Grassy Glide': 1 }, Incineroar: { 'Fake Out': 1 } });
   });
 
   it('ignores moves called by something else and switches after turn 1 for leads', () => {
@@ -99,7 +108,7 @@ describe('parseBattleLog (real replay)', () => {
     ].join('\n');
     const parsed = parseBattleLog(log);
     assert.deepEqual(parsed.leads.p1, ['Rillaboom', 'Incineroar']);
-    assert.deepEqual(parsed.moves.p1, { 'Fake Out': 1 });
+    assert.deepEqual(parsed.moves.p1, { Rillaboom: { 'Fake Out': 1 } });
   });
 
   it('uses the |player| rating as "before" when there is no post-game update', () => {
@@ -151,7 +160,7 @@ describe('toBattleRecord', () => {
     assert.equal(record.rating_after, 1161);
     assert.deepEqual(record.leads, ['Metagross', 'Whimsicott']);
     assert.deepEqual(record.opponent_leads, ['Farigiraf', 'Incineroar']);
-    assert.equal(record.moves['Steel Roller'], 2);
+    assert.equal(record.moves.Metagross['Steel Roller'], 2);
     assert.equal(record.parse_version, PARSE_VERSION);
   });
 

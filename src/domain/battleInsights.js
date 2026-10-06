@@ -1,8 +1,10 @@
 import { summarizeBattles, ratio, time } from './battleStats.js';
 
-// Derived stats for the stats panels: Elo history, matchups, attendance, leads, move usage.
+// Derived stats for the stats panels: Elo history, matchups, attendance, leads, move usage per Pokémon.
 
 export const MIN_MATCHUP_GAMES = 3;
+// How many entries each ranked list shows.
+export const TOP_COUNT = 5;
 
 /**
  * Rating after each rated game, oldest first, as one series per ladder (format) — ratings
@@ -36,13 +38,16 @@ function extremes(rows, score, count) {
 }
 
 /** Opponent Pokémon you win most and least against (faced at least MIN_MATCHUP_GAMES times). */
-export function matchups(battles, count = 3) {
+export function matchups(battles, count = TOP_COUNT) {
   const faced = summarizeBattles(battles).opponentPokemon.filter(p => p.games >= MIN_MATCHUP_GAMES);
   return extremes(faced, p => p.winRate, count);
 }
 
-/** How often each of your team's Pokémon is brought when it's on the team, highest and lowest. */
-export function attendance(battles, count = 3) {
+/**
+ * How often each of your team's Pokémon is brought when it's on the team: `all` ranked, plus
+ * the `count` highest and lowest (never overlapping).
+ */
+export function attendance(battles, count = TOP_COUNT) {
   const bySpecies = new Map();
   for (const battle of battles) {
     const brought = new Set(battle.brought ?? []);
@@ -55,11 +60,11 @@ export function attendance(battles, count = 3) {
   }
   const rows = [...bySpecies.values()].map(e => ({ ...e, rate: ratio(e.brought, e.games) }));
   const { best, worst } = extremes(rows, r => r.rate, count);
-  return { highest: best, lowest: worst };
+  return { all: extremes(rows, r => r.rate, rows.length).best, highest: best, lowest: worst };
 }
 
 /** Lead pairs, most used first, with your win rate for each. */
-export function commonLeads(battles, count = 5) {
+export function commonLeads(battles, count = TOP_COUNT) {
   const byPair = new Map();
   for (const battle of battles) {
     if (!battle.leads?.length) continue;
@@ -76,18 +81,33 @@ export function commonLeads(battles, count = 5) {
     .slice(0, count);
 }
 
-/** Your moves by times used; past `top`, the rest fold into a single "Other" slice. */
-export function moveUsage(battles, top = 7) {
-  const totals = new Map();
-  for (const battle of battles) {
-    for (const [move, uses] of Object.entries(battle.moves ?? {})) {
-      totals.set(move, (totals.get(move) ?? 0) + (Number(uses) || 0));
-    }
-  }
+/** Slices for a move → uses map, largest first; past `top`, the rest fold into one "Other" slice. */
+export function toSlices(totals, top = 5) {
   const sorted = [...totals].map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
   const total = sorted.reduce((sum, m) => sum + m.count, 0);
   const shown = sorted.length > top + 1 ? sorted.slice(0, top) : sorted;
   const otherCount = total - shown.reduce((sum, m) => sum + m.count, 0);
   const slices = otherCount > 0 ? [...shown, { name: 'Other', count: otherCount, other: true }] : shown;
   return { total, slices: slices.map(s => ({ ...s, share: ratio(s.count, total) })) };
+}
+
+/**
+ * Each of your Pokémon's moves ({ species, total, slices }), in `order` (the team's preview
+ * order) and then by most uses. Battles store moves as { species: { move: uses } }.
+ */
+export function movesByPokemon(battles, order = [], top = 5) {
+  const bySpecies = new Map();
+  for (const battle of battles) {
+    for (const [species, moves] of Object.entries(battle.moves ?? {})) {
+      if (!moves || typeof moves !== 'object') continue; // older, pre-per-Pokémon rows
+      const totals = bySpecies.get(species) ?? new Map();
+      for (const [move, uses] of Object.entries(moves)) totals.set(move, (totals.get(move) ?? 0) + (Number(uses) || 0));
+      bySpecies.set(species, totals);
+    }
+  }
+  const rank = (species) => (order.includes(species) ? order.indexOf(species) : order.length);
+  return [...bySpecies]
+    .map(([species, totals]) => ({ species, ...toSlices(totals, top) }))
+    .filter(p => p.total > 0)
+    .sort((a, b) => rank(a.species) - rank(b.species) || b.total - a.total);
 }

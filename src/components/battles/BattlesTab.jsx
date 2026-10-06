@@ -6,6 +6,7 @@ import ShowdownNames from './ShowdownNames';
 import AddBattles from './AddBattles';
 import BattleStats from './BattleStats';
 import TeamsSection from './TeamsSection';
+import PokemonMoves from './PokemonMoves';
 import BookmarkletSetup from './BookmarkletSetup';
 import { useAuth } from '../../context/AuthContext';
 import { useRemoteList } from '../../hooks/useRemoteList.js';
@@ -14,6 +15,7 @@ import { listBattles, listShowdownNames, deleteBattle } from '../../services/bat
 import { listTeams, listTeamPeriods } from '../../services/teams.js';
 import { signOut } from '../../services/auth.js';
 import { formatsIn } from '../../domain/battleStats.js';
+import { organizeBattles, allGroups, groupTitle } from '../../domain/teams.js';
 
 const ALL_FORMATS = '';
 
@@ -43,6 +45,16 @@ function Dashboard({ pendingImport }) {
     [battles.items, format],
   );
 
+  const organized = useMemo(
+    () => organizeBattles(shown, teams.items, periods.items),
+    [shown, teams.items, periods.items],
+  );
+  // The open team card: null means the current team (open by default), '' means none.
+  const [openChoice, setOpenChoice] = useState(null);
+  const openKey = openChoice ?? organized.current?.key ?? '';
+  const openGroup = allGroups(organized).find(g => g.key === openKey);
+  const toggle = (key) => setOpenChoice(openKey === key ? '' : key);
+
   async function handleDelete(battle) {
     if (!confirm(`Delete the battle vs ${battle.opponent_name}?`)) return;
     await deleteBattle(battle.id);
@@ -50,19 +62,28 @@ function Dashboard({ pendingImport }) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between text-xs text-gray-400">
-        <span className="truncate">Signed in as {user.email}</span>
-        <Button tone="secondary" onClick={signOut}>Sign out</Button>
+    <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-4 lg:items-start">
+      <div className="space-y-4 min-w-0">
+        <div className="flex items-center justify-between text-xs text-gray-400">
+          <span className="truncate">Signed in as {user.email}</span>
+          <Button tone="secondary" onClick={signOut}>Sign out</Button>
+        </div>
+        <ShowdownNames names={names} />
+        <AddBattles userId={user.id} canSync={names.items.length > 0} pendingImport={pendingImport} onImported={battles.reload} />
+        <FormatFilter formats={formats} value={format} onChange={setFormat} />
+        <TeamsSection organized={organized} teams={teams.items} openKey={openKey} onToggle={toggle}
+          onCreated={() => { setOpenChoice(null); reloadTeams(); }}
+          loading={battles.loading || teams.loading} error={battles.error || teams.error}
+          onChanged={reloadTeams} onDelete={handleDelete} />
+        <BattleStats battles={shown} />
+        <BookmarkletSetup />
       </div>
-      <ShowdownNames names={names} />
-      <AddBattles userId={user.id} canSync={names.items.length > 0} pendingImport={pendingImport} onImported={battles.reload} />
-      <FormatFilter formats={formats} value={format} onChange={setFormat} />
-      <TeamsSection battles={shown} teams={teams.items} periods={periods.items}
-        loading={battles.loading || teams.loading} error={battles.error || teams.error}
-        onChanged={reloadTeams} onDelete={handleDelete} />
-      <BattleStats battles={shown} />
-      <BookmarkletSetup />
+      {/* Wide screens: the open team's move usage beside the main column. */}
+      <aside className="hidden lg:block sticky top-4">
+        <Card title="Move usage" subtitle={openGroup ? groupTitle(openGroup) : 'Open a team to see its moves.'}>
+          {openGroup && <PokemonMoves battles={openGroup.battles} order={openGroup.species} />}
+        </Card>
+      </aside>
     </div>
   );
 }
@@ -87,5 +108,5 @@ export default function BattlesTab() {
     );
   }
 
-  return <div className="max-w-xl mx-auto px-3 py-4">{content}</div>;
+  return <div className={`mx-auto px-3 py-4 ${session ? 'max-w-xl lg:max-w-5xl' : 'max-w-xl'}`}>{content}</div>;
 }

@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { eloSeries, matchups, attendance, commonLeads, moveUsage, MIN_MATCHUP_GAMES } from '../src/domain/battleInsights.js';
+import { eloSeries, matchups, attendance, commonLeads, toSlices, movesByPokemon, MIN_MATCHUP_GAMES, TOP_COUNT } from '../src/domain/battleInsights.js';
 import { niceStep, niceTicks, linear } from '../src/utils/chartScale.js';
 
 let day = 0;
@@ -56,6 +56,13 @@ describe('matchups', () => {
   it('is empty without enough data', () => {
     assert.deepEqual(matchups([]), { best: [], worst: [] });
   });
+
+  it(`lists up to ${TOP_COUNT} by default`, () => {
+    const many = 'ABCDEFGHIJKL'.split('').flatMap(name => Array(MIN_MATCHUP_GAMES).fill(0).map(() => vs(name, 'win')));
+    const { best, worst } = matchups(many);
+    assert.equal(best.length, TOP_COUNT);
+    assert.equal(worst.length, TOP_COUNT);
+  });
 });
 
 describe('attendance', () => {
@@ -66,7 +73,8 @@ describe('attendance', () => {
     game({ team, brought: ['A', 'B', 'D', 'E'] }),
   ];
 
-  it('rates how often each team member is brought', () => {
+  it('ranks every team member, and lists the highest and lowest without overlap', () => {
+    assert.deepEqual(attendance(battles).all.map(p => p.name), ['A', 'B', 'C', 'D', 'E', 'F']);
     const { highest, lowest } = attendance(battles, 2);
     assert.deepEqual(highest.map(p => [p.name, p.brought, p.games]), [['A', 3, 3], ['B', 3, 3]]);
     assert.deepEqual(lowest.map(p => [p.name, p.rate]), [['F', 0], ['C', 2 / 3]]);
@@ -93,29 +101,49 @@ describe('commonLeads', () => {
   });
 });
 
-describe('moveUsage', () => {
-  it('totals moves across games, largest first, with shares', () => {
-    const { total, slices } = moveUsage([game({ moves: { 'Fake Out': 2, Protect: 1 } }), game({ moves: { Protect: 3 } })]);
+describe('toSlices', () => {
+  const totals = (obj) => new Map(Object.entries(obj));
+
+  it('orders by uses with shares', () => {
+    const { total, slices } = toSlices(totals({ 'Fake Out': 2, Protect: 4 }));
     assert.equal(total, 6);
-    assert.deepEqual(slices.map(s => [s.name, s.count]), [['Protect', 4], ['Fake Out', 2]]);
-    assert.equal(slices[0].share, 4 / 6);
+    assert.deepEqual(slices.map(s => [s.name, s.count, s.share]), [['Protect', 4, 4 / 6], ['Fake Out', 2, 2 / 6]]);
   });
 
-  it('folds the tail into "Other" past the top moves', () => {
-    const moves = Object.fromEntries('ABCDEFGHIJ'.split('').map((m, i) => [m, 10 - i]));
-    const { slices, total } = moveUsage([game({ moves })], 7);
-    assert.equal(slices.length, 8);
-    assert.deepEqual(slices.at(-1), { name: 'Other', count: 3 + 2 + 1, other: true, share: 6 / total });
+  it('folds the tail into "Other" past the top moves, but never a single leftover', () => {
+    const many = totals(Object.fromEntries('ABCDEFGH'.split('').map((m, i) => [m, 8 - i])));
+    const { slices } = toSlices(many, 5);
+    assert.equal(slices.length, 6);
+    assert.deepEqual(slices.at(-1).name, 'Other');
+    assert.equal(slices.at(-1).count, 3 + 2 + 1);
+    assert.equal(toSlices(totals({ A: 1, B: 1, C: 1, D: 1, E: 1, F: 1 }), 5).slices.some(s => s.other), false);
   });
 
-  it('does not make an "Other" slice for a single leftover move', () => {
-    const moves = Object.fromEntries('ABCDEFGH'.split('').map(m => [m, 1]));
-    assert.equal(moveUsage([game({ moves })], 7).slices.some(s => s.other), false);
+  it('handles nothing', () => {
+    assert.deepEqual(toSlices(new Map()), { total: 0, slices: [] });
+  });
+});
+
+describe('movesByPokemon', () => {
+  const battles = [
+    game({ moves: { Rillaboom: { 'Fake Out': 1, 'Grassy Glide': 2 }, Incineroar: { 'Fake Out': 1 } } }),
+    game({ moves: { Rillaboom: { 'Fake Out': 1 }, Sneasler: { 'Close Combat': 3 } } }),
+  ];
+
+  it('totals each Pokémon\'s moves separately', () => {
+    const rilla = movesByPokemon(battles).find(p => p.species === 'Rillaboom');
+    assert.equal(rilla.total, 4);
+    assert.deepEqual(rilla.slices.map(s => [s.name, s.count]), [['Fake Out', 2], ['Grassy Glide', 2]]);
   });
 
-  it('ignores junk counts and handles no moves', () => {
-    assert.equal(moveUsage([game({ moves: { Protect: 'x' } }), game({ moves: null })]).total, 0);
-    assert.deepEqual(moveUsage([]).slices, []);
+  it('follows the team order, then most used', () => {
+    assert.deepEqual(movesByPokemon(battles, ['Incineroar', 'Rillaboom']).map(p => p.species), ['Incineroar', 'Rillaboom', 'Sneasler']);
+    assert.deepEqual(movesByPokemon(battles).map(p => p.species), ['Rillaboom', 'Sneasler', 'Incineroar']);
+  });
+
+  it('ignores the older per-player shape and junk counts', () => {
+    const legacy = [game({ moves: { Protect: 3 } }), game({ moves: { Rillaboom: { Protect: 'x' } } }), game({ moves: null })];
+    assert.deepEqual(movesByPokemon(legacy), []);
   });
 });
 

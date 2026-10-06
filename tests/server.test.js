@@ -4,6 +4,7 @@ import { replayFixture } from './helpers.js';
 import { authedPost, HttpError } from '../server/http.js';
 import { createReplayService, MAX_SYNC_IMPORTS, MAX_SEARCH_PAGES } from '../server/replays.js';
 import { createShowdownClient } from '../server/showdown.js';
+import { PARSE_VERSION } from '../src/domain/replay.js';
 
 const REPLAY_ID = replayFixture.id;
 const USER = { id: 'user-1' };
@@ -208,7 +209,7 @@ describe('syncRecent', () => {
     const showdown = fakeShowdown();
     const svc = createReplayService({ store, showdown });
     assert.deepEqual(await svc.syncRecent(USER.id), { imported: 0, remaining: 0 });
-    assert.equal(store.saved[0].parse_version, 2);
+    assert.equal(store.saved[0].parse_version, PARSE_VERSION);
     assert.equal(store.saved[0].rating_after, 1161);
     assert.equal(store.saved[0].team_id, 7, 'a manual team move survives re-reading');
     void service;
@@ -219,7 +220,7 @@ describe('syncRecent', () => {
     store.saved.push({ replay_id: 'gen9championsvgc2026regmc-1', parse_version: 1, result: 'win' });
     const svc = createReplayService({ store, showdown: fakeShowdown({ replays: {} }) });
     await svc.syncRecent(USER.id);
-    assert.deepEqual([store.saved[0].parse_version, store.saved[0].result], [2, 'win']);
+    assert.deepEqual([store.saved[0].parse_version, store.saved[0].result], [PARSE_VERSION, 'win']);
   });
 
   it('needs at least one linked name', async () => {

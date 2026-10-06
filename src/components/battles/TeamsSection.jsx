@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import Card from '../ui/Card';
 import { Button, Notice } from '../ui/controls';
 import TeamCard from './TeamCard';
 import NewTeamForm from './NewTeamForm';
 import { useAsyncAction } from '../../hooks/useAsyncAction.js';
-import { organizeBattles, MAX_TEAM_NAME } from '../../domain/teams.js';
+import { groupTitle, MAX_TEAM_NAME } from '../../domain/teams.js';
 import { createTeam, deleteTeam, makeCurrent, moveBattles, renameTeam } from '../../services/teams.js';
 
 // Unnamed iterations with fewer games than this are tucked behind "show more".
@@ -18,20 +18,17 @@ const SectionLabel = ({ children }) => (
 
 /**
  * The current team on top (new games go here), older saved teams, then unnamed iterations of
- * games no saved team owns. `onChanged` reloads teams and battles after any edit.
+ * games no saved team owns. `organized` comes from organizeBattles(); the open card is owned by
+ * the dashboard (its side column shows that team's moves). `onChanged` reloads after any edit.
  */
-export default function TeamsSection({ battles, teams, periods, loading, error, onChanged, onDelete }) {
-  const { current, older, iterations } = useMemo(() => organizeBattles(battles, teams, periods), [battles, teams, periods]);
-  // Which card is open; null means "the current team" (open by default), '' means none.
-  const [expanded, setExpanded] = useState(null);
+export default function TeamsSection({ organized, teams, openKey, onToggle, onCreated, loading, error, onChanged, onDelete }) {
+  const { current, older, iterations } = organized;
   const [creating, setCreating] = useState(false);
   const [showAllIterations, setShowAllIterations] = useState(false);
   const { notice, run } = useAsyncAction();
 
   const moveTargets = teams.map(t => ({ id: t.id, name: t.name }));
-  const openKey = expanded ?? current?.key;
   const isExpanded = (key) => openKey === key;
-  const toggle = (key) => setExpanded(openKey === key ? '' : key);
   const act = async (action) => { if (await run(async () => { await action(); return true; })) onChanged(); };
 
   const savedActions = (team, isCurrent) => (
@@ -63,12 +60,12 @@ export default function TeamsSection({ battles, teams, periods, loading, error, 
       {loading && <p className="text-xs text-gray-500">Loading…</p>}
       {error && <p className="text-xs text-red-300">{error}</p>}
       <Notice notice={notice} />
-      {creating && <NewTeamForm onCreated={() => { setCreating(false); setExpanded(null); onChanged(); }} onCancel={() => setCreating(false)} />}
+      {creating && <NewTeamForm onCreated={() => { setCreating(false); onCreated(); }} onCancel={() => setCreating(false)} />}
 
       {current ? (
         <ul className="mt-2">
-          <TeamCard group={current} title={current.saved.name} badge="Current"
-            expanded={isExpanded(current.key)} onToggle={() => toggle(current.key)}
+          <TeamCard group={current} title={groupTitle(current)} badge="Current"
+            expanded={isExpanded(current.key)} onToggle={() => onToggle(current.key)}
             actions={savedActions(current.saved, true)} {...cardProps} />
         </ul>
       ) : (
@@ -80,8 +77,8 @@ export default function TeamsSection({ battles, teams, periods, loading, error, 
           <SectionLabel>Older teams</SectionLabel>
           <ul className="space-y-2">
             {older.map(group => (
-              <TeamCard key={group.key} group={group} title={group.saved.name}
-                expanded={isExpanded(group.key)} onToggle={() => toggle(group.key)}
+              <TeamCard key={group.key} group={group} title={groupTitle(group)}
+                expanded={isExpanded(group.key)} onToggle={() => onToggle(group.key)}
                 actions={savedActions(group.saved, false)} {...cardProps} />
             ))}
           </ul>
@@ -93,8 +90,8 @@ export default function TeamsSection({ battles, teams, periods, loading, error, 
           <SectionLabel>Other iterations</SectionLabel>
           <ul className="space-y-2">
             {shownIterations.map(group => (
-              <TeamCard key={group.key} group={group} title="Unnamed iteration"
-                expanded={isExpanded(group.key)} onToggle={() => toggle(group.key)}
+              <TeamCard key={group.key} group={group} title={groupTitle(group)}
+                expanded={isExpanded(group.key)} onToggle={() => onToggle(group.key)}
                 actions={<Button tone="secondary" onClick={() => nameIteration(group)}>Save as team</Button>} {...cardProps} />
             ))}
           </ul>

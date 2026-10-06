@@ -2,13 +2,15 @@ import { useState } from 'react';
 import { CHART, OTHER_COLOR, SERIES_COLORS } from './palette.js';
 import { formatPercent } from '../../domain/battleStats.js';
 
-const SIZE = 132;
-const OUTER = 62;
-const INNER = 38;
+// Ring radii as fractions of the chart's size.
+const OUTER_RATIO = 0.47;
+const INNER_RATIO = 0.29;
 
 // SVG path for a ring segment between two angles (radians, 0 = 12 o'clock, clockwise).
-function arc(start, end) {
-  const point = (r, a) => [SIZE / 2 + r * Math.sin(a), SIZE / 2 - r * Math.cos(a)];
+function arc(size, start, end) {
+  const OUTER = size * OUTER_RATIO;
+  const INNER = size * INNER_RATIO;
+  const point = (r, a) => [size / 2 + r * Math.sin(a), size / 2 - r * Math.cos(a)];
   const large = end - start > Math.PI ? 1 : 0;
   const [x0, y0] = point(OUTER, start);
   const [x1, y1] = point(OUTER, end);
@@ -23,7 +25,9 @@ const colorOf = (slice, i) => (slice.other ? OTHER_COLOR : SERIES_COLORS[i % SER
  * Part-to-whole ring with a legend that doubles as the table view (name, count, share).
  * Slices are separated by a 2px surface gap; hovering a slice or legend row highlights it.
  */
-export default function DonutChart({ slices, total, unit = 'uses' }) {
+export default function DonutChart({ slices, total, unit = 'uses', size = 132 }) {
+  const OUTER = size * OUTER_RATIO;
+  const INNER = size * INNER_RATIO;
   const [active, setActive] = useState(null);
   // A lone slice is a full ring; two ring arcs at the same point would draw nothing.
   const whole = slices.length === 1;
@@ -36,24 +40,24 @@ export default function DonutChart({ slices, total, unit = 'uses' }) {
   const focus = active === null ? null : slices[active];
 
   return (
-    <div className="flex flex-wrap items-center gap-4">
-      <svg width={SIZE} height={SIZE} role="img" className="shrink-0"
+    <div className="flex flex-wrap items-center gap-3">
+      <svg width={size} height={size} role="img" className="shrink-0"
         aria-label={`${total} ${unit}: ${slices.map(s => `${s.name} ${formatPercent(s.share)}`).join(', ')}`}>
         {whole
-          ? <circle cx={SIZE / 2} cy={SIZE / 2} r={(OUTER + INNER) / 2} fill="none" stroke={colorOf(slices[0], 0)} strokeWidth={OUTER - INNER} />
+          ? <circle cx={size / 2} cy={size / 2} r={(OUTER + INNER) / 2} fill="none" stroke={colorOf(slices[0], 0)} strokeWidth={OUTER - INNER} />
           : segments.map(({ slice, i, start, end }) => (
-            <path key={slice.name} d={arc(start, end)} fill={colorOf(slice, i)} stroke={CHART.surface} strokeWidth="2"
+            <path key={slice.name} d={arc(size, start, end)} fill={colorOf(slice, i)} stroke={CHART.surface} strokeWidth="2"
               opacity={active === null || active === i ? 1 : 0.35}
               onPointerEnter={() => setActive(i)} onPointerLeave={() => setActive(null)} />
           ))}
-        <text x={SIZE / 2} y={SIZE / 2 - 4} textAnchor="middle" fontSize="16" fontWeight="600" fill={CHART.text}>
+        <text x={size / 2} y={size / 2 - 4} textAnchor="middle" fontSize={size >= 120 ? 16 : 13} fontWeight="600" fill={CHART.text}>
           {focus ? formatPercent(focus.share) : total}
         </text>
-        <text x={SIZE / 2} y={SIZE / 2 + 12} textAnchor="middle" fontSize="10" fill={CHART.muted}>
+        <text x={size / 2} y={size / 2 + 11} textAnchor="middle" fontSize="10" fill={CHART.muted}>
           {focus ? `${focus.count} ${unit}` : unit}
         </text>
       </svg>
-      <ul className="flex-1 min-w-[10rem] space-y-0.5 text-xs">
+      <ul className="flex-1 min-w-[9rem] space-y-0.5 text-xs">
         {slices.map((slice, i) => (
           <li key={slice.name} onPointerEnter={() => setActive(i)} onPointerLeave={() => setActive(null)}
             className={`flex items-center gap-2 rounded px-1 ${active === i ? 'bg-gray-700/50' : ''}`}>

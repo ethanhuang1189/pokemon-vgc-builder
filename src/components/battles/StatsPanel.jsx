@@ -1,8 +1,7 @@
 import { useMemo } from 'react';
 import SpeciesIcons from './SpeciesIcons';
 import EloChart from '../charts/EloChart';
-import DonutChart from '../charts/DonutChart';
-import { eloSeries, matchups, attendance, commonLeads, moveUsage, MIN_MATCHUP_GAMES } from '../../domain/battleInsights.js';
+import { eloSeries, matchups, attendance, commonLeads, MIN_MATCHUP_GAMES, TOP_COUNT } from '../../domain/battleInsights.js';
 import { formatPercent } from '../../domain/battleStats.js';
 
 const Section = ({ title, children }) => (
@@ -36,19 +35,19 @@ function RankedList({ heading, rows }) {
 
 const games = (n) => `${n} game${n === 1 ? '' : 's'}`;
 const pokemonRow = (p, value, detail) => ({ key: p.name, names: [p.name], label: p.name, value, detail });
+const attendanceRow = (p) => pokemonRow(p, formatPercent(p.rate), `${p.brought}/${p.games}`);
 
-/** Rating, matchups, attendance, leads and move usage for a set of battles. */
+/** Rating, matchups, attendance and leads for a set of battles (move usage: PokemonMoves). */
 export default function StatsPanel({ battles }) {
   const stats = useMemo(() => ({
     elo: eloSeries(battles).filter(s => s.points.length >= 2).slice(0, 3),
     matchups: matchups(battles),
     attendance: attendance(battles),
     leads: commonLeads(battles),
-    moves: moveUsage(battles),
   }), [battles]);
 
   if (!battles.length) return null;
-  const { elo, moves } = stats;
+  const { elo } = stats;
 
   return (
     <div className="space-y-4">
@@ -68,12 +67,15 @@ export default function StatsPanel({ battles }) {
       </Section>
 
       <Section title="Attendance">
-        <div className="grid gap-3 sm:grid-cols-2">
-          <RankedList heading="Brought most often"
-            rows={stats.attendance.highest.map(p => pokemonRow(p, formatPercent(p.rate), `${p.brought}/${p.games}`))} />
-          <RankedList heading="Brought least often"
-            rows={stats.attendance.lowest.map(p => pokemonRow(p, formatPercent(p.rate), `${p.brought}/${p.games}`))} />
-        </div>
+        {stats.attendance.all.length <= TOP_COUNT * 2 ? (
+          // A single team: rank all six rather than splitting them into most/least.
+          <RankedList heading="Share of games brought" rows={stats.attendance.all.map(attendanceRow)} />
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <RankedList heading="Brought most often" rows={stats.attendance.highest.map(attendanceRow)} />
+            <RankedList heading="Brought least often" rows={stats.attendance.lowest.map(attendanceRow)} />
+          </div>
+        )}
       </Section>
 
       <Section title="Most common leads">
@@ -83,9 +85,6 @@ export default function StatsPanel({ battles }) {
         ) : <Empty>Leads appear after your next sync.</Empty>}
       </Section>
 
-      <Section title="Move usage">
-        {moves.total ? <DonutChart slices={moves.slices} total={moves.total} unit="uses" /> : <Empty>Moves appear after your next sync.</Empty>}
-      </Section>
     </div>
   );
 }

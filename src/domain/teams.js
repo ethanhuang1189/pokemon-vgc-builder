@@ -28,6 +28,12 @@ function savedGroup(team, battles) {
   return { key: `team-${team.id}`, saved: team, species: team.species, battles, lastPlayed: latestPlayed(battles), ...summarizeBattles(battles) };
 }
 
+/** The display name of a team group (saved teams have names; iterations don't). */
+export const groupTitle = (group) => group?.saved?.name ?? 'Unnamed iteration';
+
+/** Every group from organizeBattles(), current first. */
+export const allGroups = ({ current, older, iterations }) => [...(current ? [current] : []), ...older, ...iterations];
+
 /**
  * Sorts battles into { current, older, iterations }:
  *   current    — the team made current most recently (null before any team exists)
