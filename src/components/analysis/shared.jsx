@@ -1,18 +1,7 @@
 import TypeBadge from '../TypeBadge';
 import { TYPE_COLORS } from '../typeColors.js';
 
-export function Card({ title, subtitle, action, children }) {
-  return (
-    <div className="bg-gray-800 border border-gray-700 rounded-sm p-4">
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">{title}</h3>
-        {action}
-      </div>
-      {subtitle && <p className="text-xs text-gray-500 mb-3">{subtitle}</p>}
-      {children}
-    </div>
-  );
-}
+export { default as Card } from '../ui/Card';
 
 export function DetailBox({ children }) {
   return <div className="mt-1.5 bg-gray-900/60 border border-gray-600/60 rounded px-2 py-1.5 space-y-1">{children}</div>;
