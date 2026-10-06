@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@pkmn/data": "^0.10.9",
-    "@pkmn/dex": "^0.10.9",
+    "@pkmn/dex": "^0.10.11",
     "@supabase/supabase-js": "2.117.2",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
