@@ -1,3 +1,4 @@
+import { readFileSync } from 'fs';
 import { Dex } from '@pkmn/dex';
 import { buildFormat } from '../src/domain/format.js';
 import { REGULATIONS, CURRENT_REGULATION } from '../src/regulations/index.js';
@@ -31,3 +32,6 @@ export const moves = (...names) => names.map(n => {
 
 /** A slot's move array: the given moves, padded with nulls to 4. */
 export const moveSlots = (...names) => [...moves(...names), null, null, null, null].slice(0, 4);
+
+/** A real Reg M-C replay with player names, nicknames and chat removed. */
+export const replayFixture = JSON.parse(readFileSync(new URL('./fixtures/replay-regmc.json', import.meta.url), 'utf8'));

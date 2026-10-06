@@ -14,6 +14,9 @@ scripts/scraper/debug.png
 dist
 dist-ssr
 *.local
+.env
+.env.*
+!.env.example
 
 # Claude Code local config
 .claude/

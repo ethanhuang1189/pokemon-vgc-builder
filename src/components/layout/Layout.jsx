@@ -1,6 +1,7 @@
 import { useTeam } from '../../context/TeamContext';
 import { useFormat } from '../../context/FormatContext';
 import { safeSides } from '../../utils/safeArea.js';
+import { TABS } from './tabs.js';
 
 function ClearTeamButton() {
   const { clearTeam } = useTeam();
@@ -12,18 +13,33 @@ function ClearTeamButton() {
   );
 }
 
-export function Header() {
+function TabBar({ tab, onSelect }) {
+  return (
+    <nav className="max-w-3xl mx-auto flex gap-1 mt-2" aria-label="Sections">
+      {TABS.map(({ id, label }) => (
+        <button key={id} type="button" onClick={() => onSelect(id)} aria-current={tab === id ? 'page' : undefined}
+          className={`text-xs px-3 py-1.5 border-b-2 transition-colors ${
+            tab === id ? 'border-indigo-500 text-white' : 'border-transparent text-gray-500 hover:text-gray-300'}`}>
+          {label}
+        </button>
+      ))}
+    </nav>
+  );
+}
+
+export function Header({ tab, onSelectTab }) {
   const { format } = useFormat();
   return (
     <header className="bg-gray-900 border-b border-gray-700"
-      style={{ ...safeSides('1rem'), paddingTop: 'max(0.75rem, env(safe-area-inset-top))', paddingBottom: '0.75rem' }}>
+      style={{ ...safeSides('1rem'), paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
       <div className="max-w-3xl mx-auto flex items-center gap-2">
         <div className="flex-1 min-w-0">
           <span className="text-base font-bold text-white">Pokémon Champions</span>
           <span className="text-xs text-gray-500 ml-2 hidden sm:inline">{format.regulation.label}</span>
         </div>
-        <ClearTeamButton />
+        {tab === 'team' && <ClearTeamButton />}
       </div>
+      <TabBar tab={tab} onSelect={onSelectTab} />
     </header>
   );
 }
@@ -32,7 +48,7 @@ const CREDITS = [
   { text: 'Pokémon sprites from the', name: 'Project Pokémon Sprite Index', href: 'https://projectpokemon.org/home/docs/spriteindex_148/' },
   { text: ', with fallbacks from', name: 'Pokémon Showdown', href: 'https://play.pokemonshowdown.com/sprites/' },
   { text: '. Item sprites from', name: 'pokesprite', href: 'https://github.com/msikma/pokesprite' },
-  { text: 'by msikma and', name: 'Serebii', href: 'https://www.serebii.net/' },
+  { text: ' by msikma and', name: 'Serebii', href: 'https://www.serebii.net/' },
   { text: '. Pokémon data provided by', name: '@pkmn/dex', href: 'https://github.com/pkmn/ps' },
 ];
 
