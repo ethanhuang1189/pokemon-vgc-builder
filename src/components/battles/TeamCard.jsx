@@ -1,6 +1,5 @@
 import SpeciesIcons from './SpeciesIcons';
 import StatsPanel from './StatsPanel';
-import PokemonMoves from './PokemonMoves';
 import BattleRows from './BattleRows';
 import { formatPercent, formatRecord } from '../../domain/battleStats.js';
 
@@ -28,12 +27,7 @@ export default function TeamCard({ group, title, badge, expanded, onToggle, acti
       {expanded && (
         <div className="px-3 pb-3 space-y-3">
           {actions && <div className="flex flex-wrap gap-2 pt-2">{actions}</div>}
-          <div className="pt-1"><StatsPanel battles={group.battles} /></div>
-          {/* On wide screens these sit in the dashboard's side column instead. */}
-          <div className="lg:hidden">
-            <h4 className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Move usage</h4>
-            <PokemonMoves battles={group.battles} order={group.species} />
-          </div>
+          <div className="pt-1"><StatsPanel battles={group.battles} order={group.species} /></div>
           <BattleRows battles={group.battles} moveTargets={moveTargets} onMove={onMove} onDelete={onDelete} />
         </div>
       )}

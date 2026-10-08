@@ -1,7 +1,7 @@
 import { useTeam } from '../../context/TeamContext';
 import { useFormat } from '../../context/FormatContext';
 import { safeSides } from '../../utils/safeArea.js';
-import { TABS } from './tabs.js';
+import { TABS, PAGE_WIDTH } from './tabs.js';
 
 function ClearTeamButton() {
   const { clearTeam } = useTeam();
@@ -13,12 +13,9 @@ function ClearTeamButton() {
   );
 }
 
-// The header lines up with the page below it, which is wider on the Battles tab.
-const widthFor = (tab) => (tab === 'battles' ? 'max-w-xl lg:max-w-5xl' : 'max-w-3xl');
-
 function TabBar({ tab, onSelect }) {
   return (
-    <nav className={`${widthFor(tab)} mx-auto flex gap-1 mt-2`} aria-label="Sections">
+    <nav className={`${PAGE_WIDTH} mx-auto flex gap-1 mt-2`} aria-label="Sections">
       {TABS.map(({ id, label }) => (
         <button key={id} type="button" onClick={() => onSelect(id)} aria-current={tab === id ? 'page' : undefined}
           className={`text-xs px-3 py-1.5 border-b-2 transition-colors ${
@@ -35,7 +32,7 @@ export function Header({ tab, onSelectTab }) {
   return (
     <header className="bg-gray-900 border-b border-gray-700"
       style={{ ...safeSides('1rem'), paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
-      <div className={`${widthFor(tab)} mx-auto flex items-center gap-2`}>
+      <div className={`${PAGE_WIDTH} mx-auto flex items-center gap-2`}>
         <div className="flex-1 min-w-0">
           <span className="text-base font-bold text-white">Pokémon Champions</span>
           <span className="text-xs text-gray-500 ml-2 hidden sm:inline">{format.regulation.label}</span>
@@ -58,7 +55,7 @@ const CREDITS = [
 export function Footer() {
   return (
     <footer className="border-t border-gray-800 mt-8 pb-8" style={safeSides('1rem')}>
-      <div className="max-w-3xl mx-auto pt-6 space-y-3">
+      <div className={`${PAGE_WIDTH} mx-auto pt-6 space-y-3`}>
         <p className="text-xs text-gray-400 leading-relaxed">
           <span className="text-white font-semibold">Pokémon Champions Team Builder</span>
           {' '}— a fan-made tool for building and sharing competitive VGC teams in the Pokémon Champions format.

@@ -5,6 +5,8 @@
 * { box-sizing: border-box; }
 
 html {
+  /* Reserve the scrollbar's space so pages don't shift sideways when switching tabs. */
+  scrollbar-gutter: stable;
   -webkit-tap-highlight-color: transparent;
   -webkit-text-size-adjust: 100%;
 }

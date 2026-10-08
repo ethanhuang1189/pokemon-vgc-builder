@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import SpeciesIcons from './SpeciesIcons';
+import PokemonMoves from './PokemonMoves';
 import EloChart from '../charts/EloChart';
 import { Segmented } from '../ui/controls';
 import {
@@ -31,12 +32,20 @@ function Figure({ label, value, tone = 'text-white' }) {
 
 /**
  * A titled list: sprites and name, a bar for `rate`, the rate, and a muted detail.
- * `rows` items: { key, names, label, rate, detail }.
+ * `rateLabel` and `detailLabel` head those two columns. `rows` items: { key, names, label, rate, detail }.
  */
-function RankedList({ heading, rows, barColor = 'bg-indigo-500', empty }) {
+function RankedList({ heading, rateLabel, detailLabel, rows, barColor = 'bg-indigo-500', empty }) {
   return (
     <div className="min-w-0">
-      <div className="text-[11px] font-semibold text-gray-300 mb-1">{heading}</div>
+      <div className="flex items-end gap-2 mb-1">
+        <span className="flex-1 text-[11px] font-semibold text-gray-300">{heading}</span>
+        {rows.length > 0 && (
+          <>
+            <span className="text-[10px] text-gray-500 w-10 text-right leading-tight">{rateLabel}</span>
+            <span className="text-[10px] text-gray-500 w-12 text-right leading-tight">{detailLabel}</span>
+          </>
+        )}
+      </div>
       {rows.length ? (
         <ul className="space-y-1">
           {rows.map(row => (
@@ -60,6 +69,7 @@ function RankedList({ heading, rows, barColor = 'bg-indigo-500', empty }) {
 
 // "W-L" for a row with wins and losses (ties, if any, are the remaining games).
 const winLoss = (p) => `${p.wins}-${p.losses}`;
+const MATCHUP_COLUMNS = { rateLabel: 'Win rate', detailLabel: 'W-L' };
 const matchupRow = (p) => ({ key: p.name, names: [p.name], label: p.name, rate: p.winRate, detail: winLoss(p) });
 
 function RatingView({ battles }) {
@@ -104,37 +114,47 @@ function MatchupsView({ battles }) {
         {' '}{formatPercent(baseline)} overall. Rankings favor bigger samples, so one lucky or unlucky game won&apos;t top a list.
       </Caption>
       <div className="grid gap-4 sm:grid-cols-2">
-        <RankedList heading="Toughest opponents" rows={worst.map(matchupRow)} barColor="bg-red-500"
+        <RankedList heading="Toughest opponents" {...MATCHUP_COLUMNS} rows={worst.map(matchupRow)} barColor="bg-red-500"
           empty="Nothing you do worse than average against." />
-        <RankedList heading="Easiest opponents" rows={best.map(matchupRow)} barColor="bg-emerald-500"
+        <RankedList heading="Easiest opponents" {...MATCHUP_COLUMNS} rows={best.map(matchupRow)} barColor="bg-emerald-500"
           empty="Nothing you do better than average against." />
       </div>
       <div className="mt-4">
-        <RankedList heading="Most faced" rows={mostFaced.map(p => ({ ...matchupRow(p), detail: `${p.games} games` }))} />
+        <RankedList heading="Most faced" rateLabel="Win rate" detailLabel="Faced" rows={mostFaced.map(p => ({ ...matchupRow(p), detail: `${p.games}×` }))} />
       </div>
     </div>
   );
 }
 
-function TeamView({ battles }) {
+function TeamView({ battles, order }) {
   const { all, highest } = useMemo(() => attendance(battles), [battles]);
   // Across many teams the full list gets long; show the most-brought only.
   const many = all.length > TOP_COUNT * 2;
   const leads = useMemo(() => commonLeads(battles), [battles]);
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
-      <RankedList heading={many ? 'Brought most often' : 'Brought to battle'}
-        rows={(many ? highest : all).map(p => ({ key: p.name, names: [p.name], label: p.name, rate: p.rate, detail: `${p.brought}/${p.games}` }))}
-        empty="No team data yet." />
-      <RankedList heading="Most common leads — win rate"
-        rows={leads.map(l => ({ key: l.key, names: l.leads, label: l.leads.join(' + '), rate: l.winRate, detail: winLoss(l) }))}
-        empty="Leads appear after your next sync." />
+    <div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <RankedList heading={many ? 'Brought most often' : 'Brought to battle'} rateLabel="Brought" detailLabel="Games"
+          rows={(many ? highest : all).map(p => ({ key: p.name, names: [p.name], label: p.name, rate: p.rate, detail: `${p.brought}/${p.games}` }))}
+          empty="No team data yet." />
+        <RankedList heading="Most common leads" rateLabel="Win rate" detailLabel="W-L"
+          rows={leads.map(l => ({ key: l.key, names: l.leads, label: l.leads.join(' + '), rate: l.winRate, detail: winLoss(l) }))}
+          empty="Leads appear after your next sync." />
+      </div>
+      {/* Wide screens show move usage in the dashboard's side column instead. */}
+      <div className="lg:hidden mt-4">
+        <div className="text-[11px] font-semibold text-gray-300 mb-1">Move usage</div>
+        <PokemonMoves battles={battles} order={order} />
+      </div>
     </div>
   );
 }
 
-/** Rating, matchups and team usage for a set of battles, one view at a time (move usage: PokemonMoves). */
-export default function StatsPanel({ battles }) {
+/**
+ * Rating, matchups and team usage for a set of battles, one view at a time. On narrow screens
+ * the team view also shows move usage, in `order` (the team's preview order).
+ */
+export default function StatsPanel({ battles, order = [] }) {
   const [view, setView] = useState('rating');
   if (!battles.length) return null;
   return (
@@ -142,7 +162,7 @@ export default function StatsPanel({ battles }) {
       <div className="mb-3"><Segmented label="Stats view" options={VIEWS} value={view} onChange={setView} /></div>
       {view === 'rating' && <RatingView battles={battles} />}
       {view === 'matchups' && <MatchupsView battles={battles} />}
-      {view === 'team' && <TeamView battles={battles} />}
+      {view === 'team' && <TeamView battles={battles} order={order} />}
     </div>
   );
 }

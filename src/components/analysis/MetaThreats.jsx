@@ -6,12 +6,13 @@ function MetaRow({ meta, topUsage, expanded, onToggle }) {
   return (
     <div>
       <button type="button" onClick={onToggle}
-        className={`w-full flex items-center gap-2 px-1.5 py-1 rounded text-left transition-colors ${expanded ? 'bg-gray-700/60' : 'hover:bg-gray-700/30'}`}>
+        className={`w-full flex flex-wrap lg:gap-y-1 items-center gap-2 px-1.5 py-1 rounded text-left transition-colors ${expanded ? 'bg-gray-700/60' : 'hover:bg-gray-700/30'}`}>
         <span className={`shrink-0 w-1.5 h-1.5 rounded-full ${meta.covered ? 'bg-green-400' : 'bg-red-500'}`} />
-        <span className="text-xs text-white font-medium w-28 shrink-0 truncate">{meta.name}</span>
+        {/* In the narrow desktop sidebar the bar drops to its own line under the name. */}
+        <span className="text-xs text-white font-medium w-28 shrink-0 truncate lg:w-auto lg:flex-1 lg:min-w-0">{meta.name}</span>
         <div className="flex gap-0.5 shrink-0">{meta.types.map(t => <TypeBadge key={t} type={t} size="xs" />)}</div>
-        <div className="flex-1 h-1 bg-gray-700 rounded overflow-hidden">
-          <div className="h-full bg-indigo-500/60 rounded" style={{ width: `${Math.min(100, (meta.usage / topUsage) * 100)}%` }} />
+        <div className="flex-1 h-1.5 bg-gray-700 rounded overflow-hidden lg:order-last lg:basis-full lg:ml-3.5">
+          <div className="h-full bg-indigo-400 rounded" style={{ width: `${Math.min(100, (meta.usage / topUsage) * 100)}%` }} />
         </div>
         <span className="text-[10px] text-gray-500 font-mono shrink-0 w-10 text-right">{meta.usage.toFixed(1)}%</span>
       </button>

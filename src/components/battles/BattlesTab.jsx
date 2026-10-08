@@ -15,6 +15,8 @@ import { listBattles, listShowdownNames, deleteBattle } from '../../services/bat
 import { listTeams, listTeamPeriods } from '../../services/teams.js';
 import { signOut } from '../../services/auth.js';
 import { formatsIn } from '../../domain/battleStats.js';
+import { PAGE_WIDTH, PAGE_COLUMNS } from '../layout/tabs.js';
+import { safeSides } from '../../utils/safeArea.js';
 import { organizeBattles, allGroups, groupTitle } from '../../domain/teams.js';
 
 const ALL_FORMATS = '';
@@ -62,7 +64,7 @@ function Dashboard({ pendingImport }) {
   }
 
   return (
-    <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-4 lg:items-start">
+    <div className={PAGE_COLUMNS}>
       <div className="space-y-4 min-w-0">
         <div className="flex items-center justify-between text-xs text-gray-400">
           <span className="truncate">Signed in as {user.email}</span>
@@ -108,5 +110,10 @@ export default function BattlesTab() {
     );
   }
 
-  return <div className={`mx-auto px-3 py-4 ${session ? 'max-w-xl lg:max-w-5xl' : 'max-w-xl'}`}>{content}</div>;
+  // Signed out, the account forms stay narrow inside the shared page width.
+  return (
+    <div className={`${PAGE_WIDTH} mx-auto py-3`} style={safeSides('0.75rem')}>
+      {session ? content : <div className="max-w-xl mx-auto">{content}</div>}
+    </div>
+  );
 }

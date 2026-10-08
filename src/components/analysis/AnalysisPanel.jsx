@@ -1,17 +1,9 @@
-import { useMemo } from 'react';
 import { Card } from './shared';
 import MetaThreats from './MetaThreats';
 import OffensiveCoverage from './OffensiveCoverage';
 import TeamWeaknesses from './TeamWeaknesses';
 import TypeDisparity from './TypeDisparity';
-import { useTeam } from '../../context/TeamContext';
-import { useFormat } from '../../context/FormatContext';
-import { useMetaStats } from '../../hooks/useMetaStats.js';
 import { ALL_TYPES } from '../../domain/typeChart.js';
-import {
-  filledSlots, getCoverage, getCoverageDetails, getWeaknessDetails, getTypeDetails,
-  analyzeMetaList, resolveMetaEntries,
-} from '../../domain/analysis.js';
 
 function Stat({ value, label, tone }) {
   return (
@@ -39,27 +31,24 @@ function TeamSummary({ memberCount, uncoveredTypes, metaAnalysis }) {
   );
 }
 
-export default function AnalysisPanel() {
-  const { team } = useTeam();
-  const { Dex } = useFormat();
-  const meta = useMetaStats();
-
-  const memberCount = filledSlots(team).length;
-  const coverage = useMemo(() => getCoverage(team), [team]);
-  const coverageDetails = useMemo(() => getCoverageDetails(team), [team]);
-  const weaknessDetails = useMemo(() => getWeaknessDetails(team), [team]);
-  const typeDetails = useMemo(() => getTypeDetails(team), [team]);
-  const metaEntries = useMemo(() => resolveMetaEntries(meta.stats?.data, Dex), [meta.stats, Dex]);
-  const metaAnalysis = useMemo(() => analyzeMetaList(team, metaEntries), [team, metaEntries]);
-
+/** Team summary, meta threats and offensive coverage: how the team does against others. */
+export function OffenseSections({ analysis: a }) {
   return (
     <div className="space-y-5">
-      <TeamSummary memberCount={memberCount} uncoveredTypes={coverage.uncovered.size} metaAnalysis={metaAnalysis} />
-      <MetaThreats analysis={metaAnalysis} label={meta.stats?.label} loading={meta.loading} error={meta.error}
-        onRefresh={meta.refresh} />
-      <OffensiveCoverage coverage={coverage} details={coverageDetails} />
-      <TeamWeaknesses details={weaknessDetails} teamSize={memberCount} />
-      <TypeDisparity details={typeDetails} />
+      <TeamSummary memberCount={a.memberCount} uncoveredTypes={a.coverage.uncovered.size} metaAnalysis={a.metaAnalysis} />
+      <MetaThreats analysis={a.metaAnalysis} label={a.meta.stats?.label} loading={a.meta.loading} error={a.meta.error}
+        onRefresh={a.meta.refresh} />
+      <OffensiveCoverage coverage={a.coverage} details={a.coverageDetails} />
+    </div>
+  );
+}
+
+/** Team weaknesses and type disparity: the team's defensive shape. */
+export function DefenseSections({ analysis: a }) {
+  return (
+    <div className="space-y-5">
+      <TeamWeaknesses details={a.weaknessDetails} teamSize={a.memberCount} />
+      <TypeDisparity details={a.typeDetails} />
     </div>
   );
 }
