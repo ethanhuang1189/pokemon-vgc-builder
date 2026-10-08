@@ -1,21 +1,45 @@
 import { summarizeBattles, ratio, time } from './battleStats.js';
+import { toId } from './ids.js';
 
 // Derived stats for the stats panels: Elo history, matchups, attendance, leads, move usage per Pokémon.
 
 export const MIN_MATCHUP_GAMES = 3;
+// Matchups are ranked as if each record also had this many games at your overall win rate,
+// so a 3-0 or 0-3 doesn't outrank a 9-1 or 1-9 on luck alone.
+export const PRIOR_GAMES = 5;
 // How many entries each ranked list shows.
 export const TOP_COUNT = 5;
 
+const isRated = (battle) => Number.isInteger(battle.rating_after);
+const oldestFirst = (a, b) => time(a.played_at) - time(b.played_at);
+
 /**
- * Rating after each rated game, oldest first, as one series per ladder (format) — ratings
- * on different ladders aren't comparable. Series with the most games come first.
+ * Your Showdown accounts with rated games ({ id, name, games }), most recently played first.
+ * Each account has its own ladder rating, so the chart shows one account at a time.
+ */
+export function ratedAccounts(battles) {
+  const byId = new Map();
+  for (const battle of battles.filter(isRated).sort(oldestFirst).reverse()) {
+    const id = toId(battle.player_name);
+    // Keep the name as spelled in the newest game.
+    const entry = byId.get(id) ?? { id, name: battle.player_name || 'Unknown account', games: 0 };
+    entry.games += 1;
+    byId.set(id, entry);
+  }
+  return [...byId.values()];
+}
+
+/**
+ * Rating after each rated game, oldest first, as one series per account and ladder (format):
+ * ratings on different accounts or ladders aren't comparable. Series with the most games come first.
  */
 export function eloSeries(battles) {
-  const byFormat = new Map();
-  const rated = battles.filter(b => Number.isInteger(b.rating_after)).sort((a, b) => time(a.played_at) - time(b.played_at));
-  for (const battle of rated) {
-    if (!byFormat.has(battle.format)) byFormat.set(battle.format, { format: battle.format, points: [] });
-    const series = byFormat.get(battle.format);
+  const byKey = new Map();
+  for (const battle of battles.filter(isRated).sort(oldestFirst)) {
+    const account = toId(battle.player_name);
+    const key = `${account}|${battle.format}`;
+    if (!byKey.has(key)) byKey.set(key, { key, account, format: battle.format, points: [] });
+    const series = byKey.get(key);
     series.points.push({
       game: series.points.length + 1,
       rating: battle.rating_after,
@@ -25,8 +49,21 @@ export function eloSeries(battles) {
       playedAt: battle.played_at,
     });
   }
-  return [...byFormat.values()].sort((a, b) => b.points.length - a.points.length);
+  return [...byKey.values()].sort((a, b) => b.points.length - a.points.length);
 }
+
+/** Current, peak and net change (from before the first game) for one series' points. */
+export function ratingSummary(points) {
+  if (!points.length) return null;
+  const first = points[0];
+  const start = first.change === null ? first.rating : first.rating - first.change;
+  const current = points.at(-1).rating;
+  return { current, peak: Math.max(...points.map(p => p.rating)), net: current - start };
+}
+
+/** A win rate pulled toward `baseline` by PRIOR_GAMES imaginary games — for ranking, not display. */
+export const adjustedWinRate = (wins, games, baseline, weight = PRIOR_GAMES) =>
+  (games + weight ? (wins + weight * baseline) / (games + weight) : baseline);
 
 /** The `count` highest- and lowest-ranked rows by `score`, never listing a row in both. */
 // Ties go to the larger sample, then alphabetical, in both lists.
@@ -37,10 +74,25 @@ function extremes(rows, score, count) {
   return { best, worst };
 }
 
-/** Opponent Pokémon you win most and least against (faced at least MIN_MATCHUP_GAMES times). */
+/**
+ * Opponent Pokémon faced at least MIN_MATCHUP_GAMES times: `best` (easiest) and `worst`
+ * (hardest), ranked by adjustedWinRate against your overall win rate so bigger samples count
+ * for more, and `mostFaced`. `baseline` is that overall win rate.
+ */
 export function matchups(battles, count = TOP_COUNT) {
-  const faced = summarizeBattles(battles).opponentPokemon.filter(p => p.games >= MIN_MATCHUP_GAMES);
-  return extremes(faced, p => p.winRate, count);
+  const { record, opponentPokemon } = summarizeBattles(battles);
+  const baseline = record.winRate;
+  const faced = opponentPokemon
+    .filter(p => p.games >= MIN_MATCHUP_GAMES)
+    .map(p => ({ ...p, score: adjustedWinRate(p.wins, p.games, baseline) }));
+  // Ties go to the larger sample, then alphabetical.
+  const by = (direction) => (a, b) => direction * (a.score - b.score) || b.games - a.games || a.name.localeCompare(b.name);
+  return {
+    best: faced.filter(p => p.score > baseline).sort(by(-1)).slice(0, count),
+    worst: faced.filter(p => p.score < baseline).sort(by(1)).slice(0, count),
+    mostFaced: faced.slice(0, count), // opponentPokemon is already most-faced first
+    baseline,
+  };
 }
 
 /**
@@ -70,9 +122,10 @@ export function commonLeads(battles, count = TOP_COUNT) {
     if (!battle.leads?.length) continue;
     const leads = [...battle.leads].sort();
     const key = leads.join('|');
-    const entry = byPair.get(key) ?? { key, leads, games: 0, wins: 0 };
+    const entry = byPair.get(key) ?? { key, leads, games: 0, wins: 0, losses: 0 };
     entry.games += 1;
     if (battle.result === 'win') entry.wins += 1;
+    if (battle.result === 'loss') entry.losses += 1;
     byPair.set(key, entry);
   }
   return [...byPair.values()]

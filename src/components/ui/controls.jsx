@@ -35,3 +35,22 @@ export function Notice({ notice }) {
   if (!notice?.text) return null;
   return <p role="status" className={`text-xs rounded px-2 py-1.5 ${NOTICE_TONES[notice.tone ?? 'info']}`}>{notice.text}</p>;
 }
+
+/**
+ * A row of mutually exclusive choices (view switcher, account picker). `options` are
+ * { value, label }; renders nothing with fewer than two.
+ */
+export function Segmented({ options, value, onChange, label, size = 'md' }) {
+  if (options.length < 2) return null;
+  const pad = size === 'sm' ? 'px-2 py-0.5 text-[11px]' : 'px-3 py-1 text-xs';
+  return (
+    <div role="group" aria-label={label} className="inline-flex flex-wrap gap-1 rounded bg-gray-900/60 p-0.5">
+      {options.map(o => (
+        <button key={o.value} type="button" aria-pressed={o.value === value} onClick={() => onChange(o.value)}
+          className={`${pad} rounded transition-colors ${o.value === value ? 'bg-gray-700 text-white font-semibold' : 'text-gray-400 hover:text-gray-200'}`}>
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}

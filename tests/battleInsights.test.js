@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { eloSeries, matchups, attendance, commonLeads, toSlices, movesByPokemon, MIN_MATCHUP_GAMES, TOP_COUNT } from '../src/domain/battleInsights.js';
+import { eloSeries, ratedAccounts, ratingSummary, adjustedWinRate, PRIOR_GAMES, matchups, attendance, commonLeads, toSlices, movesByPokemon, MIN_MATCHUP_GAMES, TOP_COUNT } from '../src/domain/battleInsights.js';
 import { niceStep, niceTicks, linear } from '../src/utils/chartScale.js';
 
 let day = 0;
@@ -28,40 +28,97 @@ describe('eloSeries', () => {
     assert.deepEqual(series.map(s => [s.format, s.points.length]), [['Bo1', 2], ['Bo3', 1]]);
   });
 
+  it('keeps each account separate on the same ladder', () => {
+    // A 1700 main and a 1000 alt playing alternately: neither line should jump between them.
+    const series = eloSeries([
+      game({ player_name: 'Main', rating_before: 1700, rating_after: 1712 }),
+      game({ player_name: 'Alt', rating_before: 1000, rating_after: 1025 }),
+      game({ player_name: 'main', rating_before: 1712, rating_after: 1698 }), // same account, other casing
+      game({ player_name: 'Alt', rating_before: 1025, rating_after: 1048 }),
+      game({ player_name: 'Alt', rating_before: 1048, rating_after: 1030 }),
+    ]);
+    assert.deepEqual(series.map(s => [s.account, s.points.map(p => p.rating)]), [
+      ['alt', [1025, 1048, 1030]],
+      ['main', [1712, 1698]],
+    ]);
+    for (const s of series) for (const p of s.points) assert.ok(Math.abs(p.change) < 50, 'no cross-account jumps');
+  });
+
   it('reports an unknown change as null and handles no rated games', () => {
     assert.equal(eloSeries([game({ rating_after: 1000 })])[0].points[0].change, null);
     assert.deepEqual(eloSeries([game()]), []);
   });
 });
 
-describe('matchups', () => {
-  const vs = (name, result) => game({ opponent_brought: [name], result });
-  const battles = [
-    ...Array(MIN_MATCHUP_GAMES).fill(0).map(() => vs('Incineroar', 'win')),
-    ...Array(MIN_MATCHUP_GAMES).fill(0).map((_, i) => vs('Sneasler', i ? 'loss' : 'win')),
-    vs('Kingambit', 'loss'), // too few games
-  ];
+describe('ratedAccounts', () => {
+  it('lists accounts with rated games, most recently played first, under their newest spelling', () => {
+    const accounts = ratedAccounts([
+      game({ player_name: 'main', rating_after: 1700, played_at: '2026-10-01T00:00:00Z' }),
+      game({ player_name: 'Alt', rating_after: 1000, played_at: '2026-10-02T00:00:00Z' }),
+      game({ player_name: 'Main', rating_after: 1710, played_at: '2026-10-03T00:00:00Z' }),
+      game({ player_name: 'Unrated', played_at: '2026-10-04T00:00:00Z' }),
+    ]);
+    assert.deepEqual(accounts, [{ id: 'main', name: 'Main', games: 2 }, { id: 'alt', name: 'Alt', games: 1 }]);
+  });
+});
 
-  it(`needs ${MIN_MATCHUP_GAMES}+ games against a Pokémon`, () => {
-    const { best, worst } = matchups(battles);
-    assert.deepEqual(best.map(p => p.name), ['Incineroar', 'Sneasler']);
-    assert.deepEqual(worst, []);
+describe('ratingSummary', () => {
+  it('reports current, peak and net change from before the first game', () => {
+    const points = [{ rating: 1020, change: 20 }, { rating: 1060, change: 40 }, { rating: 1045, change: -15 }];
+    assert.deepEqual(ratingSummary(points), { current: 1045, peak: 1060, net: 45 });
   });
 
-  it('never lists the same Pokémon as best and worst', () => {
-    const { best, worst } = matchups(battles, 1);
-    assert.deepEqual([best[0].name, worst[0].name], ['Incineroar', 'Sneasler']);
+  it('measures from the first rating when its change is unknown, and handles nothing', () => {
+    assert.equal(ratingSummary([{ rating: 1100, change: null }, { rating: 1080, change: -20 }]).net, -20);
+    assert.equal(ratingSummary([]), null);
+  });
+});
+
+describe('adjustedWinRate', () => {
+  it('pulls small samples toward the baseline more than large ones', () => {
+    assert.equal(adjustedWinRate(0, 0, 0.5), 0.5);
+    assert.equal(adjustedWinRate(3, 3, 0.5), (3 + PRIOR_GAMES * 0.5) / (3 + PRIOR_GAMES));
+    assert.ok(adjustedWinRate(9, 10, 0.5) > adjustedWinRate(3, 3, 0.5));
+    assert.ok(adjustedWinRate(1, 10, 0.5) < adjustedWinRate(0, 3, 0.5));
+  });
+});
+
+describe('matchups', () => {
+  const vs = (name, result) => game({ opponent_brought: [name], result });
+  const record = (name, wins, losses) => [
+    ...Array(wins).fill(0).map(() => vs(name, 'win')),
+    ...Array(losses).fill(0).map(() => vs(name, 'loss')),
+  ];
+
+  it(`needs ${MIN_MATCHUP_GAMES}+ games against a Pokémon, and splits around your overall win rate`, () => {
+    // 4 wins in 7 games overall.
+    const { best, worst, mostFaced, baseline } = matchups([...record('Incineroar', 3, 0), ...record('Sneasler', 1, 2), vs('Kingambit', 'loss')]);
+    assert.equal(baseline, 4 / 7);
+    assert.deepEqual(best.map(p => [p.name, p.wins, p.losses, p.winRate]), [['Incineroar', 3, 0, 1]]);
+    assert.deepEqual(worst.map(p => [p.name, p.wins, p.losses]), [['Sneasler', 1, 2]]);
+    assert.deepEqual(mostFaced.map(p => p.name), ['Incineroar', 'Sneasler']);
+  });
+
+  it('ranks a big sample above a small perfect one', () => {
+    // 13-13 overall. A 3-0 and 0-3 are mostly luck next to 9-1 and 1-9.
+    const { best, worst } = matchups([...record('A', 3, 0), ...record('B', 9, 1), ...record('C', 0, 3), ...record('D', 1, 9)]);
+    assert.deepEqual(best.map(p => p.name), ['B', 'A']);
+    assert.deepEqual(worst.map(p => p.name), ['D', 'C']);
+  });
+
+  it('never lists the same Pokémon as best and worst, nor one at exactly your average', () => {
+    const { best, worst } = matchups([...record('A', 2, 2), ...record('B', 3, 1), ...record('C', 1, 3)]);
+    assert.deepEqual([best.map(p => p.name), worst.map(p => p.name)], [['B'], ['C']]);
   });
 
   it('is empty without enough data', () => {
-    assert.deepEqual(matchups([]), { best: [], worst: [] });
+    assert.deepEqual(matchups([]), { best: [], worst: [], mostFaced: [], baseline: 0 });
   });
 
   it(`lists up to ${TOP_COUNT} by default`, () => {
-    const many = 'ABCDEFGHIJKL'.split('').flatMap(name => Array(MIN_MATCHUP_GAMES).fill(0).map(() => vs(name, 'win')));
-    const { best, worst } = matchups(many);
-    assert.equal(best.length, TOP_COUNT);
-    assert.equal(worst.length, TOP_COUNT);
+    const many = 'ABCDEFGHIJKL'.split('').flatMap((name, i) => record(name, i % 2 ? 3 : 0, i % 2 ? 0 : 3));
+    const { best, worst, mostFaced } = matchups(many);
+    assert.deepEqual([best.length, worst.length, mostFaced.length], [TOP_COUNT, TOP_COUNT, TOP_COUNT]);
   });
 });
 

@@ -79,7 +79,7 @@ function Dashboard({ pendingImport }) {
         <BookmarkletSetup />
       </div>
       {/* Wide screens: the open team's move usage beside the main column. */}
-      <aside className="hidden lg:block sticky top-4">
+      <aside className="hidden lg:block">
         <Card title="Move usage" subtitle={openGroup ? groupTitle(openGroup) : 'Open a team to see its moves.'}>
           {openGroup && <PokemonMoves battles={openGroup.battles} order={openGroup.species} />}
         </Card>

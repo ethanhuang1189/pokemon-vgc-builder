@@ -42,7 +42,17 @@ const pokemonKey = (ident) => `${sideOf(ident)}|${String(ident ?? '').split(': '
 // "Ash's rating: 1134 &rarr; <strong>1161</strong>" — Showdown's post-game ladder update.
 const RATING_LINE = /^(.+)'s rating: (\d+) &rarr; <strong>(\d+)<\/strong>/;
 
-const emptySides = (make) => ({ p1: make(), p2: make() });
+// Names in |raw| lines are HTML-escaped ("Sita &amp; Rama").
+const HTML_ENTITIES = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'", '&apos;': "'" };
+const unescapeHtml = (text) => text.replace(/&(?:amp|lt|gt|quot|#39|apos);/g, e => HTML_ENTITIES[e]);
+
+/**
+ * The team-preview name for a species seen in battle: preview hides some formes
+ * ("Urshifu-*" for Urshifu-Rapid-Strike), so a forme maps to the preview entry it extends.
+ */
+const asOnTeam = (team, species) => (team.includes(species) ? species : team.find(t => species.startsWith(`${t}-`)) ?? species);
+
+const emptySides =(make) => ({ p1: make(), p2: make() });
 
 /**
  * Pulls what we track out of a battle log: players and their ratings, the six on each team,
@@ -79,10 +89,13 @@ export function parseBattleLog(log) {
       case 'drag':
       case 'replace': {
         const side = sideOf(args[0]);
-        const species = baseOfMega(speciesOf(args[1]));
+        const key = pokemonKey(args[0]);
+        // A Pokémon keeps the species it first came in as: later switch-ins can show a changed
+        // forme (Palafin-Hero, Floette-Mega) that is still the same team member.
+        const species = speciesByPokemon.get(key) ?? asOnTeam(teams[side] ?? [], baseOfMega(speciesOf(args[1])));
         if (!brought[side] || !species) break;
         brought[side].add(species);
-        speciesByPokemon.set(pokemonKey(args[0]), species);
+        speciesByPokemon.set(key, species);
         if (turns === 0 && type === 'switch') leads[side].push(species);
         break;
       }
@@ -101,7 +114,7 @@ export function parseBattleLog(log) {
         break;
       case 'raw': {
         const [, name, before, after] = args[0]?.match(RATING_LINE) ?? [];
-        const side = name && sideNamed(name);
+        const side = name && sideNamed(unescapeHtml(name));
         if (side) ratings[side] = { before: Number(before), after: Number(after) };
         break;
       }
@@ -132,7 +145,7 @@ export function parseBattleLog(log) {
 }
 
 // Bump when parseBattleLog learns something new: sync re-reads older battles to fill it in.
-export const PARSE_VERSION = 3;
+export const PARSE_VERSION = 4;
 
 export const IMPORT_ERRORS = Object.freeze({
   notYourBattle: 'None of your linked Showdown names played in this battle.',

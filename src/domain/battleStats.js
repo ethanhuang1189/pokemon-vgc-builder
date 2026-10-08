@@ -8,9 +8,10 @@ function tallyPokemon(battles, key) {
   const bySpecies = new Map();
   for (const battle of battles) {
     for (const name of battle[key] ?? []) {
-      const entry = bySpecies.get(name) ?? { name, games: 0, wins: 0 };
+      const entry = bySpecies.get(name) ?? { name, games: 0, wins: 0, losses: 0 };
       entry.games += 1;
       if (battle.result === 'win') entry.wins += 1;
+      if (battle.result === 'loss') entry.losses += 1;
       bySpecies.set(name, entry);
     }
   }

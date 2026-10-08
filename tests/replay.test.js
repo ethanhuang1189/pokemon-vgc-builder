@@ -121,6 +121,34 @@ describe('parseBattleLog (real replay)', () => {
     assert.equal(parseBattleLog(log).ratings.p1.after, null);
   });
 
+  it('reads the rating of a player whose name Showdown HTML-escapes', () => {
+    // From gen9championsvgc2026regmc-2694691908.
+    const log = "|player|p1|Sita & Rama|1|1000\n|raw|Sita &amp; Rama's rating: 1000 &rarr; <strong>1049</strong><br />(+49 for winning)";
+    assert.deepEqual(parseBattleLog(log).ratings.p1, { before: 1000, after: 1049 });
+  });
+
+  it('counts a Pokémon once when it switches back in as another forme', () => {
+    // From gen9championsvgc2026regmc-2694692928 and -2694673694: Zero to Hero and a mega re-entering.
+    const log = [
+      '|poke|p2|Palafin, L50, M|', '|poke|p2|Floette-Eternal, L50, F|', '|poke|p2|Incineroar, L50, M|',
+      '|switch|p2a: Palafin|Palafin, L50, M|100/100', '|switch|p2b: Floette|Floette-Eternal, L50, F|100/100',
+      '|turn|1', '|detailschange|p2a: Palafin|Palafin-Hero, L50, M', '|detailschange|p2b: Floette|Floette-Mega, L50, F',
+      '|switch|p2a: Incineroar|Incineroar, L50, M|100/100',
+      '|switch|p2a: Palafin|Palafin-Hero, L50, M|100/100', '|move|p2a: Palafin|Wave Crash|p1a: X',
+      '|switch|p2b: Floette|Floette-Mega, L50, F|100/100', '|move|p2b: Floette|Dazzling Gleam|p1a: X|[spread] p1a,p1b',
+    ].join('\n');
+    const parsed = parseBattleLog(log);
+    assert.deepEqual(parsed.brought.p2, ['Palafin', 'Floette-Eternal', 'Incineroar']);
+    assert.deepEqual(parsed.moves.p2, { Palafin: { 'Wave Crash': 1 }, 'Floette-Eternal': { 'Dazzling Gleam': 1 } });
+    assert.equal(parsed.megas.p2, 'Floette-Mega');
+  });
+
+  it('names formes hidden at team preview as preview shows them', () => {
+    const log = '|poke|p1|Urshifu-*, L50|\n|switch|p1a: U|Urshifu-Rapid-Strike, L50|100/100';
+    const parsed = parseBattleLog(log);
+    assert.deepEqual([parsed.teams.p1, parsed.brought.p1, parsed.leads.p1], [['Urshifu'], ['Urshifu'], ['Urshifu']]);
+  });
+
   it('records who mega evolved into what', () => {
     assert.deepEqual(battle.megas, { p1: 'Metagross-Mega', p2: 'Garchomp-Mega-Z' });
   });
