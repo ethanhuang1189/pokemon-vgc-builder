@@ -6,6 +6,6 @@
     "scrape": "node scrape-meta.cjs"
   },
   "dependencies": {
-    "puppeteer-core": "25.12.0"
+    "puppeteer-core": "25.13.0"
   }
 }
