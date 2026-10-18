@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      # A scan still going after 5 calls (e.g. the first backfill) just continues next time;
+      # only a failed call (curl error, non-2xx) fails the run.
       - name: Run the collector until its scan is caught up (at most 5 calls)
         env:
           URL: ${{ secrets.LADDER_COLLECT_URL }}
@@ -26,5 +28,6 @@ jobs:
           for i in 1 2 3 4 5; do
             result=$(curl -fsS -X POST -H "Authorization: Bearer $SECRET" --max-time 90 "$URL")
             echo "$result"
-            echo "$result" | grep -q '"done":true' && exit 0
+            if echo "$result" | grep -q '"done":true'; then exit 0; fi
           done
+          echo "Scan not finished yet; the next scheduled run continues it."
