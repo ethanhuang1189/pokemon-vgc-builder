@@ -21,6 +21,10 @@ const SHOWN = 10;
 const SHOWN_EXPANDED = 25;
 const EXAMPLE_REPLAYS = 3;
 
+// A group's Pokémon: a team's six in preview order when known, else from its key (sorted).
+const speciesOf = (kind, group) =>
+  (kind === 'cores' ? speciesOfKey(group.core_key) : group.team?.length ? group.team : speciesOfKey(group.team_key));
+
 const shortDate = (iso) => new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 
 function ago(iso) {
@@ -76,7 +80,7 @@ function GroupDetail({ formatId, kind, group }) {
   const load = useCallback(() => fetchGroupGames(formatId, kind, key), [formatId, kind, key]);
   const games = useRemoteList(load);
   const loadIntoBuilder = useLoadIntoBuilder();
-  const species = useMemo(() => (kind === 'cores' ? speciesOfKey(key) : group.team), [kind, key, group.team]);
+  const species = useMemo(() => speciesOf(kind, group), [kind, group]);
   const summary = useMemo(() => summarizeEntries(games.items, species), [games.items, species]);
   const teams = useMemo(() => (kind === 'cores' ? teamsWithCore(games.items, 3) : []), [kind, games.items]);
 
@@ -151,7 +155,7 @@ function GroupDetail({ formatId, kind, group }) {
 }
 
 function GroupRow({ group, kind, rank, expanded, onToggle, formatId }) {
-  const species = kind === 'cores' ? speciesOfKey(group.core_key) : group.team;
+  const species = speciesOf(kind, group);
   const winRate = group.games ? group.wins / group.games : 0;
   return (
     <li>
