@@ -46,3 +46,32 @@ export function createBattleStore(supabase) {
     },
   };
 }
+
+/** The Top Teams collector's tables (see supabase/migrations/0005_ladder.sql). */
+export function createLadderStore(supabase) {
+  return {
+    async getState(formatId) {
+      return unwrap(await supabase.from('ladder_state').select('newest, scan_top, scan_cursor').eq('format_id', formatId).maybeSingle());
+    },
+
+    async setState(formatId, { newest, scan_top, scan_cursor }) {
+      unwrap(await supabase.from('ladder_state')
+        .upsert({ format_id: formatId, newest, scan_top, scan_cursor, updated_at: new Date().toISOString() }));
+    },
+
+    /** Replays (out of `replayIds`) that already have rows. */
+    async knownReplayIds(replayIds) {
+      if (!replayIds.length) return new Set();
+      const rows = unwrap(await supabase.from('ladder_entries').select('replay_id').in('replay_id', replayIds));
+      return new Set(rows.map(r => r.replay_id));
+    },
+
+    async saveEntries(entries) {
+      unwrap(await supabase.from('ladder_entries').upsert(entries, { onConflict: 'replay_id,side' }));
+    },
+
+    async refreshStats() {
+      unwrap(await supabase.rpc('refresh_ladder_stats'));
+    },
+  };
+}

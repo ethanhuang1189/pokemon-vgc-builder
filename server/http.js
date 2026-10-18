@@ -1,3 +1,5 @@
+import { timingSafeEqual } from 'node:crypto';
+
 // Request plumbing shared by every /api function: auth, JSON parsing, error responses.
 
 export class HttpError extends Error {
@@ -32,6 +34,37 @@ async function authenticate(request, auth) {
   return data.user;
 }
 
+// Only HttpError messages reach the client; anything else is logged and hidden.
+function failure(err) {
+  if (err instanceof HttpError) return json(err.status, { error: err.message });
+  console.error(err);
+  return json(500, { error: 'Something went wrong — try again later' });
+}
+
+const sameSecret = (given, expected) => {
+  const a = Buffer.from(given ?? '');
+  const b = Buffer.from(expected);
+  return a.length === b.length && timingSafeEqual(a, b);
+};
+
+/**
+ * Wraps a POST handler for scheduled jobs: (services) => result. The caller must send the
+ * secret in env var `secretName` as a bearer token; without that env var the endpoint is off.
+ */
+export function cronPost(secretName, getServices, handler) {
+  return async (request) => {
+    try {
+      const secret = process.env[secretName];
+      if (!secret || secret.length < 32) throw new HttpError(503, 'This job is not set up on this server');
+      const token = request.headers.get('authorization')?.match(/^Bearer (\S+)$/)?.[1];
+      if (!sameSecret(token, secret)) throw new HttpError(401, 'Not allowed');
+      return json(200, await handler(getServices()));
+    } catch (err) {
+      return failure(err);
+    }
+  };
+}
+
 /**
  * Wraps a POST handler that needs a signed-in user: (services, user, body) => result.
  * Only HttpError messages reach the client; anything else is logged and hidden.
@@ -44,9 +77,7 @@ export function authedPost(getServices, handler) {
       const body = await readJsonBody(request);
       return json(200, await handler(services, user, body));
     } catch (err) {
-      if (err instanceof HttpError) return json(err.status, { error: err.message });
-      console.error(err);
-      return json(500, { error: 'Something went wrong — try again later' });
+      return failure(err);
     }
   };
 }

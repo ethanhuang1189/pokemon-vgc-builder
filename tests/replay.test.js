@@ -149,6 +149,56 @@ describe('parseBattleLog (real replay)', () => {
     assert.deepEqual([parsed.teams.p1, parsed.brought.p1, parsed.leads.p1], [['Urshifu'], ['Urshifu'], ['Urshifu']]);
   });
 
+  it('records the items and abilities each Pokémon revealed (real replay)', () => {
+    assert.deepEqual(battle.items, {
+      p1: { Metagross: 'Metagrossite', Sneasler: 'Psychic Seed', 'Indeedee-F': 'Colbur Berry' },
+      p2: { Incineroar: 'Chople Berry', Garchomp: 'Garchompite Z' },
+    });
+    assert.deepEqual(battle.abilities, {
+      p1: { Metagross: 'Clear Body', 'Indeedee-F': 'Psychic Surge' },
+      p2: { Incineroar: 'Intimidate', Torkoal: 'Drought' },
+    });
+  });
+
+  it('credits items and abilities to the right Pokémon', () => {
+    const log = [
+      '|switch|p1a: A|Amoonguss, L50|100/100', '|switch|p1b: B|Gholdengo, L50|100/100',
+      '|switch|p2a: C|Garchomp, L50|100/100', '|switch|p2b: D|Porygon2, L50|100/100',
+      // Rocky Helmet hurts the attacker but belongs to the [of] Pokémon; Life Orb to the subject.
+      '|-damage|p2a: C|80/100|[from] item: Rocky Helmet|[of] p1a: A',
+      '|-damage|p2a: C|70/100|[from] item: Life Orb',
+      // Frisk: B holds the item shown, D has Frisk.
+      '|-item|p1b: B|Choice Specs|[from] ability: Frisk|[of] p2b: D',
+      // Trace: D's ability is Trace, A's is the one copied — but D already showed Frisk, which stays.
+      '|-ability|p2b: D|Regenerator|[from] ability: Trace|[of] p1a: A',
+      // Trick hands A a new item; its own (Rocky Helmet) stays recorded.
+      '|-item|p1a: A|Choice Scarf|[from] move: Trick',
+      '|-enditem|p2a: C|Sitrus Berry|[eat]',
+    ].join('\n');
+    const parsed = parseBattleLog(log);
+    assert.deepEqual(parsed.items, {
+      p1: { Amoonguss: 'Rocky Helmet', Gholdengo: 'Choice Specs' },
+      p2: { Garchomp: 'Life Orb' },
+    });
+    assert.deepEqual(parsed.abilities, { p1: { Amoonguss: 'Regenerator' }, p2: { Porygon2: 'Frisk' } });
+  });
+
+  it("doesn't take a mega's ability as the set's", () => {
+    // From gen9championsvgc2026regmc-2700316437: Mega Floette shows Fairy Aura.
+    const log = [
+      '|switch|p1a: Floette|Floette-Eternal, L50, F|100/100', '|turn|1',
+      '|detailschange|p1a: Floette|Floette-Mega, L50, F', '|-mega|p1a: Floette|Floette|Floettite',
+      '|-ability|p1a: Floette|Fairy Aura',
+    ].join('\n');
+    const parsed = parseBattleLog(log);
+    assert.deepEqual(parsed.abilities.p1, {});
+    assert.deepEqual(parsed.items.p1, { 'Floette-Eternal': 'Floettite' });
+  });
+
+  it('ignores reveals for Pokémon that never switched in', () => {
+    assert.deepEqual(parseBattleLog('|-item|p1a: Ghost|Leftovers').items, { p1: {}, p2: {} });
+  });
+
   it('records who mega evolved into what', () => {
     assert.deepEqual(battle.megas, { p1: 'Metagross-Mega', p2: 'Garchomp-Mega-Z' });
   });

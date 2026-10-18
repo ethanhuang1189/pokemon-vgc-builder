@@ -1,5 +1,6 @@
 import { Card } from './shared';
 import MetaThreats from './MetaThreats';
+import TopTeams from '../ladder/TopTeams';
 import OffensiveCoverage from './OffensiveCoverage';
 import TeamWeaknesses from './TeamWeaknesses';
 import TypeDisparity from './TypeDisparity';
@@ -31,13 +32,14 @@ function TeamSummary({ memberCount, uncoveredTypes, metaAnalysis }) {
   );
 }
 
-/** Team summary, meta threats and offensive coverage: how the team does against others. */
+/** Team summary, meta threats (Pikalytics), top Showdown teams and offensive coverage: the team against others. */
 export function OffenseSections({ analysis: a }) {
   return (
     <div className="space-y-5">
       <TeamSummary memberCount={a.memberCount} uncoveredTypes={a.coverage.uncovered.size} metaAnalysis={a.metaAnalysis} />
       <MetaThreats analysis={a.metaAnalysis} label={a.meta.stats?.label} loading={a.meta.loading} error={a.meta.error}
         onRefresh={a.meta.refresh} />
+      <TopTeams />
       <OffensiveCoverage coverage={a.coverage} details={a.coverageDetails} />
     </div>
   );

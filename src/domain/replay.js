@@ -52,12 +52,18 @@ const unescapeHtml = (text) => text.replace(/&(?:amp|lt|gt|quot|#39|apos);/g, e 
  */
 const asOnTeam = (team, species) => (team.includes(species) ? species : team.find(t => species.startsWith(`${t}-`)) ?? species);
 
-const emptySides =(make) => ({ p1: make(), p2: make() });
+const isPokemon = (ident) => /^p[12][a-d]?: /.test(ident ?? '');
+// The value of a "[from] item: X" / "[of] p1a: Y" tag on a protocol line, or null.
+const tag = (args, name) => args.find(a => a.startsWith(`[${name}] `))?.slice(name.length + 3) ?? null;
+const fromEffect = (args, kind) => tag(args, 'from')?.match(new RegExp(`^${kind}: (.+)$`))?.[1] ?? null;
+
+const emptySides = (make) => ({ p1: make(), p2: make() });
 
 /**
  * Pulls what we track out of a battle log: players and their ratings, the six on each team,
  * the Pokémon actually brought and led with, who mega evolved, each Pokémon's moves
- * ({ species: { move: uses } }), turns and outcome.
+ * ({ species: { move: uses } }), the items and abilities each Pokémon revealed ({ species: name },
+ * first seen), turns and outcome.
  */
 export function parseBattleLog(log) {
   const players = {};
@@ -67,12 +73,23 @@ export function parseBattleLog(log) {
   const leads = emptySides(() => []);
   const moves = emptySides(() => ({}));
   const megas = emptySides(() => null);
+  const items = emptySides(() => ({}));
+  const abilities = emptySides(() => ({}));
   let turns = 0;
   let winner = null;
   let tie = false;
 
   const speciesByPokemon = new Map(); // pokemonKey → species, from switch-ins
   const sideNamed = (name) => Object.keys(players).find(side => players[side] === name);
+  // Abilities shown after mega evolving are the mega's (Mega Floette's Fairy Aura), not the set's.
+  const megaEvolved = new Set(); // pokemonKeys
+  // Records what a Pokémon revealed, keeping the first value (later ones may have been swapped in).
+  const reveal = (into, ident, value) => {
+    const species = isPokemon(ident) && speciesByPokemon.get(pokemonKey(ident));
+    const side = into[sideOf(ident)];
+    if (into === abilities && megaEvolved.has(pokemonKey(ident))) return;
+    if (species && side && value && !(species in side)) side[species] = value;
+  };
 
   for (const line of String(log ?? '').split('\n')) {
     const [, type, ...args] = line.split('|');
@@ -109,8 +126,27 @@ export function parseBattleLog(log) {
         used[args[1]] = (used[args[1]] ?? 0) + 1;
         break;
       }
+      case '-item': // shown by Frisk and the like; skip items handed over by Trick or Switcheroo
+        if (!fromEffect(args, 'move')) reveal(items, args[0], args[1]);
+        break;
+      case '-enditem': // eaten, used up or knocked off
+        reveal(items, args[0], args[1]);
+        break;
+      case '-mega': // "|-mega|p1a: Metagross|Metagross|Metagrossite"
+        reveal(items, args[0], args[2]);
+        break;
+      case '-ability': {
+        // "|-ability|p1a: X|Intimidate|[from] ability: Trace|[of] p2a: Y": X has Trace, Y Intimidate.
+        const via = fromEffect(args, 'ability');
+        reveal(abilities, args[0], via ?? args[1]);
+        if (via) reveal(abilities, tag(args, 'of'), args[1]);
+        break;
+      }
       case 'detailschange':
-        if (speciesOf(args[1]).includes('-Mega')) megas[sideOf(args[0])] = speciesOf(args[1]);
+        if (speciesOf(args[1]).includes('-Mega')) {
+          megas[sideOf(args[0])] = speciesOf(args[1]);
+          megaEvolved.add(pokemonKey(args[0]));
+        }
         break;
       case 'raw': {
         const [, name, before, after] = args[0]?.match(RATING_LINE) ?? [];
@@ -128,6 +164,14 @@ export function parseBattleLog(log) {
         tie = true;
         break;
     }
+    // Other lines tag their cause: "[from] item: Life Orb", "[from] ability: Drought|[of] p2b: Torkoal".
+    // The holder is the "[of]" Pokémon when given, else the line's subject.
+    // (Lines handled above already credited their own item or ability.)
+    if (line.includes('[from] ')) {
+      const holder = tag(args, 'of') ?? args[0];
+      if (type !== '-item' && type !== '-enditem') reveal(items, holder, fromEffect(args, 'item'));
+      if (type !== '-ability') reveal(abilities, holder, fromEffect(args, 'ability'));
+    }
   }
 
   return {
@@ -138,6 +182,8 @@ export function parseBattleLog(log) {
     leads,
     moves,
     megas,
+    items,
+    abilities,
     turns,
     winner,
     tie,

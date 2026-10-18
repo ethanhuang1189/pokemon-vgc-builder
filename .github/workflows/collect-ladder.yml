@@ -1,0 +1,30 @@
+name: Collect Top Teams
+
+on:
+  schedule:
+    - cron: '17 */3 * * *'   # Every 3 hours
+  workflow_dispatch:
+
+# Calls the site's collector endpoint; the Supabase key stays in Vercel. Needs two repository
+# secrets: LADDER_COLLECT_URL (https://<site>/api/collect-ladder) and LADDER_CRON_SECRET.
+permissions: {}
+
+concurrency:
+  group: collect-ladder
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Run the collector until its scan is caught up (at most 5 calls)
+        env:
+          URL: ${{ secrets.LADDER_COLLECT_URL }}
+          SECRET: ${{ secrets.LADDER_CRON_SECRET }}
+        run: |
+          for i in 1 2 3 4 5; do
+            result=$(curl -fsS -X POST -H "Authorization: Bearer $SECRET" --max-time 90 "$URL")
+            echo "$result"
+            echo "$result" | grep -q '"done":true' && exit 0
+          done

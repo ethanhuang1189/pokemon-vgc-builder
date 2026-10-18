@@ -39,6 +39,14 @@ export function createShowdownClient(fetchImpl = fetch) {
       return valid ? { ...replay, id: replayId } : null;
     },
 
+    /** One page of public replays in a format, newest first, uploaded before `before` (seconds) if given. */
+    async searchFormat(formatId, before = null) {
+      const query = new URLSearchParams({ format: formatId });
+      if (before !== null) query.set('before', String(before));
+      const results = await getJson(`${REPLAY_HOST}/search.json?${query}`, fetchImpl);
+      return Array.isArray(results) ? results : [];
+    },
+
     /** One page of public replays a player appears in, newest first. */
     async searchReplays(nameId, page = 1) {
       const query = new URLSearchParams({ user: nameId, page: String(page) });

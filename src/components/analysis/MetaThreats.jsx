@@ -60,7 +60,7 @@ export default function MetaThreats({ analysis, label, loading, error, onRefresh
   );
 
   return (
-    <Card title="Meta Threats" action={refresh}>
+    <Card title="Meta Threats · Pikalytics" action={refresh}>
       {loading && <p className="text-gray-500 text-xs">Loading usage stats…</p>}
       {error && !loading && <p className="text-red-400 text-xs">{error}</p>}
       {!loading && !error && label && analysis.length === 0 && (

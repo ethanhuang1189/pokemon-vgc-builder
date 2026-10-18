@@ -1,8 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 import { HttpError } from './http.js';
-import { createBattleStore } from './store.js';
+import { createBattleStore, createLadderStore } from './store.js';
 import { createShowdownClient } from './showdown.js';
 import { createReplayService } from './replays.js';
+import { createLadderCollector } from './ladder.js';
+import { LADDER_FORMATS } from '../src/domain/ladder.js';
+import { CURRENT_REGULATION } from '../src/regulations/index.js';
 
 // Wires the real dependencies together once per function instance.
 // SUPABASE_SECRET_KEY is server-only: it must never get a VITE_ prefix (that would ship it to browsers).
@@ -23,9 +26,14 @@ export function getServices() {
   if (!services) {
     const { url, secretKey } = readConfig();
     const supabase = createClient(url, secretKey, { auth: { persistSession: false, autoRefreshToken: false } });
+    const showdown = createShowdownClient();
+    // Also used by scripts/collect-ladder.mjs, which runs bigger collections locally.
+    const ladderOptions = { store: createLadderStore(supabase), showdown, formatId: LADDER_FORMATS[CURRENT_REGULATION.id] };
     services = {
       auth: supabase.auth,
-      replays: createReplayService({ store: createBattleStore(supabase), showdown: createShowdownClient() }),
+      replays: createReplayService({ store: createBattleStore(supabase), showdown }),
+      ladder: createLadderCollector(ladderOptions),
+      ladderOptions,
     };
   }
   return services;
